@@ -74,7 +74,7 @@ export const Sidebar = ({ activePage, setActivePage }) => {
 
       {/* Mobile Bottom Navigation Bar (iOS / Android / iPadOS ergonomics) */}
       <nav className="mobile-bottom-bar">
-        {navItems.slice(0, 5).map((item) => {
+        {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activePage === item.id;
           return (

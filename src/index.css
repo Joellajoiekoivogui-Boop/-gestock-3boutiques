@@ -1626,3 +1626,341 @@ body {
 .w-full { width: 100%; }
 .text-center { text-align: center; }
 .font-bold { font-weight: 700; }
+
+/* ========================================
+   RESPONSIVE — Mobile First Improvements
+   ======================================== */
+
+/* --- Navbar responsive --- */
+@media (max-width: 767px) {
+  .navbar-container {
+    padding: 0 12px;
+    height: 56px;
+    gap: 8px;
+  }
+
+  .navbar-left {
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .brand-title {
+    font-size: 1rem;
+  }
+
+  .boutique-selector-wrapper {
+    padding: 4px 8px;
+    max-width: 140px;
+  }
+
+  .boutique-select {
+    font-size: 0.75rem;
+    max-width: 100px;
+  }
+
+  /* Hide verbose text labels in navbar on mobile */
+  .status-badge span,
+  .alert-badge span {
+    display: none;
+  }
+
+  .status-badge {
+    padding: 6px;
+    border-radius: 8px;
+  }
+
+  .hidden-mobile {
+    display: none !important;
+  }
+
+  .navbar-right {
+    gap: 6px;
+  }
+
+  .role-btn {
+    padding: 6px 8px;
+  }
+}
+
+/* --- Main content padding on mobile --- */
+@media (max-width: 767px) {
+  .app-main-content {
+    padding: 12px;
+    padding-bottom: 80px;
+  }
+
+  .page-title {
+    font-size: 1.15rem;
+  }
+
+  .page-subtitle {
+    font-size: 0.78rem;
+  }
+}
+
+/* --- KPI / Stat Cards --- */
+@media (max-width: 480px) {
+  .kpi-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 12px;
+  }
+
+  .stat-card-value {
+    font-size: 1.1rem;
+  }
+}
+
+/* --- Charts grid --- */
+@media (max-width: 767px) {
+  .charts-grid,
+  .dual-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .chart-wrapper {
+    height: 200px;
+  }
+}
+
+/* --- POS responsive --- */
+@media (max-width: 1023px) {
+  .pos-layout-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* On mobile, cart shows after products */
+  .pos-cart-column {
+    padding: 14px;
+  }
+
+  .cart-items-wrapper {
+    max-height: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pos-products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+
+  .pos-product-img-wrap {
+    height: 90px;
+  }
+
+  .payment-grid-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+  }
+
+  .pay-mode-btn {
+    padding: 6px 4px;
+    font-size: 0.65rem;
+  }
+}
+
+/* --- Data Tables: scroll on mobile --- */
+@media (max-width: 767px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-table {
+    min-width: 600px;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 10px 10px;
+    font-size: 0.78rem;
+  }
+
+  /* Inventory table: hide less critical columns on small screens */
+  .inventory-page .data-table th:nth-child(3),
+  .inventory-page .data-table td:nth-child(3) {
+    display: none;
+  }
+}
+
+/* --- Inventory filters bar --- */
+@media (max-width: 767px) {
+  .inventory-filters-bar {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .search-input-wrap {
+    width: 100%;
+  }
+
+  .filter-select,
+  .filter-btn-alert {
+    flex: 1;
+    font-size: 0.78rem;
+    padding: 8px 10px;
+  }
+}
+
+/* --- Valuation grid --- */
+@media (max-width: 480px) {
+  .valuation-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .val-num {
+    font-size: 1rem;
+  }
+}
+
+/* --- Reports cards grid --- */
+@media (max-width: 600px) {
+  .reports-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .report-summary-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
+
+/* --- Settings boutiques grid --- */
+@media (max-width: 600px) {
+  .settings-boutiques-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Modals responsive --- */
+@media (max-width: 600px) {
+  .modal-overlay {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .modal-content {
+    padding: 18px;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+
+  .modal-lg {
+    max-width: 100%;
+  }
+
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .stocks-inputs-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .modal-actions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .transfer-route-grid {
+    grid-template-columns: 1fr 30px 1fr;
+    gap: 6px;
+  }
+
+  .payment-select-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* --- Page header action buttons stacking --- */
+@media (max-width: 480px) {
+  .page-header > div:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .btn {
+    padding: 8px 12px;
+    font-size: 0.82rem;
+  }
+}
+
+/* --- Recent sales items --- */
+@media (max-width: 480px) {
+  .recent-sale-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .sale-item-right {
+    align-items: flex-start;
+  }
+}
+
+/* --- Debt summary box --- */
+@media (max-width: 480px) {
+  .debt-summary-box {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+
+/* --- Toast messages --- */
+@media (max-width: 480px) {
+  .toast-container {
+    left: 12px;
+    right: 12px;
+    bottom: 72px;
+  }
+
+  .toast-item {
+    min-width: unset;
+    width: 100%;
+  }
+}
+
+/* --- Mobile bottom nav: show all 7 tabs using scroll --- */
+@media (max-width: 480px) {
+  .mobile-bottom-bar {
+    overflow-x: auto;
+    justify-content: flex-start;
+    gap: 0;
+    padding: 0 4px;
+  }
+
+  .mobile-tab {
+    min-width: 60px;
+    padding: 6px 8px;
+    flex-shrink: 0;
+  }
+
+  .mobile-tab-label {
+    font-size: 0.6rem;
+  }
+}
+
+/* --- Utility: hide on mobile --- */
+@media (max-width: 767px) {
+  .hidden-mobile {
+    display: none !important;
+  }
+}
+
+/* --- Utility: full width buttons on mobile --- */
+@media (max-width: 480px) {
+  .btn-full-mobile {
+    width: 100%;
+  }
+}
+
