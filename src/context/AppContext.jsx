@@ -161,7 +161,7 @@ export const AppProvider = ({ children }) => {
     }
 
     setSales((prev) => [newSale, ...prev]);
-    addToast(`Vente ${newSaleId} enregistrée avec succès ! (${totalAmount.toLocaleString()} FCFA)`, 'success');
+    addToast(`Vente ${newSaleId} enregistrée avec succès ! (${totalAmount.toLocaleString()} GNF)`, 'success');
     return newSale;
   };
 
@@ -194,7 +194,7 @@ export const AppProvider = ({ children }) => {
       })
     );
 
-    addToast(`Remboursement de ${numAmount.toLocaleString()} FCFA enregistré !`, 'success');
+    addToast(`Remboursement de ${numAmount.toLocaleString()} GNF enregistré !`, 'success');
   };
 
   // Transfer stock between boutiques
@@ -264,7 +264,7 @@ export const AppProvider = ({ children }) => {
     };
 
     setExpenses((prev) => [newExpense, ...prev]);
-    addToast(`Dépense de ${Number(amount).toLocaleString()} FCFA enregistrée !`, 'info');
+    addToast(`Dépense de ${Number(amount).toLocaleString()} GNF enregistrée !`, 'info');
   };
 
   // Reset to initial demo data

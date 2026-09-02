@@ -171,7 +171,7 @@ export const generateDailyReportPDF = (stats, boutiqueName, selectedDate) => {
   y += 10;
   doc.autoTable({
     startY: y,
-    head: [['Indicateur Financier', 'Montant (FCFA)']],
+    head: [['Indicateur Financier', 'Montant (GNF)']],
     body: [
       ['Chiffre d\'Affaires Total', formatMoney(stats.totalRevenue)],
       ['Encaissements Espèces', formatMoney(stats.cashTotal)],

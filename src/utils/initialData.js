@@ -1,26 +1,26 @@
 export const INITIAL_BOUTIQUES = [
   {
     id: 'b1',
-    name: 'Boutique Centre',
-    location: 'Avenue Centrale, Abidjan',
+    name: 'Boutique Kaloum',
+    location: 'Avenue de la République, Kaloum - Conakry',
     manager: 'Mamadou Diallo',
-    phone: '+225 07 01 02 03 04',
+    phone: '+224 620 11 22 33',
     color: '#6366f1' // Indigo
   },
   {
     id: 'b2',
-    name: 'Boutique Port',
-    location: 'Zone Portuaire, San Pedro',
+    name: 'Boutique Madina',
+    location: 'Marché Madina, Matam - Conakry',
     manager: 'Aminata Touré',
-    phone: '+225 05 02 03 04 05',
+    phone: '+224 664 22 33 44',
     color: '#10b981' // Emerald
   },
   {
     id: 'b3',
-    name: 'Boutique Palmeraie',
-    location: 'Bd Mitterrand, Palmeraie',
+    name: 'Boutique Kipé',
+    location: 'Carrefour Kipé, Ratoma - Conakry',
     manager: 'Kouassi Jean',
-    phone: '+225 01 03 04 05 06',
+    phone: '+224 628 33 44 55',
     color: '#f59e0b' // Amber
   }
 ];
@@ -166,10 +166,10 @@ export const INITIAL_PRODUCTS = [
 ];
 
 export const INITIAL_CUSTOMERS = [
-  { id: 'c1', name: 'Koffi Serge', phone: '+225 07 44 33 22', boutiqueId: 'b1', totalDebt: 19500 },
-  { id: 'c2', name: 'Lounge Le Palmier', phone: '+225 05 11 22 33', boutiqueId: 'b3', totalDebt: 45000 },
-  { id: 'c3', name: 'Yao Ibrahim', phone: '+225 01 99 88 77', boutiqueId: 'b2', totalDebt: 10000 },
-  { id: 'c4', name: 'Shisha Club Port', phone: '+225 07 55 66 77', boutiqueId: 'b2', totalDebt: 0 }
+  { id: 'c1', name: 'Koffi Serge', phone: '+224 621 44 33 22', boutiqueId: 'b1', totalDebt: 19500 },
+  { id: 'c2', name: 'Lounge Le Palmier', phone: '+224 664 11 22 33', boutiqueId: 'b3', totalDebt: 45000 },
+  { id: 'c3', name: 'Yao Ibrahim', phone: '+224 628 99 88 77', boutiqueId: 'b2', totalDebt: 10000 },
+  { id: 'c4', name: 'Shisha Club Madina', phone: '+224 622 55 66 77', boutiqueId: 'b2', totalDebt: 0 }
 ];
 
 export const INITIAL_SALES = [
