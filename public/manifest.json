@@ -1,0 +1,17 @@
+{
+  "short_name": "Gestock 3B",
+  "name": "Gestock - Gestion Multi-Boutiques",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "type": "image/x-icon",
+      "sizes": "64x64"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "display": "standalone",
+  "orientation": "any",
+  "description": "Plateforme PWA de gestion des stocks, ventes, dettes et finances pour 3 boutiques."
+}
