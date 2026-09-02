@@ -234,6 +234,10 @@ export const AppProvider = ({ children }) => {
 
   // Add Product
   const addProduct = (newProd) => {
+    if (activeRole !== 'admin') {
+      addToast('Accès refusé : Seul l\'administrateur peut ajouter de nouveaux produits !', 'error');
+      return;
+    }
     const id = `p-${Date.now()}`;
     const productObj = {
       id,

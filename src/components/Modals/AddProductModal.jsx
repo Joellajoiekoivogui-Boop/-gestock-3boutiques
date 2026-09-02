@@ -4,7 +4,7 @@ import { CATEGORIES } from '../../utils/initialData';
 import { X, Package, Save } from 'lucide-react';
 
 export const AddProductModal = ({ productToEdit, onClose }) => {
-  const { addProduct, updateProduct, boutiques } = useApp();
+  const { addProduct, updateProduct, boutiques, activeRole } = useApp();
 
   const [name, setName] = useState('');
   const [category, setCategory] = useState('charbon');

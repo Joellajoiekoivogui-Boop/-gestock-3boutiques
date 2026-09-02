@@ -111,15 +111,17 @@ export const Inventory = () => {
             </button>
           )}
 
-          <button
-            onClick={() => {
-              setProductToEdit(null);
-              setIsAddModalOpen(true);
-            }}
-            className="btn btn-primary flex-center gap-2"
-          >
-            <Plus className="w-4 h-4" /> Nouveau Produit
-          </button>
+          {activeRole === 'admin' && (
+            <button
+              onClick={() => {
+                setProductToEdit(null);
+                setIsAddModalOpen(true);
+              }}
+              className="btn btn-primary flex-center gap-2"
+            >
+              <Plus className="w-4 h-4" /> Nouveau Produit
+            </button>
+          )}
         </div>
       </div>
 
@@ -289,16 +291,18 @@ export const Inventory = () => {
 
                       <td>
                         <div className="table-actions-cell">
-                          <button
-                            onClick={() => {
-                              setProductToEdit(p);
-                              setIsAddModalOpen(true);
-                            }}
-                            className="btn-icon"
-                            title="Modifier Produit"
-                          >
-                            <Edit2 className="w-4 h-4 text-indigo-400" />
-                          </button>
+                          {activeRole === 'admin' && (
+                            <button
+                              onClick={() => {
+                                setProductToEdit(p);
+                                setIsAddModalOpen(true);
+                              }}
+                              className="btn-icon"
+                              title="Modifier Produit"
+                            >
+                              <Edit2 className="w-4 h-4 text-indigo-400" />
+                            </button>
+                          )}
                           <button
                             onClick={() => setTransferProduct(p)}
                             className="btn-icon"
