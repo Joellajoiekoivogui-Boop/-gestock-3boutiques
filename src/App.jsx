@@ -19,6 +19,7 @@ function MainLayout() {
   const { activeRole } = useApp();
   const isAdmin = activeRole === 'admin';
   const [requestedPage, setActivePage] = useState('dashboard');
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Un gérant n'accède jamais aux pages réservées à l'admin
   const activePage =
@@ -26,10 +27,15 @@ function MainLayout() {
 
   return (
     <div className="app-shell">
-      <Navbar />
+      <Navbar onOpenMenu={() => setMenuOpen(true)} />
 
       <div className="app-body">
-        <Sidebar activePage={activePage} setActivePage={setActivePage} />
+        <Sidebar
+          activePage={activePage}
+          setActivePage={setActivePage}
+          menuOpen={menuOpen}
+          onClose={() => setMenuOpen(false)}
+        />
 
         <main className="app-main-content">
           {activePage === 'dashboard' && isAdmin && <Dashboard onNavigate={setActivePage} />}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -8,15 +8,15 @@ import {
   FileSpreadsheet,
   Settings as SettingsIcon,
   Store,
-  ArrowRightLeft
+  ArrowRightLeft,
+  X
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
-export const Sidebar = ({ activePage, setActivePage }) => {
-  const { activeBoutiqueId, activeBoutique, activeRole } = useApp();
+const ADMIN_ONLY = ['dashboard', 'settings'];
 
-  // Le Tableau de Bord et les Paramètres sont réservés à l'administrateur
-  const ADMIN_ONLY = ['dashboard', 'settings'];
+export const Sidebar = ({ activePage, setActivePage, menuOpen, onClose }) => {
+  const { activeBoutiqueId, activeBoutique, activeRole } = useApp();
 
   const navItems = [
     { id: 'dashboard', label: 'Tableau de Bord', icon: LayoutDashboard },
@@ -28,70 +28,100 @@ export const Sidebar = ({ activePage, setActivePage }) => {
     { id: 'settings', label: 'Paramètres', icon: SettingsIcon }
   ].filter((item) => activeRole === 'admin' || !ADMIN_ONLY.includes(item.id));
 
+  // Ferme le tiroir avec Échap + bloque le défilement du corps quand ouvert
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [menuOpen, onClose]);
+
+  const StoreInfo = () => (
+    <div className="sidebar-store-info">
+      <div className="store-avatar">
+        <Store className="w-5 h-5 text-indigo-400" />
+      </div>
+      <div className="store-meta">
+        <span className="store-name">
+          {activeBoutiqueId === 'all' ? 'Toutes Boutiques (3)' : activeBoutique?.name}
+        </span>
+        <span className="store-role-tag">
+          {activeRole === 'admin' ? '🔑 Administrateur' : `👤 ${activeBoutique?.manager}`}
+        </span>
+      </div>
+    </div>
+  );
+
+  const NavList = ({ onNavigate }) => (
+    <nav className="sidebar-nav">
+      {navItems.map((item) => {
+        const Icon = item.icon;
+        const isActive = activePage === item.id;
+        return (
+          <button
+            key={item.id}
+            onClick={() => {
+              setActivePage(item.id);
+              onNavigate?.();
+            }}
+            className={`nav-item ${isActive ? 'nav-item-active' : ''}`}
+          >
+            <Icon className="w-5 h-5 nav-icon" />
+            <span className="nav-label">{item.label}</span>
+            {item.badge && <span className="nav-badge">{item.badge}</span>}
+          </button>
+        );
+      })}
+    </nav>
+  );
+
+  const Footer = () => (
+    <div className="sidebar-footer">
+      <div className="pwa-status-card">
+        <ArrowRightLeft className="w-4 h-4 text-emerald-400" />
+        <div className="pwa-text">
+          <span className="pwa-title">Mode PWA Inclus</span>
+          <span className="pwa-desc">Synchro temps réel & Hors-ligne</span>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <>
-      {/* Desktop Sidebar */}
+      {/* Barre latérale bureau */}
       <aside className="sidebar-container">
-        <div className="sidebar-store-info">
-          <div className="store-avatar">
-            <Store className="w-5 h-5 text-indigo-400" />
-          </div>
-          <div className="store-meta">
-            <span className="store-name">
-              {activeBoutiqueId === 'all' ? 'Toutes Boutiques (3)' : activeBoutique?.name}
-            </span>
-            <span className="store-role-tag">
-              {activeRole === 'admin' ? '🔑 Administrateur' : `👤 ${activeBoutique?.manager}`}
-            </span>
-          </div>
-        </div>
-
-        <nav className="sidebar-nav">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activePage === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActivePage(item.id)}
-                className={`nav-item ${isActive ? 'nav-item-active' : ''}`}
-              >
-                <Icon className="w-5 h-5 nav-icon" />
-                <span className="nav-label">{item.label}</span>
-                {item.badge && <span className="nav-badge">{item.badge}</span>}
-              </button>
-            );
-          })}
-        </nav>
-
-        <div className="sidebar-footer">
-          <div className="pwa-status-card">
-            <ArrowRightLeft className="w-4 h-4 text-emerald-400" />
-            <div className="pwa-text">
-              <span className="pwa-title">Mode PWA Inclus</span>
-              <span className="pwa-desc">Synchro temps réel & Hors-ligne</span>
-            </div>
-          </div>
-        </div>
+        <StoreInfo />
+        <NavList />
+        <Footer />
       </aside>
 
-      {/* Mobile Bottom Navigation Bar (iOS / Android / iPadOS ergonomics) */}
-      <nav className="mobile-bottom-bar">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activePage === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActivePage(item.id)}
-              className={`mobile-tab ${isActive ? 'mobile-tab-active' : ''}`}
-            >
-              <Icon className="w-5 h-5" />
-              <span className="mobile-tab-label">{item.label.split(' ')[0]}</span>
-            </button>
-          );
-        })}
-      </nav>
+      {/* Tiroir mobile / tablette (menu hamburger) */}
+      <div
+        className={`drawer-overlay ${menuOpen ? 'drawer-open' : ''}`}
+        onClick={onClose}
+        aria-hidden={!menuOpen}
+      />
+      <aside
+        className={`drawer-panel ${menuOpen ? 'drawer-open' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menu de navigation"
+      >
+        <div className="drawer-head">
+          <span className="drawer-title">Menu</span>
+          <button onClick={onClose} className="drawer-close" aria-label="Fermer le menu">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <StoreInfo />
+        <NavList onNavigate={onClose} />
+        <Footer />
+      </aside>
     </>
   );
 };

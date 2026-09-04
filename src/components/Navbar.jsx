@@ -11,10 +11,11 @@ import {
   Sparkles,
   ChevronDown,
   LogOut,
-  ShieldCheck
+  ShieldCheck,
+  Menu
 } from 'lucide-react';
 
-export const Navbar = () => {
+export const Navbar = ({ onOpenMenu }) => {
   const {
     boutiques,
     currentUser,
@@ -61,6 +62,10 @@ export const Navbar = () => {
     <header className="navbar-container">
       {/* Brand & Boutique Switcher */}
       <div className="navbar-left">
+        <button className="menu-toggle" onClick={onOpenMenu} aria-label="Ouvrir le menu">
+          <Menu className="w-5 h-5" />
+        </button>
+
         <div className="brand-logo">
           <div className="brand-icon">
             <Sparkles className="w-5 h-5 text-indigo-400" />
