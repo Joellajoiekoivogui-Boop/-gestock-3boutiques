@@ -2953,14 +2953,6 @@ button,
 @media (max-width: 1023px) {
   .menu-toggle {
     display: inline-flex;
-    position: fixed;
-    right: max(16px, env(safe-area-inset-right));
-    bottom: calc(16px + env(safe-area-inset-bottom));
-    width: 52px;
-    height: 52px;
-    border-radius: var(--r-full);
-    z-index: 40;
-    box-shadow: var(--shadow-lg);
   }
 
   .drawer-overlay {
