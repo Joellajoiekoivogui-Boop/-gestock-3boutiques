@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Download, Share, PlusSquare, MoreVertical, Smartphone } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Download, Share, PlusSquare, MoreVertical, Smartphone, X } from 'lucide-react';
 
 const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
 
@@ -20,6 +20,7 @@ export const PwaInstall = ({ variant = 'nav' }) => {
   const [deferred, setDeferred] = useState(null);
   const [installed, setInstalled] = useState(isStandalone());
   const [showHint, setShowHint] = useState(false);
+  const wrapperRef = useRef(null);
 
   useEffect(() => {
     const onPrompt = (e) => {
@@ -39,6 +40,20 @@ export const PwaInstall = ({ variant = 'nav' }) => {
     };
   }, []);
 
+  // Ferme la bulle d'aide au clic en dehors
+  useEffect(() => {
+    if (!showHint) return;
+    const onClickOutside = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) setShowHint(false);
+    };
+    document.addEventListener('mousedown', onClickOutside);
+    document.addEventListener('touchstart', onClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', onClickOutside);
+      document.removeEventListener('touchstart', onClickOutside);
+    };
+  }, [showHint]);
+
   if (installed) return null;
 
   const triggerNative = async () => {
@@ -52,18 +67,6 @@ export const PwaInstall = ({ variant = 'nav' }) => {
     setShowHint((v) => !v);
   };
 
-  // -- Variante navbar : seulement si l'installation en 1 tap est possible --
-  if (variant === 'nav') {
-    if (!deferred) return null;
-    return (
-      <button type="button" onClick={triggerNative} className="pwa-install-btn" title="Installer l'application">
-        <Download className="w-4 h-4" />
-        <span>Installer l'app</span>
-      </button>
-    );
-  }
-
-  // -- Variante tiroir : toujours proposée tant que l'app n'est pas installée --
   const Hint = () => {
     if (isIos()) {
       return (
@@ -93,6 +96,28 @@ export const PwaInstall = ({ variant = 'nav' }) => {
     );
   };
 
+  // -- Variante navbar : toujours visible tant que l'app n'est pas installée --
+  if (variant === 'nav') {
+    return (
+      <div className="pwa-nav-wrapper" ref={wrapperRef}>
+        <button type="button" onClick={handleClick} className="pwa-install-btn" title="Télécharger l'application">
+          <Download className="w-4 h-4" />
+          <span>Télécharger</span>
+        </button>
+
+        {!deferred && showHint && (
+          <div className="pwa-ios-hint pwa-card">
+            <button type="button" className="pwa-ios-close" onClick={() => setShowHint(false)} aria-label="Fermer">
+              <X className="w-4 h-4" />
+            </button>
+            <Hint />
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // -- Variante tiroir : toujours proposée tant que l'app n'est pas installée --
   return (
     <div className="pwa-card">
       <div className="pwa-card-top">

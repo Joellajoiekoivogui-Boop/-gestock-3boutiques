@@ -2797,6 +2797,10 @@ button svg,
 }
 
 /* — Bouton d'installation PWA — */
+.pwa-nav-wrapper {
+  position: relative;
+  display: inline-flex;
+}
 .pwa-install-btn {
   display: inline-flex;
   align-items: center;
@@ -2907,6 +2911,12 @@ button,
   color: var(--text-3);
   cursor: pointer;
   padding: 2px;
+}
+.pwa-ios-hint.pwa-card {
+  margin-top: 0;
+  padding-right: 30px;
+  background: var(--bg-card);
+  box-shadow: 0 16px 40px -14px rgba(0, 0, 0, 0.45);
 }
 
 /* ============================================================
