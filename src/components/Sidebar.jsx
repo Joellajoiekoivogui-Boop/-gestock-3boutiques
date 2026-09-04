@@ -9,6 +9,8 @@ import {
   Settings as SettingsIcon,
   Store,
   ArrowRightLeft,
+  UserCog,
+  LogOut,
   X
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -17,7 +19,7 @@ import { PwaInstall } from './PwaInstall';
 const ADMIN_ONLY = ['dashboard', 'settings'];
 
 export const Sidebar = ({ activePage, setActivePage, menuOpen, onClose }) => {
-  const { activeBoutiqueId, activeBoutique, activeRole } = useApp();
+  const { activeBoutiqueId, activeBoutique, activeRole, currentUser, logout } = useApp();
 
   const navItems = [
     { id: 'dashboard', label: 'Tableau de Bord', icon: LayoutDashboard },
@@ -80,6 +82,37 @@ export const Sidebar = ({ activePage, setActivePage, menuOpen, onClose }) => {
     </nav>
   );
 
+  const AccountActions = ({ onNavigate }) => (
+    <div className="sidebar-account">
+      <div className="sidebar-account-user">
+        <span className="account-name">{currentUser?.name || 'Utilisateur'}</span>
+        <span className="account-role">{activeRole === 'admin' ? 'Administrateur' : 'Gérant'}</span>
+      </div>
+      <button
+        type="button"
+        className="sidebar-account-btn"
+        onClick={() => {
+          onNavigate?.();
+          logout();
+        }}
+      >
+        <UserCog className="w-4 h-4" />
+        <span>Changer d'utilisateur</span>
+      </button>
+      <button
+        type="button"
+        className="sidebar-account-btn sidebar-account-btn-danger"
+        onClick={() => {
+          onNavigate?.();
+          logout();
+        }}
+      >
+        <LogOut className="w-4 h-4" />
+        <span>Se déconnecter</span>
+      </button>
+    </div>
+  );
+
   const Footer = () => (
     <div className="sidebar-footer">
       <div className="pwa-status-card">
@@ -122,6 +155,7 @@ export const Sidebar = ({ activePage, setActivePage, menuOpen, onClose }) => {
         <StoreInfo />
         <NavList onNavigate={onClose} />
         <PwaInstall variant="drawer" />
+        <AccountActions onNavigate={onClose} />
         <Footer />
       </aside>
     </>
