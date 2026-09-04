@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Download, Share, X } from 'lucide-react';
+import { Download, Share, PlusSquare, MoreVertical, Smartphone } from 'lucide-react';
+
+const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
 
 const isIos = () =>
-  typeof navigator !== 'undefined' && /iphone|ipad|ipod/i.test(navigator.userAgent);
+  /iphone|ipad|ipod/i.test(ua) ||
+  // iPadOS 13+ se présente comme un Mac
+  (/Macintosh/.test(ua) && typeof navigator !== 'undefined' && navigator.maxTouchPoints > 1);
+
+const isAndroid = () => /android/i.test(ua);
 
 const isStandalone = () =>
   (typeof window !== 'undefined' &&
@@ -10,16 +16,10 @@ const isStandalone = () =>
     window.matchMedia('(display-mode: standalone)').matches) ||
   (typeof navigator !== 'undefined' && navigator.standalone === true);
 
-export const PwaInstall = () => {
+export const PwaInstall = ({ variant = 'nav' }) => {
   const [deferred, setDeferred] = useState(null);
-  const [showIosHint, setShowIosHint] = useState(false);
-  const [dismissed, setDismissed] = useState(() => {
-    try {
-      return localStorage.getItem('gestock_3b_pwa_dismissed') === '1';
-    } catch {
-      return false;
-    }
-  });
+  const [installed, setInstalled] = useState(isStandalone());
+  const [showHint, setShowHint] = useState(false);
 
   useEffect(() => {
     const onPrompt = (e) => {
@@ -28,7 +28,8 @@ export const PwaInstall = () => {
     };
     const onInstalled = () => {
       setDeferred(null);
-      setShowIosHint(false);
+      setInstalled(true);
+      setShowHint(false);
     };
     window.addEventListener('beforeinstallprompt', onPrompt);
     window.addEventListener('appinstalled', onInstalled);
@@ -38,51 +39,76 @@ export const PwaInstall = () => {
     };
   }, []);
 
-  if (dismissed || isStandalone()) return null;
+  if (installed) return null;
 
-  const remember = () => {
-    try {
-      localStorage.setItem('gestock_3b_pwa_dismissed', '1');
-    } catch {
-      /* ignore */
-    }
-    setDismissed(true);
+  const triggerNative = async () => {
+    deferred.prompt();
+    const { outcome } = await deferred.userChoice;
+    if (outcome === 'accepted') setDeferred(null);
   };
 
-  const handleClick = async () => {
-    if (deferred) {
-      deferred.prompt();
-      const { outcome } = await deferred.userChoice;
-      if (outcome === 'accepted') setDeferred(null);
-      else remember();
-      return;
-    }
-    if (isIos()) {
-      setShowIosHint((v) => !v);
-    }
+  const handleClick = () => {
+    if (deferred) return triggerNative();
+    setShowHint((v) => !v);
   };
 
-  // Rien à proposer (ni prompt Android, ni iOS Safari)
-  if (!deferred && !isIos()) return null;
-
-  return (
-    <div style={{ position: 'relative' }}>
-      <button type="button" onClick={handleClick} className="pwa-install-btn" title="Installer l'application">
+  // -- Variante navbar : seulement si l'installation en 1 tap est possible --
+  if (variant === 'nav') {
+    if (!deferred) return null;
+    return (
+      <button type="button" onClick={triggerNative} className="pwa-install-btn" title="Installer l'application">
         <Download className="w-4 h-4" />
         <span>Installer l'app</span>
       </button>
+    );
+  }
 
-      {showIosHint && (
-        <div className="pwa-ios-hint glass-panel">
-          <button className="pwa-ios-close" onClick={() => setShowIosHint(false)} aria-label="Fermer">
-            <X className="w-4 h-4" />
-          </button>
+  // -- Variante tiroir : toujours proposée tant que l'app n'est pas installée --
+  const Hint = () => {
+    if (isIos()) {
+      return (
+        <div className="pwa-hint">
           <p>
-            Sur iPhone / iPad : appuyez sur <Share className="w-4 h-4" style={{ verticalAlign: 'middle' }} />{' '}
-            <strong>Partager</strong>, puis <strong>« Sur l'écran d'accueil »</strong>.
+            <span className="pwa-step">1</span> Touchez{' '}
+            <Share className="w-4 h-4 pwa-ic" /> <strong>Partager</strong> en bas de Safari
+          </p>
+          <p>
+            <span className="pwa-step">2</span> Choisissez{' '}
+            <PlusSquare className="w-4 h-4 pwa-ic" /> <strong>Sur l'écran d'accueil</strong>
           </p>
         </div>
-      )}
+      );
+    }
+    return (
+      <div className="pwa-hint">
+        <p>
+          <span className="pwa-step">1</span> Ouvrez le menu{' '}
+          <MoreVertical className="w-4 h-4 pwa-ic" /> du navigateur
+        </p>
+        <p>
+          <span className="pwa-step">2</span> Touchez{' '}
+          <strong>{isAndroid() ? 'Installer l’application' : 'Ajouter à l’écran d’accueil'}</strong>
+        </p>
+      </div>
+    );
+  };
+
+  return (
+    <div className="pwa-card">
+      <div className="pwa-card-top">
+        <Smartphone className="w-5 h-5 text-indigo-400" />
+        <div>
+          <span className="pwa-card-title">Installer l'application</span>
+          <span className="pwa-card-sub">Accès rapide depuis l'écran d'accueil, hors-ligne inclus</span>
+        </div>
+      </div>
+
+      <button type="button" onClick={handleClick} className="btn btn-primary w-full flex-center gap-2">
+        <Download className="w-4 h-4" />
+        {deferred ? 'Installer maintenant' : showHint ? 'Masquer les étapes' : 'Voir comment faire'}
+      </button>
+
+      {!deferred && showHint && <Hint />}
     </div>
   );
 };

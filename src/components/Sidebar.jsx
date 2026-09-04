@@ -12,6 +12,7 @@ import {
   X
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { PwaInstall } from './PwaInstall';
 
 const ADMIN_ONLY = ['dashboard', 'settings'];
 
@@ -120,6 +121,7 @@ export const Sidebar = ({ activePage, setActivePage, menuOpen, onClose }) => {
         </div>
         <StoreInfo />
         <NavList onNavigate={onClose} />
+        <PwaInstall variant="drawer" />
         <Footer />
       </aside>
     </>
