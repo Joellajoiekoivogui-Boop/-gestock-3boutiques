@@ -194,6 +194,13 @@ body {
   }
 }
 
+/* Laisse la place pour la bottom nav fixe */
+@media (max-width: 767px) {
+  .app-main-content {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+}
+
 /* Glass Panel Styling */
 .glass-panel {
   background: var(--bg-card);
@@ -553,46 +560,62 @@ body {
   color: var(--text-muted);
 }
 
-/* Mobile Bottom Navigation Bar */
-.mobile-bottom-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 64px;
-  background: var(--bg-navbar);
-  border-top: 1px solid var(--bg-card-border);
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  z-index: 50;
-  padding: 0 10px;
+/* Bottom Navigation (mobile) — toujours sombre, quel que soit le thème actif */
+.bottom-nav {
+  display: none;
 }
 
-@media (min-width: 1024px) {
-  .mobile-bottom-bar {
-    display: none;
+@media (max-width: 767px) {
+  .bottom-nav {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-around;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 45;
+    height: calc(60px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: max(4px, env(safe-area-inset-left));
+    padding-right: max(4px, env(safe-area-inset-right));
+    background: rgba(9, 12, 22, 0.92);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 }
 
-.mobile-tab {
+.bottom-nav-tab {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 3px;
   background: transparent;
   border: none;
-  color: var(--text-muted);
+  color: #838ba3;
   cursor: pointer;
+  transition: color 0.18s var(--ease), transform 0.18s var(--ease);
+}
+.bottom-nav-tab:active {
+  transform: scale(0.94);
 }
 
-.mobile-tab-active {
-  color: var(--primary);
+.bottom-nav-icon {
+  width: 22px;
+  height: 22px;
 }
 
-.mobile-tab-label {
-  font-size: 0.68rem;
+.bottom-nav-label {
+  font-size: 0.66rem;
   font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.bottom-nav-tab-active {
+  color: #2dd4bf;
 }
 
 /* Page Headers */
@@ -1463,6 +1486,12 @@ body {
 @media (min-width: 1024px) {
   .toast-container {
     bottom: 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  .toast-container {
+    bottom: calc(76px + env(safe-area-inset-bottom));
   }
 }
 
@@ -3041,6 +3070,13 @@ button,
   }
   .drawer-panel .sidebar-footer {
     margin-top: auto;
+  }
+}
+
+/* En dessous de 768px, la bottom nav remplace le bouton hamburger de la barre */
+@media (max-width: 767px) {
+  .menu-toggle {
+    display: none;
   }
 }
 

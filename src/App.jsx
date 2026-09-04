@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
+import { BottomNav } from './components/BottomNav';
 import { ToastContainer } from './components/ToastContainer';
 import { Login } from './pages/Login';
 
@@ -47,6 +48,8 @@ function MainLayout() {
           {activePage === 'settings' && isAdmin && <Settings />}
         </main>
       </div>
+
+      <BottomNav activePage={activePage} setActivePage={setActivePage} onOpenMenu={() => setMenuOpen(true)} />
     </div>
   );
 }

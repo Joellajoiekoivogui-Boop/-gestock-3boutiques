@@ -1,35 +1,13 @@
 import React, { useEffect } from 'react';
-import {
-  LayoutDashboard,
-  ShoppingCart,
-  Boxes,
-  Receipt,
-  Wallet,
-  FileSpreadsheet,
-  Settings as SettingsIcon,
-  Store,
-  ArrowRightLeft,
-  UserCog,
-  LogOut,
-  X
-} from 'lucide-react';
+import { Store, ArrowRightLeft, UserCog, LogOut, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { PwaInstall } from './PwaInstall';
-
-const ADMIN_ONLY = ['dashboard', 'settings'];
+import { getNavItems } from '../utils/navConfig';
 
 export const Sidebar = ({ activePage, setActivePage, menuOpen, onClose }) => {
   const { activeBoutiqueId, activeBoutique, activeRole, currentUser, logout } = useApp();
 
-  const navItems = [
-    { id: 'dashboard', label: 'Tableau de Bord', icon: LayoutDashboard },
-    { id: 'pos', label: 'Caisse / Ventes', icon: ShoppingCart, badge: 'POS' },
-    { id: 'inventory', label: 'Gestion des Stocks', icon: Boxes },
-    { id: 'debts', label: 'Dettes & Clients', icon: Receipt },
-    { id: 'expenses', label: 'Dépenses & Caisse', icon: Wallet },
-    { id: 'reports', label: 'Rapports PDF', icon: FileSpreadsheet },
-    { id: 'settings', label: 'Paramètres', icon: SettingsIcon }
-  ].filter((item) => activeRole === 'admin' || !ADMIN_ONLY.includes(item.id));
+  const navItems = getNavItems(activeRole);
 
   // Ferme le tiroir avec Échap + bloque le défilement du corps quand ouvert
   useEffect(() => {
