@@ -2,31 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   Store,
-  Shield,
-  User,
   Sun,
   Moon,
   Wifi,
   WifiOff,
   Bell,
   Sparkles,
-  ChevronDown
+  ChevronDown,
+  LogOut,
+  ShieldCheck
 } from 'lucide-react';
 
 export const Navbar = () => {
   const {
     boutiques,
+    currentUser,
+    logout,
     activeBoutiqueId,
     setActiveBoutiqueId,
     activeRole,
-    setActiveRole,
     theme,
     setTheme,
-    products,
-    activeBoutique
+    products
   } = useApp();
 
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const isAdmin = activeRole === 'admin';
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -48,6 +49,13 @@ export const Navbar = () => {
     return (p.stocks[activeBoutiqueId] || 0) <= p.minAlertStock;
   }).length;
 
+  const initials = (currentUser?.name || '?')
+    .split(' ')
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+
   return (
     <header className="navbar-container">
       {/* Brand & Boutique Switcher */}
@@ -62,25 +70,30 @@ export const Navbar = () => {
           </div>
         </div>
 
-        {/* Boutique Selector Dropdown */}
-        <div className="boutique-selector-wrapper">
-          <Store className="w-4 h-4 text-indigo-400" />
-          <select
-            value={activeBoutiqueId}
-            onChange={(e) => setActiveBoutiqueId(e.target.value)}
-            className="boutique-select"
-          >
-            {activeRole === 'admin' && (
+        {/* Boutique : sélecteur pour l'admin, statique pour le gérant */}
+        {isAdmin ? (
+          <div className="boutique-selector-wrapper">
+            <Store className="w-4 h-4 text-indigo-400" />
+            <select
+              value={activeBoutiqueId}
+              onChange={(e) => setActiveBoutiqueId(e.target.value)}
+              className="boutique-select"
+            >
               <option value="all">🏢 Toutes les Boutiques (Vue Consolidée)</option>
-            )}
-            {boutiques.map((b) => (
-              <option key={b.id} value={b.id}>
-                📍 {b.name} ({b.manager})
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="w-4 h-4 select-arrow" />
-        </div>
+              {boutiques.map((b) => (
+                <option key={b.id} value={b.id}>
+                  📍 {b.name} ({b.manager})
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="w-4 h-4 select-arrow" />
+          </div>
+        ) : (
+          <div className="boutique-static" title="Votre boutique">
+            <Store className="w-4 h-4 text-indigo-400" />
+            <span>{boutiques.find((b) => b.id === activeBoutiqueId)?.name || 'Ma Boutique'}</span>
+          </div>
+        )}
       </div>
 
       {/* Navbar Right Actions */}
@@ -89,11 +102,11 @@ export const Navbar = () => {
         <div className={`status-badge ${isOnline ? 'status-online' : 'status-offline'}`}>
           {isOnline ? (
             <>
-              <Wifi className="w-3.5 h-3.5" /> <span>En Ligne</span>
+              <Wifi className="w-3.5 h-3.5" /> <span className="hidden-mobile">En Ligne</span>
             </>
           ) : (
             <>
-              <WifiOff className="w-3.5 h-3.5" /> <span>Hors Ligne</span>
+              <WifiOff className="w-3.5 h-3.5" /> <span className="hidden-mobile">Hors Ligne</span>
             </>
           )}
         </div>
@@ -106,26 +119,23 @@ export const Navbar = () => {
           </div>
         )}
 
-        {/* Role Switcher (Admin vs Gérant) */}
-        <div className="role-switcher">
-          <button
-            onClick={() => setActiveRole('admin')}
-            className={`role-btn ${activeRole === 'admin' ? 'active-role-admin' : ''}`}
-            title="Passer en mode Administrateur"
-          >
-            <Shield className="w-4 h-4" />
-            <span className="hidden-mobile">Admin</span>
-          </button>
-          <button
-            onClick={() => {
-              setActiveRole('gerant');
-              if (activeBoutiqueId === 'all') setActiveBoutiqueId('b1');
-            }}
-            className={`role-btn ${activeRole === 'gerant' ? 'active-role-gerant' : ''}`}
-            title="Passer en mode Gérant de boutique"
-          >
-            <User className="w-4 h-4" />
-            <span className="hidden-mobile">Gérant</span>
+        {/* Compte connecté */}
+        <div className="user-chip">
+          <span className="user-avatar">{initials}</span>
+          <span className="user-meta hidden-mobile">
+            <span className="user-name">{currentUser?.name}</span>
+            <span className="user-role">
+              {isAdmin ? (
+                <>
+                  <ShieldCheck className="w-3 h-3" /> Administrateur
+                </>
+              ) : (
+                'Gérant'
+              )}
+            </span>
+          </span>
+          <button onClick={logout} className="logout-btn" title="Se déconnecter">
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
 

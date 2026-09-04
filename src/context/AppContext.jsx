@@ -5,7 +5,8 @@ import {
   INITIAL_SALES,
   INITIAL_DEBTS,
   INITIAL_EXPENSES,
-  INITIAL_CUSTOMERS
+  INITIAL_CUSTOMERS,
+  INITIAL_USERS
 } from '../utils/initialData';
 
 const AppContext = createContext();
@@ -22,9 +23,12 @@ export const AppProvider = ({ children }) => {
   };
 
   const [boutiques] = useState(INITIAL_BOUTIQUES);
+  const [currentUser, setCurrentUser] = useState(() => loadLocal('session', null));
   const [activeBoutiqueId, setActiveBoutiqueId] = useState(() => loadLocal('activeBoutiqueId', 'all'));
-  const [activeRole, setActiveRole] = useState(() => loadLocal('activeRole', 'admin')); // 'admin' | 'gerant'
   const [theme, setTheme] = useState(() => loadLocal('theme', 'dark'));
+
+  // Le rôle découle du compte connecté
+  const activeRole = currentUser?.role === 'admin' ? 'admin' : 'gerant';
 
   // Data States
   const [products, setProducts] = useState(() => loadLocal('products', INITIAL_PRODUCTS));
@@ -48,14 +52,58 @@ export const AppProvider = ({ children }) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
+  // --- Authentification ---
+  const login = (email, password) => {
+    const u = INITIAL_USERS.find(
+      (x) =>
+        x.email.toLowerCase() === String(email).trim().toLowerCase() &&
+        x.password === password
+    );
+    if (!u) return { ok: false, error: 'E-mail ou mot de passe incorrect.' };
+
+    const safeUser = {
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      boutiqueId: u.boutiqueId
+    };
+    setCurrentUser(safeUser);
+    setActiveBoutiqueId(u.role === 'admin' ? 'all' : u.boutiqueId);
+    addToast(`Bienvenue ${u.name} !`, 'success');
+    return { ok: true };
+  };
+
+  const logout = () => {
+    setCurrentUser(null);
+    addToast('Vous êtes déconnecté.', 'info');
+  };
+
+  // Un gérant ne peut pas changer de boutique
+  const changeBoutique = (id) => {
+    if (activeRole !== 'admin') return;
+    setActiveBoutiqueId(id);
+  };
+
   // Sync to LocalStorage
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem('gestock_3b_session', JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem('gestock_3b_session');
+    }
+  }, [currentUser]);
+
+  // Verrouille la boutique du gérant (y compris après un rechargement)
+  useEffect(() => {
+    if (currentUser && currentUser.role !== 'admin' && activeBoutiqueId !== currentUser.boutiqueId) {
+      setActiveBoutiqueId(currentUser.boutiqueId);
+    }
+  }, [currentUser, activeBoutiqueId]);
+
   useEffect(() => {
     localStorage.setItem('gestock_3b_activeBoutiqueId', JSON.stringify(activeBoutiqueId));
   }, [activeBoutiqueId]);
-
-  useEffect(() => {
-    localStorage.setItem('gestock_3b_activeRole', JSON.stringify(activeRole));
-  }, [activeRole]);
 
   useEffect(() => {
     localStorage.setItem('gestock_3b_theme', JSON.stringify(theme));
@@ -286,11 +334,13 @@ export const AppProvider = ({ children }) => {
     <AppContext.Provider
       value={{
         boutiques,
+        currentUser,
+        login,
+        logout,
         activeBoutiqueId,
-        setActiveBoutiqueId,
+        setActiveBoutiqueId: changeBoutique,
         activeBoutique,
         activeRole,
-        setActiveRole,
         theme,
         setTheme,
         products,

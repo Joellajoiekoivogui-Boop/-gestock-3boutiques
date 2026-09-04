@@ -24,8 +24,11 @@ export const Reports = () => {
     debts,
     products,
     boutiques,
-    activeBoutiqueId
+    activeBoutiqueId,
+    activeRole
   } = useApp();
+
+  const isAdmin = activeRole === 'admin';
 
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0]
@@ -34,18 +37,21 @@ export const Reports = () => {
     activeBoutiqueId === 'all' ? 'b1' : activeBoutiqueId
   );
 
+  // Un gérant ne peut générer un rapport que pour sa propre boutique
+  const effectiveBoutiqueId = isAdmin ? reportBoutiqueId : activeBoutiqueId;
+
   // Compute daily stats for selected boutique and date
   const computeDailyStats = () => {
-    const targetBoutique = boutiques.find((b) => b.id === reportBoutiqueId);
+    const targetBoutique = boutiques.find((b) => b.id === effectiveBoutiqueId);
     const daySales = sales.filter((s) => {
       const saleDate = new Date(s.date).toISOString().split('T')[0];
-      const matchBoutique = reportBoutiqueId === 'all' || s.boutiqueId === reportBoutiqueId;
+      const matchBoutique = effectiveBoutiqueId === 'all' || s.boutiqueId === effectiveBoutiqueId;
       return matchBoutique && saleDate === selectedDate;
     });
 
     const dayExpenses = expenses.filter((e) => {
       const expDate = new Date(e.date).toISOString().split('T')[0];
-      const matchBoutique = reportBoutiqueId === 'all' || e.boutiqueId === reportBoutiqueId;
+      const matchBoutique = effectiveBoutiqueId === 'all' || e.boutiqueId === effectiveBoutiqueId;
       return matchBoutique && expDate === selectedDate;
     });
 
@@ -64,7 +70,7 @@ export const Reports = () => {
 
     // Repayments recovered on that day
     const recoveredDebtsTotal = debts.reduce((sum, d) => {
-      if (reportBoutiqueId !== 'all' && d.boutiqueId !== reportBoutiqueId) return sum;
+      if (effectiveBoutiqueId !== 'all' && d.boutiqueId !== effectiveBoutiqueId) return sum;
       const dayRepayments = d.repayments.filter((r) => {
         const rDate = new Date(r.date).toISOString().split('T')[0];
         return rDate === selectedDate;
@@ -105,27 +111,27 @@ export const Reports = () => {
   };
 
   const handleDownloadStockPDF = () => {
-    const targetBoutique = boutiques.find((b) => b.id === reportBoutiqueId);
+    const targetBoutique = boutiques.find((b) => b.id === effectiveBoutiqueId);
     const boutiqueName = targetBoutique ? targetBoutique.name : 'Toutes Boutiques';
 
     const mappedProducts = products.map((p) => ({
       ...p,
       currentStock:
-        reportBoutiqueId === 'all'
+        effectiveBoutiqueId === 'all'
           ? Object.values(p.stocks).reduce((a, b) => a + b, 0)
-          : p.stocks[reportBoutiqueId] || 0
+          : p.stocks[effectiveBoutiqueId] || 0
     }));
 
     generateStockReportPDF(mappedProducts, boutiqueName);
   };
 
   const handleDownloadDebtsPDF = () => {
-    const targetBoutique = boutiques.find((b) => b.id === reportBoutiqueId);
+    const targetBoutique = boutiques.find((b) => b.id === effectiveBoutiqueId);
     const boutiqueName = targetBoutique ? targetBoutique.name : 'Toutes Boutiques';
     const targetDebts =
-      reportBoutiqueId === 'all'
+      effectiveBoutiqueId === 'all'
         ? debts
-        : debts.filter((d) => d.boutiqueId === reportBoutiqueId);
+        : debts.filter((d) => d.boutiqueId === effectiveBoutiqueId);
 
     generateDebtReportPDF(targetDebts, boutiqueName);
   };
@@ -153,17 +159,28 @@ export const Reports = () => {
             <label className="form-label flex-center gap-1">
               <Store className="w-4 h-4 text-indigo-400" /> Sélectionner la Boutique
             </label>
-            <select
-              value={reportBoutiqueId}
-              onChange={(e) => setReportBoutiqueId(e.target.value)}
-              className="form-input"
-            >
-              {boutiques.map((b) => (
-                <option key={b.id} value={b.id}>
-                  📍 {b.name} ({b.manager})
-                </option>
-              ))}
-            </select>
+            {isAdmin ? (
+              <select
+                value={reportBoutiqueId}
+                onChange={(e) => setReportBoutiqueId(e.target.value)}
+                className="form-input"
+              >
+                <option value="all">🏢 Toutes les Boutiques</option>
+                {boutiques.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    📍 {b.name} ({b.manager})
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type="text"
+                readOnly
+                value={boutiques.find((b) => b.id === activeBoutiqueId)?.name || 'Ma Boutique'}
+                className="form-input"
+                title="Vous ne pouvez générer un rapport que pour votre boutique"
+              />
+            )}
           </div>
 
           <div className="form-group">

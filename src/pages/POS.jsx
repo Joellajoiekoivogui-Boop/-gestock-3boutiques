@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { CATEGORIES } from '../utils/initialData';
 import { formatMoney } from '../utils/formatters';
 import { SaleSuccessModal } from '../components/Modals/SaleSuccessModal';
+import { FeuillVente } from './FeuillVente';
 import {
   Search,
   ShoppingCart,
@@ -16,7 +17,9 @@ import {
   CheckCircle,
   AlertCircle,
   Package,
-  Calendar
+  Calendar,
+  ClipboardList,
+  LayoutGrid
 } from 'lucide-react';
 
 export const POS = () => {
@@ -29,6 +32,7 @@ export const POS = () => {
     addToast
   } = useApp();
 
+  const [viewMode, setViewMode] = useState('sheet'); // 'sheet' (Feuille de vente) | 'pos' (Caisse classique)
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [cart, setCart] = useState([]);
@@ -36,7 +40,6 @@ export const POS = () => {
   // Customer & Payment Form State
   const [customerName, setCustomerName] = useState('Client Passant');
   const [paymentMethod, setPaymentMethod] = useState('cash'); // 'cash' | 'orange_money' | 'credit'
-  const [cashReceived, setCashReceived] = useState('');
   const [omReference, setOmReference] = useState('');
   const [dueDate, setDueDate] = useState(
     new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0]
@@ -111,22 +114,14 @@ export const POS = () => {
     setCart((prev) => prev.filter((i) => i.productId !== productId));
   };
 
+  // La somme totale est toujours calculée automatiquement depuis le panier
   const totalCartAmount = cart.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
-
-  // Cash change calculation
-  const cashReceivedNum = Number(cashReceived) || 0;
-  const cashChange = Math.max(0, cashReceivedNum - totalCartAmount);
 
   // Submit Sale
   const handleCompleteSale = (e) => {
     e.preventDefault();
     if (cart.length === 0) {
       addToast('Votre panier est vide !', 'error');
-      return;
-    }
-
-    if (paymentMethod === 'cash' && cashReceivedNum < totalCartAmount) {
-      addToast('Montant espèces insuffisant pour couvrir le total !', 'error');
       return;
     }
 
@@ -143,8 +138,8 @@ export const POS = () => {
     const saleResult = addSale({
       items: cart,
       paymentMethod,
-      cashReceived: cashReceivedNum,
-      cashChange,
+      cashReceived: paymentMethod === 'cash' ? totalCartAmount : 0,
+      cashChange: 0,
       omReference,
       customerName,
       dueDate
@@ -153,26 +148,51 @@ export const POS = () => {
     setCompletedSale(saleResult);
     // Reset cart
     setCart([]);
-    setCashReceived('');
     setOmReference('');
     setCustomerName('Client Passant');
   };
 
   return (
     <div className="pos-page animate-fade">
-      <div className="pos-header">
+      <div className="pos-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h1 className="page-title">Terminal de Vente (Caisse POS)</h1>
+          <h1 className="page-title">
+            {viewMode === 'sheet' ? 'Feuille de Vente Journalière' : 'Terminal de Vente (Caisse POS)'}
+          </h1>
           <p className="page-subtitle">
             Boutique active :{' '}
             <strong className="text-indigo-400 font-bold">
-              {activeBoutique ? activeBoutique.name : 'Boutique Centre (par défaut)'}
+              {activeBoutique ? activeBoutique.name : 'Toutes les Boutiques'}
             </strong>
           </p>
         </div>
+
+        {/* View Mode Switcher */}
+        <div className="role-switcher">
+          <button
+            onClick={() => setViewMode('sheet')}
+            className={`role-btn ${viewMode === 'sheet' ? 'active-role-admin' : ''}`}
+            title="Feuille de vente en tableau"
+          >
+            <ClipboardList className="w-4 h-4" />
+            <span>Feuille de Vente</span>
+          </button>
+          <button
+            onClick={() => setViewMode('pos')}
+            className={`role-btn ${viewMode === 'pos' ? 'active-role-admin' : ''}`}
+            title="Caisse POS avec panier"
+          >
+            <LayoutGrid className="w-4 h-4" />
+            <span>Caisse / Catalogue</span>
+          </button>
+        </div>
       </div>
 
-      <div className="pos-layout-grid mt-4">
+      {/* Render Feuille de Vente or Classic POS */}
+      {viewMode === 'sheet' ? (
+        <FeuillVente />
+      ) : (
+        <div className="pos-layout-grid mt-4">
         {/* Left Column: Product Selection Catalog */}
         <div className="pos-catalog-column">
           {/* Search & Category Filter Bar */}
@@ -353,27 +373,9 @@ export const POS = () => {
 
             {/* Conditional Payment Method Controls */}
             {paymentMethod === 'cash' && (
-              <div className="form-group animate-fade">
-                <label className="form-label">Montant Remis par le Client (FCFA)</label>
-                <input
-                  type="number"
-                  value={cashReceived}
-                  onChange={(e) => setCashReceived(e.target.value)}
-                  placeholder={`ex: ${totalCartAmount}`}
-                  className="form-input text-lg font-bold"
-                />
-                {cashReceivedNum > 0 && (
-                  <div className="change-result-box">
-                    <span>Monnaie à Rendre :</span>
-                    <strong
-                      className={cashReceivedNum < totalCartAmount ? 'text-red-400' : 'text-emerald-400'}
-                    >
-                      {cashReceivedNum < totalCartAmount
-                        ? 'Montant Insuffisant !'
-                        : formatMoney(cashChange)}
-                    </strong>
-                  </div>
-                )}
+              <div className="change-result-box animate-fade">
+                <span>Montant encaissé en espèces :</span>
+                <strong className="text-emerald-400">{formatMoney(totalCartAmount)}</strong>
               </div>
             )}
 
@@ -416,6 +418,7 @@ export const POS = () => {
           </form>
         </div>
       </div>
+      )}
 
       {/* Printable Receipt Popup Modal */}
       {completedSale && (

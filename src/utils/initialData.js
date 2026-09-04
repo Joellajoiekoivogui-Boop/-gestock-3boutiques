@@ -1,27 +1,64 @@
 export const INITIAL_BOUTIQUES = [
   {
     id: 'b1',
-    name: 'Boutique Kaloum',
-    location: 'Avenue de la République, Kaloum - Conakry',
+    name: 'Boutique Kissosso',
+    location: 'Kissosso, Matoto - Conakry',
     manager: 'Mamadou Diallo',
     phone: '+224 620 11 22 33',
     color: '#6366f1' // Indigo
   },
   {
     id: 'b2',
-    name: 'Boutique Madina',
-    location: 'Marché Madina, Matam - Conakry',
+    name: 'Boutique Tombolia',
+    location: 'Tombolia, Matoto - Conakry',
     manager: 'Aminata Touré',
     phone: '+224 664 22 33 44',
     color: '#10b981' // Emerald
   },
   {
     id: 'b3',
-    name: 'Boutique Kipé',
-    location: 'Carrefour Kipé, Ratoma - Conakry',
+    name: 'Boutique Sangoyah',
+    location: 'Sangoyah, Ratoma - Conakry',
     manager: 'Kouassi Jean',
     phone: '+224 628 33 44 55',
     color: '#f59e0b' // Amber
+  }
+];
+
+// Comptes de connexion. L'admin voit tout ; chaque gérant est indépendant
+// et n'accède qu'à sa propre boutique.
+export const INITIAL_USERS = [
+  {
+    id: 'u-admin',
+    name: 'Administrateur Général',
+    email: 'admin@gestock.gn',
+    password: 'admin2026',
+    role: 'admin',
+    boutiqueId: 'all'
+  },
+  {
+    id: 'u-b1',
+    name: 'Mamadou Diallo',
+    email: 'kissosso@gestock.gn',
+    password: 'kissosso2026',
+    role: 'gerant',
+    boutiqueId: 'b1'
+  },
+  {
+    id: 'u-b2',
+    name: 'Aminata Touré',
+    email: 'tombolia@gestock.gn',
+    password: 'tombolia2026',
+    role: 'gerant',
+    boutiqueId: 'b2'
+  },
+  {
+    id: 'u-b3',
+    name: 'Kouassi Jean',
+    email: 'sangoyah@gestock.gn',
+    password: 'sangoyah2026',
+    role: 'gerant',
+    boutiqueId: 'b3'
   }
 ];
 

@@ -15,6 +15,9 @@ import { useApp } from '../context/AppContext';
 export const Sidebar = ({ activePage, setActivePage }) => {
   const { activeBoutiqueId, activeBoutique, activeRole } = useApp();
 
+  // Le Tableau de Bord et les Paramètres sont réservés à l'administrateur
+  const ADMIN_ONLY = ['dashboard', 'settings'];
+
   const navItems = [
     { id: 'dashboard', label: 'Tableau de Bord', icon: LayoutDashboard },
     { id: 'pos', label: 'Caisse / Ventes', icon: ShoppingCart, badge: 'POS' },
@@ -23,7 +26,7 @@ export const Sidebar = ({ activePage, setActivePage }) => {
     { id: 'expenses', label: 'Dépenses & Caisse', icon: Wallet },
     { id: 'reports', label: 'Rapports PDF', icon: FileSpreadsheet },
     { id: 'settings', label: 'Paramètres', icon: SettingsIcon }
-  ];
+  ].filter((item) => activeRole === 'admin' || !ADMIN_ONLY.includes(item.id));
 
   return (
     <>

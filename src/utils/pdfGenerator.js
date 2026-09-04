@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { formatMoney, formatDateTime, formatDate, getPaymentMethodLabel } from './formatters';
 
 // Helper for Header Styling
@@ -130,7 +130,7 @@ export const generateRepaymentReceiptPDF = (debt, repayment, boutique) => {
   doc.text(`Reçu par : ${repayment.receivedBy || 'Gérant'}`, 140, y);
 
   y += 10;
-  doc.autoTable({
+  autoTable(doc, {
     startY: y,
     head: [['Montant Payé', 'Mode de Règlement', 'Référence OM / Reçu', 'Nouveau Solde Restant']],
     body: [
@@ -169,7 +169,7 @@ export const generateDailyReportPDF = (stats, boutiqueName, selectedDate) => {
   doc.text(`Boutique : ${boutiqueName}`, 14, y);
 
   y += 10;
-  doc.autoTable({
+  autoTable(doc, {
     startY: y,
     head: [['Indicateur Financier', 'Montant (GNF)']],
     body: [
@@ -217,7 +217,7 @@ export const generateStockReportPDF = (products, boutiqueName) => {
     ];
   });
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: 45,
     head: [['Produit', 'Catégorie', 'P. Achat', 'P. Vente', 'Stock', 'Val. Achat', 'Val. Vente', 'Statut']],
     body: rows,
@@ -249,7 +249,7 @@ export const generateDebtReportPDF = (debts, boutiqueName) => {
     d.remainingAmount === 0 ? 'SOLDÉ' : (new Date(d.dueDate) < new Date() ? 'EN RETARD' : 'EN COURS')
   ]);
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: 45,
     head: [['Client', 'Contact', 'Date Prêt', 'Échéance', 'Origine', 'Reste à Payer', 'Statut']],
     body: rows,
