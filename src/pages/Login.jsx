@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Sparkles, Mail, Lock, Eye, EyeOff, LogIn, ShieldCheck } from 'lucide-react';
+import { Sparkles, Mail, Lock, Eye, EyeOff, LogIn, Loader2 } from 'lucide-react';
 
 export const Login = () => {
   const { login } = useApp();
@@ -9,12 +9,15 @@ export const Login = () => {
   const [password, setPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
   const [error, setError] = useState('');
-  const [showHint, setShowHint] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
     setError('');
-    const res = login(email, password);
+    setLoading(true);
+    const res = await login(email, password);
+    setLoading(false);
     if (!res.ok) setError(res.error);
   };
 
@@ -48,6 +51,7 @@ export const Login = () => {
               placeholder="exemple@gestock.gn"
               autoComplete="username"
               required
+              disabled={loading}
               className="form-input"
             />
           </div>
@@ -64,6 +68,7 @@ export const Login = () => {
                 placeholder="••••••••"
                 autoComplete="current-password"
                 required
+                disabled={loading}
                 className="form-input"
               />
               <button
@@ -79,28 +84,22 @@ export const Login = () => {
 
           {error && <div className="auth-error">{error}</div>}
 
-          <button type="submit" className="btn btn-primary w-full flex-center gap-2">
-            <LogIn className="w-4 h-4" /> Se connecter
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn btn-primary w-full flex-center gap-2"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 auth-spin" /> Connexion…
+              </>
+            ) : (
+              <>
+                <LogIn className="w-4 h-4" /> Se connecter
+              </>
+            )}
           </button>
         </form>
-
-        <button
-          type="button"
-          className="auth-hint-toggle"
-          onClick={() => setShowHint((v) => !v)}
-        >
-          <ShieldCheck className="w-3.5 h-3.5" />
-          {showHint ? 'Masquer les comptes de démonstration' : 'Voir les comptes de démonstration'}
-        </button>
-
-        {showHint && (
-          <div className="auth-hint">
-            <div><strong>Admin</strong> · admin@gestock.gn · admin2026</div>
-            <div><strong>Gérant Kissosso</strong> · kissosso@gestock.gn · kissosso2026</div>
-            <div><strong>Gérant Tombolia</strong> · tombolia@gestock.gn · tombolia2026</div>
-            <div><strong>Gérant Sangoyah</strong> · sangoyah@gestock.gn · sangoyah2026</div>
-          </div>
-        )}
       </div>
 
       <p className="auth-footer">© {new Date().getFullYear()} Gestock 3B · Tous droits réservés</p>

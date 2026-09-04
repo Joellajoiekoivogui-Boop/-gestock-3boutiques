@@ -8,21 +8,21 @@ Application de gestion multi-boutiques (stocks, ventes, dettes, dépenses) pour 
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
-npm run build    # build de production dans dist/
-npm run lint     # oxlint
+npm run dev        # front seul (Vite) — http://localhost:5173 ; l'auth NE fonctionne PAS
+npm run dev:full   # front + fonctions serveur (vercel dev) — auth fonctionnelle
+npm run build      # build de production dans dist/
+npm run lint       # oxlint
 ```
 
-## Comptes de connexion (démo)
+## Authentification
 
-| Rôle | E-mail | Mot de passe |
-|------|--------|--------------|
-| Administrateur | `admin@gestock.gn` | `admin2026` |
-| Gérant Kissosso | `kissosso@gestock.gn` | `kissosso2026` |
-| Gérant Tombolia | `tombolia@gestock.gn` | `tombolia2026` |
-| Gérant Sangoyah | `sangoyah@gestock.gn` | `sangoyah2026` |
+Les comptes vivent **côté serveur** (fonctions Vercel `api/login.js` + `api/session.js`) :
+- mots de passe hachés (scrypt), stockés dans la variable d'env `AUTH_USERS` — jamais dans le code ni le bundle ;
+- session = jeton signé HMAC-SHA256 (`AUTH_SECRET`), expiration 12 h, revérifié au serveur à chaque chargement.
 
-> Les mots de passe sont en clair dans `src/utils/initialData.js` (app sans back-end). À usage interne uniquement.
+Les e-mails et mots de passe sont fournis séparément (hors dépôt). Pour changer un mot de passe : régénérer `AUTH_USERS` et le mettre à jour dans Vercel.
+
+Voir `.env.example`.
 
 ## Rôles
 

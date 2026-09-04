@@ -46,7 +46,18 @@ function MainLayout() {
 }
 
 function Root() {
-  const { currentUser } = useApp();
+  const { currentUser, authChecking } = useApp();
+
+  if (authChecking) {
+    return (
+      <div className="auth-shell">
+        <div className="auth-card glass-panel" style={{ textAlign: 'center' }}>
+          Vérification de la session…
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       {currentUser ? <MainLayout /> : <Login />}

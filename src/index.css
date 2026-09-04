@@ -2358,6 +2358,16 @@ button svg,
   color: var(--text-muted);
 }
 
+.auth-spin {
+  animation: auth-spin 0.8s linear infinite;
+}
+
+@keyframes auth-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* ========================================
    NAVBAR : boutique statique + compte
    ======================================== */

@@ -24,43 +24,8 @@ export const INITIAL_BOUTIQUES = [
     color: '#f59e0b' // Amber
   }
 ];
-
-// Comptes de connexion. L'admin voit tout ; chaque gérant est indépendant
-// et n'accède qu'à sa propre boutique.
-export const INITIAL_USERS = [
-  {
-    id: 'u-admin',
-    name: 'Administrateur Général',
-    email: 'admin@gestock.gn',
-    password: 'admin2026',
-    role: 'admin',
-    boutiqueId: 'all'
-  },
-  {
-    id: 'u-b1',
-    name: 'Mamadou Diallo',
-    email: 'kissosso@gestock.gn',
-    password: 'kissosso2026',
-    role: 'gerant',
-    boutiqueId: 'b1'
-  },
-  {
-    id: 'u-b2',
-    name: 'Aminata Touré',
-    email: 'tombolia@gestock.gn',
-    password: 'tombolia2026',
-    role: 'gerant',
-    boutiqueId: 'b2'
-  },
-  {
-    id: 'u-b3',
-    name: 'Kouassi Jean',
-    email: 'sangoyah@gestock.gn',
-    password: 'sangoyah2026',
-    role: 'gerant',
-    boutiqueId: 'b3'
-  }
-];
+// Les comptes de connexion ne sont PLUS dans le code : ils vivent côté serveur
+// (variable d'environnement AUTH_USERS, mots de passe hachés). Voir api/login.js.
 
 export const CATEGORIES = [
   { id: 'charbon', label: 'Charbon & Combustibles', icon: 'Flame' },

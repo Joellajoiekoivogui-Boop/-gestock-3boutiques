@@ -5,9 +5,10 @@ import {
   INITIAL_SALES,
   INITIAL_DEBTS,
   INITIAL_EXPENSES,
-  INITIAL_CUSTOMERS,
-  INITIAL_USERS
+  INITIAL_CUSTOMERS
 } from '../utils/initialData';
+
+const TOKEN_KEY = 'gestock_3b_token';
 
 const AppContext = createContext();
 
@@ -23,7 +24,8 @@ export const AppProvider = ({ children }) => {
   };
 
   const [boutiques] = useState(INITIAL_BOUTIQUES);
-  const [currentUser, setCurrentUser] = useState(() => loadLocal('session', null));
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authChecking, setAuthChecking] = useState(true);
   const [activeBoutiqueId, setActiveBoutiqueId] = useState(() => loadLocal('activeBoutiqueId', 'all'));
   const [theme, setTheme] = useState(() => loadLocal('theme', 'dark'));
 
@@ -52,29 +54,52 @@ export const AppProvider = ({ children }) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // --- Authentification ---
-  const login = (email, password) => {
-    const u = INITIAL_USERS.find(
-      (x) =>
-        x.email.toLowerCase() === String(email).trim().toLowerCase() &&
-        x.password === password
+  // --- Authentification (fonctions serveur Vercel + jeton signé) ---
+  const applyUser = (user) => {
+    setCurrentUser(user);
+    setActiveBoutiqueId(
+      user.role === 'admin' ? loadLocal('activeBoutiqueId', 'all') : user.boutiqueId
     );
-    if (!u) return { ok: false, error: 'E-mail ou mot de passe incorrect.' };
+  };
 
-    const safeUser = {
-      id: u.id,
-      name: u.name,
-      email: u.email,
-      role: u.role,
-      boutiqueId: u.boutiqueId
-    };
-    setCurrentUser(safeUser);
-    setActiveBoutiqueId(u.role === 'admin' ? 'all' : u.boutiqueId);
-    addToast(`Bienvenue ${u.name} !`, 'success');
-    return { ok: true };
+  // Au démarrage : on valide le jeton auprès du serveur (une session forgée
+  // à la main dans le localStorage est rejetée ici).
+  useEffect(() => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) {
+      setAuthChecking(false);
+      return;
+    }
+    fetch('/api/session', { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error('invalid'))))
+      .then(({ user }) => applyUser(user))
+      .catch(() => localStorage.removeItem(TOKEN_KEY))
+      .finally(() => setAuthChecking(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const login = async (email, password) => {
+    try {
+      const r = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        return { ok: false, error: data.error || 'Connexion impossible.' };
+      }
+      localStorage.setItem(TOKEN_KEY, data.token);
+      applyUser(data.user);
+      addToast(`Bienvenue ${data.user.name} !`, 'success');
+      return { ok: true };
+    } catch {
+      return { ok: false, error: 'Serveur injoignable. Vérifiez votre connexion.' };
+    }
   };
 
   const logout = () => {
+    localStorage.removeItem(TOKEN_KEY);
     setCurrentUser(null);
     addToast('Vous êtes déconnecté.', 'info');
   };
@@ -84,15 +109,6 @@ export const AppProvider = ({ children }) => {
     if (activeRole !== 'admin') return;
     setActiveBoutiqueId(id);
   };
-
-  // Sync to LocalStorage
-  useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem('gestock_3b_session', JSON.stringify(currentUser));
-    } else {
-      localStorage.removeItem('gestock_3b_session');
-    }
-  }, [currentUser]);
 
   // Verrouille la boutique du gérant (y compris après un rechargement)
   useEffect(() => {
@@ -319,14 +335,25 @@ export const AppProvider = ({ children }) => {
     addToast(`Dépense de ${Number(amount).toLocaleString()} GNF enregistrée !`, 'info');
   };
 
-  // Reset to initial demo data
+  // Reset to initial demo data — n'efface QUE les données métier
+  // (ni le jeton de session, ni le thème, ni les préférences).
   const resetToDemoData = () => {
     setProducts(INITIAL_PRODUCTS);
     setSales(INITIAL_SALES);
     setDebts(INITIAL_DEBTS);
     setExpenses(INITIAL_EXPENSES);
     setCustomers(INITIAL_CUSTOMERS);
-    localStorage.clear();
+    try {
+      Object.keys(localStorage)
+        .filter(
+          (k) =>
+            k.startsWith('gestock_3b_feuille_vente') ||
+            ['gestock_3b_products', 'gestock_3b_sales', 'gestock_3b_debts', 'gestock_3b_expenses', 'gestock_3b_customers'].includes(k)
+        )
+        .forEach((k) => localStorage.removeItem(k));
+    } catch {
+      /* localStorage indisponible */
+    }
     addToast('Données de démonstration réinitialisées avec succès !', 'info');
   };
 
@@ -335,6 +362,7 @@ export const AppProvider = ({ children }) => {
       value={{
         boutiques,
         currentUser,
+        authChecking,
         login,
         logout,
         activeBoutiqueId,
