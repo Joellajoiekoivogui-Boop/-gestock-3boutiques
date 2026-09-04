@@ -1,16 +1,34 @@
-# React + Vite
+# Gestock 3B
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Application de gestion multi-boutiques (stocks, ventes, dettes, dépenses) pour 3 boutiques à Conakry : **Kissosso**, **Tombolia**, **Sangoyah**.
 
-Currently, two official plugins are available:
+100 % front-end (React 19 + Vite), données persistées dans le `localStorage` du navigateur — aucun serveur.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Démarrage
 
-## React Compiler
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm run build    # build de production dans dist/
+npm run lint     # oxlint
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Comptes de connexion (démo)
 
-## Expanding the Oxlint configuration
+| Rôle | E-mail | Mot de passe |
+|------|--------|--------------|
+| Administrateur | `admin@gestock.gn` | `admin2026` |
+| Gérant Kissosso | `kissosso@gestock.gn` | `kissosso2026` |
+| Gérant Tombolia | `tombolia@gestock.gn` | `tombolia2026` |
+| Gérant Sangoyah | `sangoyah@gestock.gn` | `sangoyah2026` |
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+> Les mots de passe sont en clair dans `src/utils/initialData.js` (app sans back-end). À usage interne uniquement.
+
+## Rôles
+
+- **Admin** : accès complet, vue consolidée des 3 boutiques, Tableau de Bord, Paramètres, création d'articles / prix / réapprovisionnement.
+- **Gérant** : accès limité à **sa** boutique. Il saisit le comptage quotidien (stock Initial / Reste) sur la Feuille de Vente et encaisse à la Caisse. Pas d'accès au Tableau de Bord ni aux Paramètres.
+
+## Déploiement
+
+Hébergé sur Vercel, redéploiement automatique à chaque `git push` sur `main`.
