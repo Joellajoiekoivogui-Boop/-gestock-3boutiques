@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
+import { PwaInstall } from './PwaInstall';
 import {
   Store,
   Sun,
@@ -98,6 +99,8 @@ export const Navbar = () => {
 
       {/* Navbar Right Actions */}
       <div className="navbar-right">
+        <PwaInstall />
+
         {/* Offline/Online PWA Indicator */}
         <div className={`status-badge ${isOnline ? 'status-online' : 'status-offline'}`}>
           {isOnline ? (

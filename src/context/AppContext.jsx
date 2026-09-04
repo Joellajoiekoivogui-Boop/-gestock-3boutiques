@@ -124,6 +124,9 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('gestock_3b_theme', JSON.stringify(theme));
     document.documentElement.setAttribute('data-theme', theme);
+    // Barre d'état (PWA / mobile) accordée au thème actif
+    const meta = document.getElementById('theme-color-meta');
+    if (meta) meta.setAttribute('content', theme === 'light' ? '#ffffff' : '#0f172a');
   }, [theme]);
 
   useEffect(() => {

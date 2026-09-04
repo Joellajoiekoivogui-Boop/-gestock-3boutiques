@@ -1,17 +1,22 @@
 {
+  "id": "/",
+  "name": "Gestock 3B — Gestion Multi-Boutiques",
   "short_name": "Gestock 3B",
-  "name": "Gestock - Gestion Multi-Boutiques",
-  "icons": [
-    {
-      "src": "favicon.ico",
-      "type": "image/x-icon",
-      "sizes": "64x64"
-    }
-  ],
-  "start_url": "/",
-  "background_color": "#0f172a",
-  "theme_color": "#4f46e5",
+  "description": "Gérez les stocks, ventes, dettes et finances de vos boutiques de Conakry, même hors ligne.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
-  "orientation": "any",
-  "description": "Plateforme PWA de gestion des stocks, ventes, dettes et finances pour 3 boutiques."
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#0a0e1a",
+  "theme_color": "#0f172a",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": ["business", "productivity", "finance"],
+  "icons": [
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" },
+    { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" },
+    { "src": "/icon-512-maskable.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
+  ]
 }

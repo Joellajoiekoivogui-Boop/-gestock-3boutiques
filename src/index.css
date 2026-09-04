@@ -1,37 +1,93 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+/* ============================================================
+   GESTOCK 3B — Design system
+   Police chargée via <link> dans index.html (preconnect).
+   ============================================================ */
 
 :root {
-  --bg-main: #090d16;
-  --bg-card: rgba(15, 23, 42, 0.75);
-  --bg-card-border: rgba(255, 255, 255, 0.08);
-  --bg-sidebar: #0f172a;
-  --bg-navbar: #0f172a;
-  
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  
-  --primary: #6366f1;
-  --primary-hover: #4f46e5;
-  --emerald: #10b981;
+  color-scheme: dark;
+
+  /* — Surfaces (slate profond, superposé) — */
+  --bg-app: #0a0e1a;
+  --surface-1: #111726;      /* cartes */
+  --surface-2: #171e30;      /* éléments surélevés */
+  --surface-3: #1f2740;      /* survol */
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.13);
+
+  /* — Texte — */
+  --text: #f2f5fb;
+  --text-2: #a6b1c6;
+  --text-3: #707c92;
+
+  /* — Marque + sémantique — */
+  --primary: #6d5efc;
+  --primary-2: #8b7dff;
+  --primary-soft: rgba(109, 94, 252, 0.15);
+  --success: #22c55e;
+  --warning: #f5a524;
+  --danger: #f43f5e;
+  --info: #3b82f6;
+
+  /* — Rayons — */
+  --r-xs: 6px;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r-full: 999px;
+
+  /* — Élévation — */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 6px 24px -8px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 24px 60px -16px rgba(0, 0, 0, 0.6);
+  --ring: 0 0 0 3px var(--primary-soft);
+
+  /* — Mouvement — */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur: 0.18s;
+
+  --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  /* — Alias hérités (compat. avec le CSS existant) — */
+  --bg-main: var(--bg-app);
+  --bg-card: var(--surface-1);
+  --bg-card-border: var(--border);
+  --bg-sidebar: var(--surface-1);
+  --bg-navbar: rgba(13, 18, 32, 0.72);
+  --text-main: var(--text);
+  --text-muted: var(--text-2);
+  --primary-hover: var(--primary-2);
+  --emerald: var(--success);
   --orange: #f97316;
-  --amber: #f59e0b;
-  --red: #ef4444;
-  
-  --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
+  --amber: var(--warning);
+  --red: var(--danger);
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --font-family: var(--font);
 }
 
 [data-theme='light'] {
-  --bg-main: #f1f5f9;
-  --bg-card: rgba(255, 255, 255, 0.85);
-  --bg-card-border: rgba(0, 0, 0, 0.08);
-  --bg-sidebar: #ffffff;
-  --bg-navbar: #ffffff;
-  
-  --text-main: #0f172a;
-  --text-muted: #64748b;
+  color-scheme: light;
+
+  --bg-app: #f4f6fb;
+  --surface-1: #ffffff;
+  --surface-2: #ffffff;
+  --surface-3: #f1f4f9;
+  --border: rgba(15, 23, 42, 0.09);
+  --border-strong: rgba(15, 23, 42, 0.16);
+
+  --text: #0f1729;
+  --text-2: #4a5568;
+  --text-3: #8b95a7;
+
+  --primary-soft: rgba(109, 94, 252, 0.12);
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 8px 24px -10px rgba(15, 23, 42, 0.14);
+  --shadow-lg: 0 24px 60px -18px rgba(15, 23, 42, 0.22);
+
+  --bg-navbar: rgba(255, 255, 255, 0.78);
 }
 
 * {
@@ -40,13 +96,70 @@
   padding: 0;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   font-family: var(--font-family);
   background-color: var(--bg-main);
+  background-image:
+    radial-gradient(1100px 700px at 88% -8%, rgba(109, 94, 252, 0.1), transparent 60%),
+    radial-gradient(900px 600px at -8% 108%, rgba(34, 197, 94, 0.06), transparent 55%);
+  background-attachment: fixed;
   color: var(--text-main);
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
+  font-size: 15px;
+  line-height: 1.55;
+  letter-spacing: -0.006em;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+[data-theme='light'] body {
+  background-image:
+    radial-gradient(1100px 700px at 88% -8%, rgba(109, 94, 252, 0.08), transparent 60%),
+    radial-gradient(900px 600px at -8% 108%, rgba(59, 130, 246, 0.06), transparent 55%);
+}
+
+/* Accessibilité : anneau de focus visible et cohérent */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--primary-2);
+  outline-offset: 2px;
+  border-radius: var(--r-xs);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Barres de défilement discrètes */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--r-full);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--text-3);
+  background-clip: content-box;
 }
 
 /* App Shell */
@@ -64,10 +177,12 @@ body {
 .app-main-content {
   flex: 1;
   padding: 24px;
+  padding-left: max(24px, env(safe-area-inset-left));
+  padding-right: max(24px, env(safe-area-inset-right));
   max-width: 1600px;
   margin: 0 auto;
   width: 100%;
-  padding-bottom: 90px; /* Space for mobile nav */
+  padding-bottom: calc(84px + env(safe-area-inset-bottom)); /* place pour la barre mobile */
 }
 
 @media (min-width: 1024px) {
@@ -76,28 +191,63 @@ body {
   }
 }
 
+@media (max-width: 640px) {
+  .app-main-content {
+    padding: 16px;
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+}
+
 /* Glass Panel Styling */
 .glass-panel {
   background: var(--bg-card);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
   border: 1px solid var(--bg-card-border);
-  border-radius: var(--radius-md);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  position: relative;
+}
+
+/* filet lumineux en haut de chaque carte */
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  pointer-events: none;
+}
+[data-theme='light'] .glass-panel::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
 }
 
 /* Navbar */
 .navbar-container {
-  height: 64px;
+  height: calc(64px + env(safe-area-inset-top));
+  padding-top: env(safe-area-inset-top);
   background-color: var(--bg-navbar);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
   border-bottom: 1px solid var(--bg-card-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding-left: max(24px, env(safe-area-inset-left));
+  padding-right: max(24px, env(safe-area-inset-right));
   position: sticky;
   top: 0;
   z-index: 50;
+}
+
+@media (max-width: 640px) {
+  .navbar-container {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
 }
 
 .navbar-left {
@@ -1685,8 +1835,9 @@ button svg,
 /* --- Navbar responsive --- */
 @media (max-width: 767px) {
   .navbar-container {
-    padding: 0 12px;
-    height: 56px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+    height: calc(58px + env(safe-area-inset-top));
     gap: 8px;
   }
 
@@ -2460,3 +2611,306 @@ button svg,
   }
 }
 
+
+/* ============================================================
+   POLISH 2026 — finitions UI/UX (couche additive, non destructive)
+   ============================================================ */
+
+/* — Typographie & titres — */
+.page-title {
+  font-size: clamp(1.25rem, 1rem + 1.4vw, 1.6rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.page-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-3);
+}
+
+/* — Boutons : transitions, focus, appui — */
+.btn {
+  transition: transform var(--dur) var(--ease), background var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  will-change: transform;
+}
+.btn:active {
+  transform: translateY(1px) scale(0.985);
+}
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.btn-primary {
+  background: linear-gradient(180deg, var(--primary-2), var(--primary));
+  box-shadow: 0 6px 18px -6px rgba(109, 94, 252, 0.5);
+}
+.btn-primary:hover {
+  box-shadow: 0 10px 26px -6px rgba(109, 94, 252, 0.6);
+}
+.btn-emerald {
+  background: linear-gradient(180deg, #34d17f, var(--success));
+}
+.btn-secondary {
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+}
+.btn-secondary:hover {
+  background: var(--surface-3);
+}
+.btn-icon:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+/* — Champs de formulaire — */
+.form-input,
+.filter-select,
+.search-input,
+.boutique-select {
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease),
+    background var(--dur) var(--ease);
+}
+.form-input:focus,
+.filter-select:focus,
+.search-input:focus {
+  border-color: var(--primary);
+  box-shadow: var(--ring);
+  outline: none;
+}
+[data-theme='light'] .form-input,
+[data-theme='light'] .filter-select,
+[data-theme='light'] .feuille-input {
+  background: #fbfcfe;
+}
+
+/* — Navbar : marque plus nette — */
+.brand-icon {
+  background: linear-gradient(135deg, var(--primary-2), #4338ca 70%, #06b6d4);
+  box-shadow: 0 6px 18px -6px rgba(109, 94, 252, 0.55);
+  border-radius: 12px;
+}
+[data-theme='light'] .brand-title {
+  background: linear-gradient(135deg, #0f1729, #64748b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* — Sidebar : item actif plus élégant — */
+.nav-item {
+  border-radius: var(--r-md);
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.nav-item-active {
+  background: var(--primary-soft);
+  color: var(--primary-2);
+  position: relative;
+}
+.nav-item-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 55%;
+  border-radius: var(--r-full);
+  background: var(--primary-2);
+}
+
+/* — Barre mobile : safe-area, blur, cible tactile — */
+.mobile-bottom-bar {
+  height: calc(60px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--bg-navbar);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  box-shadow: 0 -8px 24px -12px rgba(0, 0, 0, 0.4);
+}
+.mobile-tab {
+  min-height: 44px;
+  min-width: 44px;
+  justify-content: center;
+  padding: 6px 4px;
+  border-radius: var(--r-sm);
+  transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.mobile-tab-active {
+  color: var(--primary-2);
+}
+.mobile-tab-active svg {
+  filter: drop-shadow(0 4px 10px rgba(109, 94, 252, 0.5));
+}
+
+/* — Tableaux : lisibilité — */
+.data-table th {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.data-table tbody tr {
+  transition: background var(--dur) var(--ease);
+}
+.data-table tbody tr:hover {
+  background: var(--surface-2);
+}
+
+/* — Badges — */
+.badge {
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+}
+
+/* — Toasts — */
+.toast {
+  border-radius: var(--r-md) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* — Modales — */
+.modal-content {
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-lg);
+}
+.modal-overlay {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* — Cartes KPI / valorisation — */
+.val-card,
+.feuille-summary-card,
+.rep-stat-box {
+  transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.val-card:hover,
+.feuille-summary-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+}
+.val-num {
+  letter-spacing: -0.02em;
+}
+
+/* — Cartes produit POS — */
+.pos-product-card {
+  border-radius: var(--r-md);
+}
+.pos-product-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 12px 30px -12px rgba(109, 94, 252, 0.4);
+}
+
+/* — Bouton d'installation PWA — */
+.pwa-install-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary-2);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.pwa-install-btn:hover {
+  background: rgba(109, 94, 252, 0.22);
+}
+.pwa-install-btn:active {
+  transform: scale(0.96);
+}
+@media (max-width: 767px) {
+  .pwa-install-btn span {
+    display: none;
+  }
+  .pwa-install-btn {
+    padding: 8px;
+  }
+}
+
+/* — Page de connexion : fond plus soigné — */
+.auth-shell {
+  background:
+    radial-gradient(1000px 640px at 82% -12%, rgba(109, 94, 252, 0.22), transparent 60%),
+    radial-gradient(880px 520px at -12% 112%, rgba(34, 197, 94, 0.13), transparent 58%),
+    var(--bg-app);
+}
+.auth-card {
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+/* — Transition douce de page — */
+.animate-fade {
+  animation: pageIn 0.32s var(--ease);
+}
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* — Coupe le tap-highlight bleu mobile — */
+a,
+button,
+[role='button'],
+.nav-item,
+.mobile-tab,
+.pos-product-card,
+.cat-pill {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* — Écrans très étroits (≤ 380 px) — */
+@media (max-width: 380px) {
+  body {
+    font-size: 14px;
+  }
+  .page-title {
+    font-size: 1.15rem;
+  }
+  .btn {
+    font-size: 0.8rem;
+    padding: 9px 12px;
+  }
+  .val-num {
+    font-size: 1.05rem;
+  }
+}
+
+/* — Bulle d'aide installation iOS — */
+.pwa-ios-hint {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(280px, 78vw);
+  padding: 14px 16px 14px;
+  z-index: 60;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+.pwa-ios-hint strong {
+  color: var(--text);
+}
+.pwa-ios-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  padding: 2px;
+}
