@@ -179,7 +179,7 @@ export const generateDailyReportPDF = (stats, boutiqueName, selectedDate) => {
       ['Nouvelles Dettes Accordées', formatMoney(stats.creditTotal)],
       ['Remboursements Dettes Recouvrés', formatMoney(stats.recoveredDebtsTotal)],
       ['Dépenses Totales', formatMoney(stats.expensesTotal)],
-      ['BÉNÉFICE NET ESTIMÉ', formatMoney(stats.netProfit)]
+      ['SOLDE NET', formatMoney(stats.netProfit)]
     ],
     theme: 'striped',
     headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255] },
@@ -201,33 +201,22 @@ export const generateStockReportPDF = (products, boutiqueName) => {
 
   const rows = products.map((p) => {
     const qty = p.currentStock;
-    const valBuy = qty * p.buyPrice;
     const valSell = qty * p.sellPrice;
     const status = qty <= p.minAlertStock ? 'ALERTE LOW' : 'OK';
 
-    return [
-      p.name,
-      p.category,
-      formatMoney(p.buyPrice),
-      formatMoney(p.sellPrice),
-      qty,
-      formatMoney(valBuy),
-      formatMoney(valSell),
-      status
-    ];
+    return [p.name, p.category, formatMoney(p.sellPrice), qty, formatMoney(valSell), status];
   });
 
   autoTable(doc, {
     startY: 45,
-    head: [['Produit', 'Catégorie', 'P. Achat', 'P. Vente', 'Stock', 'Val. Achat', 'Val. Vente', 'Statut']],
+    head: [['Produit', 'Catégorie', 'P. Vente', 'Stock', 'Val. Vente', 'Statut']],
     body: rows,
     theme: 'grid',
     headStyles: { fillColor: [99, 102, 241], textColor: [255, 255, 255] },
     columnStyles: {
-      4: { halign: 'center' },
-      5: { halign: 'right' },
-      6: { halign: 'right' },
-      7: { fontStyle: 'bold', halign: 'center' }
+      3: { halign: 'center' },
+      4: { halign: 'right' },
+      5: { fontStyle: 'bold', halign: 'center' }
     }
   });
 

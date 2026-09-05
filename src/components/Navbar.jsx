@@ -46,11 +46,8 @@ export const Navbar = ({ onOpenMenu }) => {
 
   // Calculate low stock alert count
   const lowStockCount = products.filter((p) => {
-    if (activeBoutiqueId === 'all') {
-      const totalStock = Object.values(p.stocks).reduce((a, b) => a + b, 0);
-      return totalStock <= p.minAlertStock * 3;
-    }
-    return (p.stocks[activeBoutiqueId] || 0) <= p.minAlertStock;
+    if (activeBoutiqueId !== 'all' && p.boutiqueId !== activeBoutiqueId) return false;
+    return (p.stock || 0) <= (p.minAlertStock || 0);
   }).length;
 
   const initials = (currentUser?.name || '?')

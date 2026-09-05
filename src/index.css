@@ -1229,6 +1229,14 @@ body {
   object-fit: cover;
 }
 
+.pos-product-img-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  color: var(--text-3);
+}
+
 .stock-badge {
   position: absolute;
   bottom: 6px;

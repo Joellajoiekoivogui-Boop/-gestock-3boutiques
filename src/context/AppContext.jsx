@@ -76,8 +76,11 @@ export const AppProvider = ({ children }) => {
     try {
       const r = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(body)
+        headers:
+          method === 'GET'
+            ? { Authorization: `Bearer ${token}` }
+            : { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: method === 'GET' ? undefined : JSON.stringify(body)
       });
       const data = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(data.error || 'Une erreur est survenue.');
@@ -202,43 +205,6 @@ export const AppProvider = ({ children }) => {
     return result.data.debt;
   };
 
-  // Transfer stock between boutiques
-  const transferStock = async ({ productId, fromBoutiqueId, toBoutiqueId, quantity }) => {
-    const result = await callApi('/api/stock', 'POST', { productId, fromBoutiqueId, toBoutiqueId, quantity });
-    if (!result.ok) return null;
-
-    await fetchData();
-    const product = products.find((p) => p.id === productId);
-    const fromB = boutiques.find((b) => b.id === fromBoutiqueId)?.name;
-    const toB = boutiques.find((b) => b.id === toBoutiqueId)?.name;
-    addToast(`Transfert de ${quantity}x ${product?.name} (${fromB} ➔ ${toB}) réalisé !`, 'success');
-    return result.data.product;
-  };
-
-  // Add Product
-  const addProduct = async (newProd) => {
-    if (activeRole !== 'admin') {
-      addToast("Accès refusé : Seul l'administrateur peut ajouter de nouveaux produits !", 'error');
-      return null;
-    }
-    const result = await callApi('/api/products', 'POST', newProd);
-    if (!result.ok) return null;
-
-    await fetchData();
-    addToast(`Produit "${newProd.name}" ajouté avec succès !`, 'success');
-    return result.data.product;
-  };
-
-  // Update Product
-  const updateProduct = async (id, updatedFields) => {
-    const result = await callApi('/api/products', 'PATCH', { id, ...updatedFields });
-    if (!result.ok) return null;
-
-    await fetchData();
-    addToast('Produit mis à jour !', 'success');
-    return result.data.product;
-  };
-
   // Add Expense
   const addExpense = async ({ category, description, amount, boutiqueId }) => {
     const targetBoutiqueId = boutiqueId || (activeBoutiqueId === 'all' ? 'b1' : activeBoutiqueId);
@@ -275,11 +241,9 @@ export const AppProvider = ({ children }) => {
         removeToast,
         addSale,
         repayDebt,
-        transferStock,
-        addProduct,
-        updateProduct,
         addExpense,
-        refreshData: fetchData
+        refreshData: fetchData,
+        apiRequest: callApi
       }}
     >
       {children}

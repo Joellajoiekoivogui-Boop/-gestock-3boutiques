@@ -6,10 +6,12 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 const newLigne = (category) => ({
-  id: Date.now() + Math.random(),
+  id: `new-${Date.now()}-${Math.random()}`,
   category,
   designation: '',
   pVente: '',
+  stock: '',
+  minAlertStock: '',
   initial: '',
   nouveau: '',
   reste: ''
@@ -26,24 +28,272 @@ const calcLigne = (l) => {
   return { total, qteVendue, somme };
 };
 
-// Catégories libres : le vendeur crée les siennes (Chicha, Charbon, Arômes...)
+// Catégories libres suggérées au tout premier usage d'une boutique (aucun
+// article enregistré) — l'admin les édite puis les sauvegarde pour de bon.
 const DEFAULT_INITIAL_LIGNES = [
-  { id: 'init-1', category: 'Charbon', designation: 'Carton de charbon', pVente: '', initial: '', nouveau: '', reste: '' },
-  { id: 'init-2', category: 'Charbon', designation: 'Charbon tête restant', pVente: '60000', initial: '21', nouveau: '48', reste: '23' },
-  { id: 'init-3', category: 'Chicha', designation: 'Tete 60.000', pVente: '10000', initial: '', nouveau: '', reste: '' },
-  { id: 'init-4', category: 'Chicha', designation: 'Café', pVente: '60000', initial: '', nouveau: '', reste: '' },
-  { id: 'init-5', category: 'Chicha', designation: 'Déjà vu', pVente: '50000', initial: '', nouveau: '', reste: '' },
-  { id: 'init-6', category: 'Chicha', designation: 'Tete 100000', pVente: '40000', initial: '', nouveau: '', reste: '' }
+  { id: 'init-1', category: 'Charbon', designation: 'Carton de charbon', pVente: '', stock: '', minAlertStock: '', initial: '', nouveau: '', reste: '' },
+  { id: 'init-2', category: 'Charbon', designation: 'Charbon tête restant', pVente: '60000', stock: '23', minAlertStock: '10', initial: '21', nouveau: '48', reste: '23' },
+  { id: 'init-3', category: 'Chicha', designation: 'Tete 60.000', pVente: '10000', stock: '', minAlertStock: '', initial: '', nouveau: '', reste: '' },
+  { id: 'init-4', category: 'Chicha', designation: 'Café', pVente: '60000', stock: '', minAlertStock: '', initial: '', nouveau: '', reste: '' },
+  { id: 'init-5', category: 'Chicha', designation: 'Déjà vu', pVente: '50000', stock: '', minAlertStock: '', initial: '', nouveau: '', reste: '' },
+  { id: 'init-6', category: 'Chicha', designation: 'Tete 100000', pVente: '40000', stock: '', minAlertStock: '', initial: '', nouveau: '', reste: '' }
 ];
-
-const storageKey = (boutiqueId, date) => `gestock_3b_feuille_vente_${boutiqueId}_${date}`;
 
 // Le gérant ne renseigne que le comptage du jour (Initial / Reste).
 // La création des articles, le prix et le nouveau stock sont réservés à l'admin.
 const GERANT_EDITABLE = ['initial', 'reste'];
 
+const sectionsOf = (lignes) => {
+  const order = [];
+  for (const l of lignes) {
+    if (!order.includes(l.category)) order.push(l.category);
+  }
+  return order.map((name) => ({ name, lignes: lignes.filter((l) => l.category === name) }));
+};
+
+const sectionTotals = (secLignes) =>
+  secLignes.reduce(
+    (acc, l) => {
+      const { qteVendue, somme } = calcLigne(l);
+      return { qteVendue: acc.qteVendue + qteVendue, somme: acc.somme + somme };
+    },
+    { qteVendue: 0, somme: 0 }
+  );
+
+// Un bloc de tableaux (une boutique). `canEdit` gouverne toute saisie ;
+// pour la vue "Toutes les Boutiques" de l'admin, canEdit vaut toujours false.
+const FeuilleBoutique = ({
+  lignes,
+  canEdit,
+  isAdmin,
+  onUpdateLigne,
+  onRemoveLigne,
+  onAddLigne,
+  onRenameCategory,
+  onRemoveCategory
+}) => {
+  const sections = useMemo(() => sectionsOf(lignes), [lignes]);
+
+  if (sections.length === 0) {
+    return (
+      <div className="glass-panel feuille-empty mt-4">
+        {canEdit
+          ? 'Aucune catégorie. Créez-en une ci-dessus pour commencer votre feuille de vente.'
+          : "Aucun article. L'administrateur doit d'abord configurer la feuille de stock."}
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {sections.map((sec) => {
+        const st = sectionTotals(sec.lignes);
+        return (
+          <div key={sec.name} className="glass-panel table-container feuille-section mt-4">
+            <div className="feuille-cat-header">
+              <div className="feuille-cat-title-wrap">
+                <span className="feuille-cat-title">{sec.name}</span>
+                {canEdit && (
+                  <>
+                    <button onClick={() => onRenameCategory(sec.name)} className="btn-icon" title="Renommer la catégorie">
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => onRemoveCategory(sec.name)} className="btn-icon" title="Supprimer la catégorie">
+                      <Trash2 className="w-4 h-4 text-red-400" />
+                    </button>
+                  </>
+                )}
+              </div>
+              <span className="feuille-cat-meta">
+                {sec.lignes.length} ligne{sec.lignes.length > 1 ? 's' : ''} · {st.qteVendue} u. vendues ·{' '}
+                <strong>{formatMoney(st.somme)}</strong>
+              </span>
+            </div>
+
+            <div className="table-responsive">
+              <table className="data-table feuille-table">
+                <thead>
+                  <tr>
+                    <th style={{ minWidth: 180 }} title={canEdit ? undefined : "Article défini par l'administrateur"}>
+                      Désignation {!canEdit && <Lock className="w-3 h-3" style={{ verticalAlign: 'middle' }} />}
+                    </th>
+                    <th style={{ minWidth: 110 }} title={canEdit ? undefined : 'Prix fixé par l\'administrateur'}>
+                      P.Vente (GNF) {!canEdit && <Lock className="w-3 h-3" style={{ verticalAlign: 'middle' }} />}
+                    </th>
+                    <th style={{ minWidth: 80 }} title="Stock disponible en Caisse — réservé à l'administrateur">
+                      Stock {!canEdit && <Lock className="w-3 h-3" style={{ verticalAlign: 'middle' }} />}
+                    </th>
+                    <th style={{ minWidth: 90 }} title="Seuil d'alerte stock bas — réservé à l'administrateur">
+                      Alerte {!canEdit && <Lock className="w-3 h-3" style={{ verticalAlign: 'middle' }} />}
+                    </th>
+                    <th style={{ minWidth: 80 }}>Initial</th>
+                    <th style={{ minWidth: 90 }} title={canEdit ? undefined : "Réservé à l'administrateur"}>
+                      Nouveau {!canEdit && <Lock className="w-3 h-3" style={{ verticalAlign: 'middle' }} />}
+                    </th>
+                    <th style={{ minWidth: 70, background: 'rgba(99,102,241,0.08)' }}>Total</th>
+                    <th style={{ minWidth: 80 }}>Reste</th>
+                    <th style={{ minWidth: 90, background: 'rgba(16,185,129,0.08)' }}>Qté Vendue</th>
+                    <th style={{ minWidth: 130, background: 'rgba(16,185,129,0.08)' }}>Somme</th>
+                    <th style={{ minWidth: 40 }}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sec.lignes.map((l) => {
+                    const { total, qteVendue, somme } = calcLigne(l);
+                    const canEditField = (field) => canEdit && (isAdmin || GERANT_EDITABLE.includes(field));
+                    return (
+                      <tr key={l.id} className="feuille-row">
+                        <td>
+                          {canEditField('designation') ? (
+                            <input
+                              className="feuille-input"
+                              type="text"
+                              placeholder="Ex: Charbon Coconut..."
+                              value={l.designation}
+                              onChange={(e) => onUpdateLigne(l.id, 'designation', e.target.value)}
+                            />
+                          ) : (
+                            <span className="feuille-designation-ro">{l.designation || '—'}</span>
+                          )}
+                        </td>
+                        <td>
+                          {canEditField('pVente') ? (
+                            <input
+                              className="feuille-input feuille-input-num"
+                              type="number"
+                              placeholder="60000"
+                              value={l.pVente}
+                              onChange={(e) => onUpdateLigne(l.id, 'pVente', e.target.value)}
+                            />
+                          ) : (
+                            <span className="feuille-calc-val feuille-locked" title="Prix fixé par l'administrateur">
+                              {l.pVente ? formatMoney(Number(l.pVente)) : '—'}
+                            </span>
+                          )}
+                        </td>
+                        <td>
+                          {canEditField('stock') ? (
+                            <input
+                              className="feuille-input feuille-input-num"
+                              type="number"
+                              placeholder="0"
+                              value={l.stock}
+                              onChange={(e) => onUpdateLigne(l.id, 'stock', e.target.value)}
+                            />
+                          ) : (
+                            <span className="feuille-calc-val feuille-locked" title="Stock géré par l'administrateur">
+                              {l.stock || '—'}
+                            </span>
+                          )}
+                        </td>
+                        <td>
+                          {canEditField('minAlertStock') ? (
+                            <input
+                              className="feuille-input feuille-input-num"
+                              type="number"
+                              placeholder="0"
+                              value={l.minAlertStock}
+                              onChange={(e) => onUpdateLigne(l.id, 'minAlertStock', e.target.value)}
+                            />
+                          ) : (
+                            <span className="feuille-calc-val feuille-locked" title="Seuil géré par l'administrateur">
+                              {l.minAlertStock || '—'}
+                            </span>
+                          )}
+                        </td>
+                        <td>
+                          {canEditField('initial') ? (
+                            <input
+                              className="feuille-input feuille-input-num"
+                              type="number"
+                              placeholder="0"
+                              value={l.initial}
+                              onChange={(e) => onUpdateLigne(l.id, 'initial', e.target.value)}
+                            />
+                          ) : (
+                            <span className="feuille-calc-val">{l.initial || '—'}</span>
+                          )}
+                        </td>
+                        <td>
+                          {canEditField('nouveau') ? (
+                            <input
+                              className="feuille-input feuille-input-num"
+                              type="number"
+                              placeholder="0"
+                              value={l.nouveau}
+                              onChange={(e) => onUpdateLigne(l.id, 'nouveau', e.target.value)}
+                            />
+                          ) : (
+                            <span className="feuille-calc-val feuille-locked" title="Seul l'administrateur peut saisir le nouveau stock">
+                              {l.nouveau || '—'}
+                            </span>
+                          )}
+                        </td>
+                        <td style={{ background: 'rgba(99,102,241,0.05)', textAlign: 'center' }}>
+                          <span className="feuille-calc-val text-indigo-400">{total || '—'}</span>
+                        </td>
+                        <td>
+                          {canEditField('reste') ? (
+                            <input
+                              className="feuille-input feuille-input-num"
+                              type="number"
+                              placeholder="0"
+                              value={l.reste}
+                              onChange={(e) => onUpdateLigne(l.id, 'reste', e.target.value)}
+                            />
+                          ) : (
+                            <span className="feuille-calc-val">{l.reste || '—'}</span>
+                          )}
+                        </td>
+                        <td style={{ background: 'rgba(16,185,129,0.05)', textAlign: 'center' }}>
+                          <span className="feuille-calc-val text-emerald-400">{qteVendue || '—'}</span>
+                        </td>
+                        <td style={{ background: 'rgba(16,185,129,0.05)' }}>
+                          <span className="feuille-somme">{somme ? formatMoney(somme) : '—'}</span>
+                        </td>
+                        <td>
+                          {canEdit && (
+                            <button onClick={() => onRemoveLigne(l.id)} className="btn-icon" title="Supprimer cette ligne">
+                              <Trash2 className="w-4 h-4 text-red-400" />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+                <tfoot>
+                  <tr className="feuille-footer-row">
+                    <td colSpan={2}>
+                      {canEdit && (
+                        <button onClick={() => onAddLigne(sec.name)} className="btn-add-ligne">
+                          <Plus className="w-4 h-4" /> Ajouter une ligne
+                        </button>
+                      )}
+                    </td>
+                    <td colSpan={4}></td>
+                    <td style={{ textAlign: 'center', fontWeight: 800, color: '#34d399' }}>
+                      {st.qteVendue > 0 ? st.qteVendue : '—'}
+                    </td>
+                    <td>
+                      <span style={{ fontWeight: 800, fontSize: '1rem', color: '#818cf8' }}>
+                        {st.somme > 0 ? formatMoney(st.somme) : '—'}
+                      </span>
+                    </td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        );
+      })}
+    </>
+  );
+};
+
 export const FeuillVente = () => {
-  const { activeBoutique, activeBoutiqueId, addToast, activeRole } = useApp();
+  const { activeBoutique, activeBoutiqueId, addToast, activeRole, apiRequest } = useApp();
   const isAdmin = activeRole === 'admin';
 
   const todayStr = new Date().toLocaleDateString('fr-FR', {
@@ -54,27 +304,36 @@ export const FeuillVente = () => {
   });
 
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [lignes, setLignes] = useState(DEFAULT_INITIAL_LIGNES);
+  const [lignes, setLignes] = useState([]);
+  const [allBoutiquesData, setAllBoutiquesData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
   const [newCatName, setNewCatName] = useState('');
 
   const boutiqueName =
     activeBoutiqueId === 'all' ? 'Toutes les Boutiques' : activeBoutique?.name || 'Boutique';
 
-  // Load the sheet saved for the current (boutique, date) pair
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(storageKey(activeBoutiqueId, date));
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        setLignes(Array.isArray(parsed) && parsed.length ? parsed : DEFAULT_INITIAL_LIGNES);
-      } else {
-        setLignes(DEFAULT_INITIAL_LIGNES);
-      }
-    } catch {
-      setLignes(DEFAULT_INITIAL_LIGNES);
+  // Charge la feuille (Supabase) pour la boutique + date sélectionnées
+  const load = useCallback(async () => {
+    setLoading(true);
+    if (activeBoutiqueId === 'all') {
+      const result = await apiRequest(`/api/feuille?boutiqueId=all&date=${date}`, 'GET');
+      if (result.ok) setAllBoutiquesData(result.data.boutiques || []);
+      setLoading(false);
+      return;
     }
+    const result = await apiRequest(`/api/feuille?boutiqueId=${activeBoutiqueId}&date=${date}`, 'GET');
+    if (result.ok) {
+      const fetched = result.data.lignes || [];
+      setLignes(fetched.length ? fetched : isAdmin ? DEFAULT_INITIAL_LIGNES : []);
+    }
+    setLoading(false);
+  }, [activeBoutiqueId, date, apiRequest, isAdmin]);
+
+  useEffect(() => {
+    load();
     setSaved(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeBoutiqueId, date]);
 
   const updateLigne = useCallback(
@@ -128,33 +387,15 @@ export const FeuillVente = () => {
     setSaved(false);
   };
 
-  const handleSave = () => {
-    localStorage.setItem(storageKey(activeBoutiqueId, date), JSON.stringify(lignes));
+  const handleSave = async () => {
+    const result = await apiRequest('/api/feuille', 'POST', { boutiqueId: activeBoutiqueId, date, lignes });
+    if (!result.ok) return;
+    setLignes(result.data.lignes || []);
     setSaved(true);
     addToast('Feuille de vente sauvegardée !', 'success');
   };
 
-  // Distinct categories, in the order they first appear
-  const sections = useMemo(() => {
-    const order = [];
-    for (const l of lignes) {
-      if (!order.includes(l.category)) order.push(l.category);
-    }
-    return order.map((name) => ({
-      name,
-      lignes: lignes.filter((l) => l.category === name)
-    }));
-  }, [lignes]);
-
-  const sectionTotals = (secLignes) =>
-    secLignes.reduce(
-      (acc, l) => {
-        const { qteVendue, somme } = calcLigne(l);
-        return { qteVendue: acc.qteVendue + qteVendue, somme: acc.somme + somme };
-      },
-      { qteVendue: 0, somme: 0 }
-    );
-
+  const sections = useMemo(() => sectionsOf(lignes), [lignes]);
   const grandTotal = lignes.reduce((acc, l) => acc + calcLigne(l).somme, 0);
   const totalQteVendue = lignes.reduce((acc, l) => acc + calcLigne(l).qteVendue, 0);
   const nbReferences = lignes.filter((l) => l.designation.trim()).length;
@@ -223,6 +464,8 @@ export const FeuillVente = () => {
     doc.save(`FeuillVente_${boutiqueName.replace(/\s+/g, '_')}_${date}.pdf`);
   };
 
+  const isAllView = activeBoutiqueId === 'all';
+
   return (
     <div className="feuille-vente-page animate-fade">
       <div className="page-header">
@@ -244,17 +487,25 @@ export const FeuillVente = () => {
             className="form-input"
             style={{ width: 'auto', fontSize: '0.85rem' }}
           />
-          <button onClick={handleSave} className="btn btn-emerald flex-center gap-2">
-            <Save className="w-4 h-4" /> {saved ? 'Sauvegardé ✓' : 'Sauvegarder'}
-          </button>
+          {!isAllView && (
+            <button onClick={handleSave} className="btn btn-emerald flex-center gap-2">
+              <Save className="w-4 h-4" /> {saved ? 'Sauvegardé ✓' : 'Sauvegarder'}
+            </button>
+          )}
           <button onClick={handlePrint} className="btn btn-primary flex-center gap-2">
             <Printer className="w-4 h-4" /> Imprimer PDF
           </button>
         </div>
       </div>
 
-      {/* Create a new category — admin only */}
-      {isAdmin && (
+      {isAllView && (
+        <div className="glass-panel feuille-add-section mt-4" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+          <Lock className="w-3.5 h-3.5" />
+          Vue consolidée en lecture seule. Sélectionnez une boutique précise pour saisir ou modifier sa feuille.
+        </div>
+      )}
+
+      {!isAllView && isAdmin && (
         <div className="glass-panel feuille-add-section mt-4">
           <span className="val-label">Nouvelle catégorie :</span>
           <input
@@ -272,7 +523,7 @@ export const FeuillVente = () => {
         </div>
       )}
 
-      {!isAdmin && (
+      {!isAllView && !isAdmin && (
         <div className="glass-panel feuille-add-section mt-4" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
           <Lock className="w-3.5 h-3.5" />
           Vous renseignez uniquement le <strong>stock Initial</strong> et le <strong>Reste</strong>.
@@ -280,193 +531,39 @@ export const FeuillVente = () => {
         </div>
       )}
 
-      {sections.length === 0 && (
-        <div className="glass-panel feuille-empty mt-4">
-          {isAdmin
-            ? 'Aucune catégorie. Créez-en une ci-dessus pour commencer votre feuille de vente.'
-            : "Aucun article. L'administrateur doit d'abord configurer la feuille de stock."}
-        </div>
+      {loading && <div className="glass-panel feuille-empty mt-4">Chargement…</div>}
+
+      {!loading && isAllView && (
+        <>
+          {allBoutiquesData.map((b) => (
+            <div key={b.boutiqueId} className="mt-6">
+              <div
+                className="feuille-cat-title"
+                style={{ borderLeft: `3px solid ${b.boutiqueColor}`, paddingLeft: 10, marginBottom: 4 }}
+              >
+                🏬 {b.boutiqueName}
+              </div>
+              <FeuilleBoutique lignes={b.lignes} canEdit={false} isAdmin={isAdmin} />
+            </div>
+          ))}
+        </>
       )}
 
-      {/* One panel per category */}
-      {sections.map((sec) => {
-        const st = sectionTotals(sec.lignes);
-        return (
-          <div key={sec.name} className="glass-panel table-container feuille-section mt-4">
-            <div className="feuille-cat-header">
-              <div className="feuille-cat-title-wrap">
-                <span className="feuille-cat-title">{sec.name}</span>
-                {isAdmin && (
-                  <>
-                    <button
-                      onClick={() => renameCategory(sec.name)}
-                      className="btn-icon"
-                      title="Renommer la catégorie"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => removeCategory(sec.name)}
-                      className="btn-icon"
-                      title="Supprimer la catégorie"
-                    >
-                      <Trash2 className="w-4 h-4 text-red-400" />
-                    </button>
-                  </>
-                )}
-              </div>
-              <span className="feuille-cat-meta">
-                {sec.lignes.length} ligne{sec.lignes.length > 1 ? 's' : ''} · {st.qteVendue} u. vendues ·{' '}
-                <strong>{formatMoney(st.somme)}</strong>
-              </span>
-            </div>
-
-            <div className="table-responsive">
-              <table className="data-table feuille-table">
-                <thead>
-                  <tr>
-                    <th style={{ minWidth: 180 }} title={isAdmin ? undefined : 'Article défini par l\'administrateur'}>
-                      Désignation {!isAdmin && <Lock className="w-3 h-3" style={{ verticalAlign: 'middle' }} />}
-                    </th>
-                    <th style={{ minWidth: 110 }} title={isAdmin ? undefined : 'Prix fixé par l\'administrateur'}>
-                      P.Vente (GNF) {!isAdmin && <Lock className="w-3 h-3" style={{ verticalAlign: 'middle' }} />}
-                    </th>
-                    <th style={{ minWidth: 80 }}>Initial</th>
-                    <th style={{ minWidth: 90 }} title={isAdmin ? undefined : 'Réservé à l\'administrateur'}>
-                      Nouveau {!isAdmin && <Lock className="w-3 h-3" style={{ verticalAlign: 'middle' }} />}
-                    </th>
-                    <th style={{ minWidth: 70, background: 'rgba(99,102,241,0.08)' }}>Total</th>
-                    <th style={{ minWidth: 80 }}>Reste</th>
-                    <th style={{ minWidth: 90, background: 'rgba(16,185,129,0.08)' }}>Qté Vendue</th>
-                    <th style={{ minWidth: 130, background: 'rgba(16,185,129,0.08)' }}>Somme</th>
-                    <th style={{ minWidth: 40 }}></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sec.lignes.map((l) => {
-                    const { total, qteVendue, somme } = calcLigne(l);
-                    return (
-                      <tr key={l.id} className="feuille-row">
-                        <td>
-                          {isAdmin ? (
-                            <input
-                              className="feuille-input"
-                              type="text"
-                              placeholder="Ex: Charbon Coconut..."
-                              value={l.designation}
-                              onChange={(e) => updateLigne(l.id, 'designation', e.target.value)}
-                            />
-                          ) : (
-                            <span className="feuille-designation-ro">{l.designation || '—'}</span>
-                          )}
-                        </td>
-                        <td>
-                          {isAdmin ? (
-                            <input
-                              className="feuille-input feuille-input-num"
-                              type="number"
-                              placeholder="60000"
-                              value={l.pVente}
-                              onChange={(e) => updateLigne(l.id, 'pVente', e.target.value)}
-                            />
-                          ) : (
-                            <span
-                              className="feuille-calc-val feuille-locked"
-                              title="Prix fixé par l'administrateur"
-                            >
-                              {l.pVente ? formatMoney(Number(l.pVente)) : '—'}
-                            </span>
-                          )}
-                        </td>
-                        <td>
-                          <input
-                            className="feuille-input feuille-input-num"
-                            type="number"
-                            placeholder="0"
-                            value={l.initial}
-                            onChange={(e) => updateLigne(l.id, 'initial', e.target.value)}
-                          />
-                        </td>
-                        <td>
-                          {isAdmin ? (
-                            <input
-                              className="feuille-input feuille-input-num"
-                              type="number"
-                              placeholder="0"
-                              value={l.nouveau}
-                              onChange={(e) => updateLigne(l.id, 'nouveau', e.target.value)}
-                            />
-                          ) : (
-                            <span
-                              className="feuille-calc-val feuille-locked"
-                              title="Seul l'administrateur peut saisir le nouveau stock"
-                            >
-                              {l.nouveau || '—'}
-                            </span>
-                          )}
-                        </td>
-                        <td style={{ background: 'rgba(99,102,241,0.05)', textAlign: 'center' }}>
-                          <span className="feuille-calc-val text-indigo-400">{total || '—'}</span>
-                        </td>
-                        <td>
-                          <input
-                            className="feuille-input feuille-input-num"
-                            type="number"
-                            placeholder="0"
-                            value={l.reste}
-                            onChange={(e) => updateLigne(l.id, 'reste', e.target.value)}
-                          />
-                        </td>
-                        <td style={{ background: 'rgba(16,185,129,0.05)', textAlign: 'center' }}>
-                          <span className="feuille-calc-val text-emerald-400">{qteVendue || '—'}</span>
-                        </td>
-                        <td style={{ background: 'rgba(16,185,129,0.05)' }}>
-                          <span className="feuille-somme">{somme ? formatMoney(somme) : '—'}</span>
-                        </td>
-                        <td>
-                          {isAdmin && (
-                            <button
-                              onClick={() => removeLigne(l.id)}
-                              className="btn-icon"
-                              title="Supprimer cette ligne"
-                            >
-                              <Trash2 className="w-4 h-4 text-red-400" />
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-                <tfoot>
-                  <tr className="feuille-footer-row">
-                    <td colSpan={2}>
-                      {isAdmin && (
-                        <button onClick={() => addLigne(sec.name)} className="btn-add-ligne">
-                          <Plus className="w-4 h-4" /> Ajouter une ligne
-                        </button>
-                      )}
-                    </td>
-                    <td colSpan={4}></td>
-                    <td style={{ textAlign: 'center', fontWeight: 800, color: '#34d399' }}>
-                      {st.qteVendue > 0 ? st.qteVendue : '—'}
-                    </td>
-                    <td>
-                      <span style={{ fontWeight: 800, fontSize: '1rem', color: '#818cf8' }}>
-                        {st.somme > 0 ? formatMoney(st.somme) : '—'}
-                      </span>
-                    </td>
-                    <td></td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          </div>
-        );
-      })}
+      {!loading && !isAllView && (
+        <FeuilleBoutique
+          lignes={lignes}
+          canEdit={true}
+          isAdmin={isAdmin}
+          onUpdateLigne={updateLigne}
+          onRemoveLigne={removeLigne}
+          onAddLigne={addLigne}
+          onRenameCategory={renameCategory}
+          onRemoveCategory={removeCategory}
+        />
+      )}
 
       {/* Global summary */}
-      {grandTotal > 0 && (
+      {!isAllView && grandTotal > 0 && (
         <div className="feuille-summary mt-4">
           <div className="feuille-summary-card glass-panel">
             <span className="val-label">Total Quantités Vendues</span>

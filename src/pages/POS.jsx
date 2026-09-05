@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { CATEGORIES } from '../utils/initialData';
 import { formatMoney } from '../utils/formatters';
 import { SaleSuccessModal } from '../components/Modals/SaleSuccessModal';
 import { FeuillVente } from './FeuillVente';
@@ -50,8 +49,22 @@ export const POS = () => {
 
   const currentStoreId = activeBoutiqueId === 'all' ? 'b1' : activeBoutiqueId;
 
+  // Le catalogue de la Caisse est celui de la Feuille de Vente, pour la boutique active
+  const storeProducts = useMemo(
+    () => products.filter((p) => p.boutiqueId === currentStoreId),
+    [products, currentStoreId]
+  );
+
+  const categories = useMemo(() => {
+    const seen = [];
+    for (const p of storeProducts) {
+      if (p.category && !seen.includes(p.category)) seen.push(p.category);
+    }
+    return seen;
+  }, [storeProducts]);
+
   // Filter products by search & category
-  const filteredProducts = products.filter((p) => {
+  const filteredProducts = storeProducts.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCat = selectedCategory === 'all' || p.category === selectedCategory;
     return matchesSearch && matchesCat;
@@ -59,7 +72,7 @@ export const POS = () => {
 
   // Cart operations
   const addToCart = (product) => {
-    const stockAvail = product.stocks[currentStoreId] || 0;
+    const stockAvail = product.stock || 0;
     const existingIndex = cart.findIndex((item) => item.productId === product.id);
 
     if (existingIndex > -1) {
@@ -90,8 +103,8 @@ export const POS = () => {
   };
 
   const updateQuantity = (productId, delta) => {
-    const product = products.find((p) => p.id === productId);
-    const stockAvail = product ? product.stocks[currentStoreId] || 0 : 999;
+    const product = storeProducts.find((p) => p.id === productId);
+    const stockAvail = product ? product.stock || 0 : 999;
 
     setCart((prev) =>
       prev
@@ -217,13 +230,13 @@ export const POS = () => {
               >
                 Tous les Articles
               </button>
-              {CATEGORIES.map((cat) => (
+              {categories.map((cat) => (
                 <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`cat-pill ${selectedCategory === cat.id ? 'pill-active' : ''}`}
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`cat-pill ${selectedCategory === cat ? 'pill-active' : ''}`}
                 >
-                  {cat.label}
+                  {cat}
                 </button>
               ))}
             </div>
@@ -232,7 +245,7 @@ export const POS = () => {
           {/* Product Grid */}
           <div className="pos-products-grid mt-4">
             {filteredProducts.map((p) => {
-              const stockInCurrentStore = p.stocks[currentStoreId] || 0;
+              const stockInCurrentStore = p.stock || 0;
               const isOut = stockInCurrentStore === 0;
               const isLow = stockInCurrentStore > 0 && stockInCurrentStore <= p.minAlertStock;
 
@@ -243,7 +256,13 @@ export const POS = () => {
                   className={`pos-product-card glass-panel ${isOut ? 'card-disabled' : ''}`}
                 >
                   <div className="pos-product-img-wrap">
-                    <img src={p.image} alt={p.name} className="pos-product-img" />
+                    {p.image ? (
+                      <img src={p.image} alt={p.name} className="pos-product-img" />
+                    ) : (
+                      <div className="pos-product-img pos-product-img-placeholder">
+                        <Package className="w-8 h-8" />
+                      </div>
+                    )}
                     <span
                       className={`stock-badge ${
                         isOut ? 'stock-out' : isLow ? 'stock-low' : 'stock-ok'

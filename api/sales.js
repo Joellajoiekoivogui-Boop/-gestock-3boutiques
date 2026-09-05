@@ -24,34 +24,44 @@ export default async function handler(req, res) {
 
   try {
     const { data: boutique } = await db.from('boutiques').select('manager').eq('id', boutiqueId).single();
-    const { data: productsRows, error: prodErr } = await db
-      .from('products')
+    const { data: articleRows, error: artErr } = await db
+      .from('feuille_articles')
       .select('*')
+      .eq('boutique_id', boutiqueId)
       .in('id', items.map((i) => i.productId));
-    if (prodErr) throw prodErr;
+    if (artErr) throw artErr;
 
     // Ne jamais faire confiance au prix/quantité envoyés par le client : on
-    // recalcule tout à partir du catalogue produit et on rejette les
-    // quantités invalides (une quantité négative permettrait sinon de
-    // regonfler le stock sans passer par le transfert, réservé à l'admin).
+    // recalcule tout à partir du catalogue (Feuille de Vente) et on rejette
+    // les quantités invalides (une quantité négative permettrait sinon de
+    // regonfler le stock arbitrairement).
     const resolvedItems = [];
     for (const item of items) {
-      const product = productsRows.find((p) => p.id === item.productId);
-      if (!product) return res.status(400).json({ error: 'Produit introuvable.' });
+      const article = articleRows.find((a) => a.id === item.productId);
+      if (!article) return res.status(400).json({ error: 'Article introuvable pour cette boutique.' });
       const quantity = Number(item.quantity);
       if (!Number.isInteger(quantity) || quantity <= 0) {
         return res.status(400).json({ error: 'Quantité invalide.' });
       }
-      resolvedItems.push({ productId: product.id, name: product.name, quantity, unitPrice: Number(product.sell_price) });
+      if (quantity > Number(article.stock)) {
+        return res.status(400).json({ error: `Stock insuffisant pour "${article.designation}".` });
+      }
+      resolvedItems.push({
+        productId: article.id,
+        name: article.designation,
+        quantity,
+        unitPrice: Number(article.p_vente)
+      });
     }
 
     const totalAmount = resolvedItems.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
 
     for (const item of resolvedItems) {
-      const product = productsRows.find((p) => p.id === item.productId);
-      const stocks = { ...(product.stocks || {}) };
-      stocks[boutiqueId] = Math.max(0, (stocks[boutiqueId] || 0) - item.quantity);
-      const { error } = await db.from('products').update({ stocks }).eq('id', item.productId);
+      const article = articleRows.find((a) => a.id === item.productId);
+      const { error } = await db
+        .from('feuille_articles')
+        .update({ stock: Math.max(0, Number(article.stock) - item.quantity) })
+        .eq('id', item.productId);
       if (error) throw error;
     }
 

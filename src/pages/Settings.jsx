@@ -68,9 +68,9 @@ export const Settings = () => {
                 <td>❌ Limité à sa propre boutique</td>
               </tr>
               <tr>
-                <td>Consulter les Prix d'Achat & Marges</td>
+                <td>Gérer le catalogue (prix, stock, alertes)</td>
                 <td><CheckCircle className="w-4 h-4 text-emerald-400 inline" /> Autorisé</td>
-                <td>❌ Masqué pour confidentialité</td>
+                <td>❌ Lecture seule</td>
               </tr>
               <tr>
                 <td>Passer des ventes Caisse (POS)</td>
@@ -83,9 +83,9 @@ export const Settings = () => {
                 <td><CheckCircle className="w-4 h-4 text-emerald-400 inline" /> Autorisé</td>
               </tr>
               <tr>
-                <td>Effectuer des transferts inter-boutiques</td>
+                <td>Ajouter / renommer les catégories d'articles</td>
                 <td><CheckCircle className="w-4 h-4 text-emerald-400 inline" /> Autorisé</td>
-                <td>❌ Sur approbation admin</td>
+                <td>❌ Réservé à l'administrateur</td>
               </tr>
               <tr>
                 <td>Générer & Télécharger les rapports PDF</td>

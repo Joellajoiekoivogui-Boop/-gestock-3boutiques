@@ -78,18 +78,9 @@ export const Reports = () => {
       return sum + dayRepayments.reduce((rSum, r) => rSum + r.amount, 0);
     }, 0);
 
-    // COGS estimation
-    const totalCOGS = daySales.reduce((sum, sale) => {
-      return (
-        sum +
-        sale.items.reduce((iSum, item) => {
-          const prod = products.find((p) => p.id === item.productId);
-          return iSum + item.quantity * (prod?.buyPrice ?? item.unitPrice * 0.6);
-        }, 0)
-      );
-    }, 0);
-
-    const netProfit = totalRevenue - totalCOGS - expensesTotal;
+    // Le prix d'achat n'étant plus suivi par article, le solde net se limite
+    // au chiffre d'affaires moins les dépenses (pas de calcul de marge).
+    const netProfit = totalRevenue - expensesTotal;
 
     return {
       boutiqueName: targetBoutique ? targetBoutique.name : 'Toutes Boutiques',
@@ -114,13 +105,9 @@ export const Reports = () => {
     const targetBoutique = boutiques.find((b) => b.id === effectiveBoutiqueId);
     const boutiqueName = targetBoutique ? targetBoutique.name : 'Toutes Boutiques';
 
-    const mappedProducts = products.map((p) => ({
-      ...p,
-      currentStock:
-        effectiveBoutiqueId === 'all'
-          ? Object.values(p.stocks).reduce((a, b) => a + b, 0)
-          : p.stocks[effectiveBoutiqueId] || 0
-    }));
+    const scopedProducts =
+      effectiveBoutiqueId === 'all' ? products : products.filter((p) => p.boutiqueId === effectiveBoutiqueId);
+    const mappedProducts = scopedProducts.map((p) => ({ ...p, currentStock: p.stock || 0 }));
 
     generateStockReportPDF(mappedProducts, boutiqueName);
   };

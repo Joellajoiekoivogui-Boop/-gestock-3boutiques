@@ -89,26 +89,13 @@ export const Dashboard = ({ onNavigate }) => {
 
   const totalExpensesAmount = filteredExpenses.reduce((acc, e) => acc + e.amount, 0);
 
-  // Cost of Goods Sold (COGS) & Net Profit
-  const totalCOGS = filteredSales.reduce((sum, sale) => {
-    const saleCOGS = sale.items.reduce((itemSum, item) => {
-      const prod = products.find((p) => p.id === item.productId);
-      const buyPrice = prod ? prod.buyPrice : item.unitPrice * 0.6;
-      return itemSum + item.quantity * buyPrice;
-    }, 0);
-    return sum + saleCOGS;
-  }, 0);
-
-  const netProfit = totalRevenue - totalCOGS - totalExpensesAmount;
+  // Solde net (le prix d'achat n'étant plus suivi, il n'entre plus dans le calcul)
+  const netProfit = totalRevenue - totalExpensesAmount;
 
   // Low stock products
-  const lowStockProducts = products.filter((p) => {
-    if (activeBoutiqueId === 'all') {
-      const totalStock = Object.values(p.stocks).reduce((a, b) => a + b, 0);
-      return totalStock <= p.minAlertStock * 2;
-    }
-    return (p.stocks[activeBoutiqueId] || 0) <= p.minAlertStock;
-  });
+  const scopedProducts =
+    activeBoutiqueId === 'all' ? products : products.filter((p) => p.boutiqueId === activeBoutiqueId);
+  const lowStockProducts = scopedProducts.filter((p) => (p.stock || 0) <= (p.minAlertStock || 0));
 
   // Chart Data 1: Sales Trend (Last 7 Days)
   const daysLabels = ['J-6', 'J-5', 'J-4', 'J-3', 'J-2', 'Hier', 'Aujourd\'hui'];
@@ -223,9 +210,9 @@ export const Dashboard = ({ onNavigate }) => {
           color="amber"
         />
         <StatCard
-          title="Bénéfice Net Estimé"
+          title="Solde Net"
           value={formatMoney(netProfit)}
-          subtext="Après déduction achats & charges"
+          subtext="Chiffre d'affaires moins dépenses"
           icon={PieIcon}
           color={netProfit >= 0 ? 'emerald' : 'red'}
         />
@@ -303,10 +290,7 @@ export const Dashboard = ({ onNavigate }) => {
                   </tr>
                 ) : (
                   lowStockProducts.map((p) => {
-                    const currentStock =
-                      activeBoutiqueId === 'all'
-                        ? Object.values(p.stocks).reduce((a, b) => a + b, 0)
-                        : p.stocks[activeBoutiqueId] || 0;
+                    const currentStock = p.stock || 0;
 
                     return (
                       <tr key={p.id}>

@@ -18,6 +18,7 @@ export default async function handler(req, res) {
     let debtsQuery = db.from('debts').select('*').order('date', { ascending: false });
     let expensesQuery = db.from('expenses').select('*').order('date', { ascending: false });
     let customersQuery = db.from('customers').select('*').order('created_at');
+    let articlesQuery = db.from('feuille_articles').select('*').order('sort_order').order('created_at');
 
     // Un gérant ne voit que les données de sa propre boutique.
     if (!isAdmin) {
@@ -25,32 +26,37 @@ export default async function handler(req, res) {
       debtsQuery = debtsQuery.eq('boutique_id', user.boutiqueId);
       expensesQuery = expensesQuery.eq('boutique_id', user.boutiqueId);
       customersQuery = customersQuery.eq('boutique_id', user.boutiqueId);
+      articlesQuery = articlesQuery.eq('boutique_id', user.boutiqueId);
     }
 
-    const [boutiques, products, sales, debts, expenses, customers] = await Promise.all([
+    const [boutiques, articles, sales, debts, expenses, customers] = await Promise.all([
       db.from('boutiques').select('*').order('id'),
-      db.from('products').select('*').order('created_at'),
+      articlesQuery,
       salesQuery,
       debtsQuery,
       expensesQuery,
       customersQuery
     ]);
 
-    const firstError = [boutiques, products, sales, debts, expenses, customers].find((r) => r.error);
+    const firstError = [boutiques, articles, sales, debts, expenses, customers].find((r) => r.error);
     if (firstError) throw firstError.error;
 
-    let products_ = toCamel(products.data);
-    if (!isAdmin) {
-      // Prix d'achat et stocks des autres boutiques : réservés à l'administrateur.
-      products_ = products_.map((p) => {
-        const { buyPrice: _buyPrice, stocks, ...rest } = p;
-        return { ...rest, stocks: { [user.boutiqueId]: stocks?.[user.boutiqueId] || 0 } };
-      });
-    }
+    // Le catalogue (issu de la Feuille de Vente) alimente Caisse, Tableau de
+    // Bord et Rapports — chaque article appartient à une seule boutique.
+    const products = toCamel(articles.data).map((a) => ({
+      id: a.id,
+      boutiqueId: a.boutiqueId,
+      name: a.designation,
+      category: a.category,
+      sellPrice: a.pVente,
+      stock: a.stock,
+      minAlertStock: a.minAlertStock,
+      image: a.image
+    }));
 
     return res.status(200).json({
       boutiques: toCamel(boutiques.data),
-      products: products_,
+      products,
       sales: toCamel(sales.data),
       debts: toCamel(debts.data),
       expenses: toCamel(expenses.data),
