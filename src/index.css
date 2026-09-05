@@ -239,9 +239,16 @@ body {
   justify-content: space-between;
   padding-left: max(24px, env(safe-area-inset-left));
   padding-right: max(24px, env(safe-area-inset-right));
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 50;
+}
+
+/* La barre étant fixe (hors du flux), on réserve sa hauteur en haut du corps de page */
+.app-body {
+  padding-top: calc(64px + env(safe-area-inset-top));
 }
 
 @media (max-width: 640px) {
@@ -1929,6 +1936,10 @@ button svg,
     padding-right: max(12px, env(safe-area-inset-right));
     height: calc(58px + env(safe-area-inset-top));
     gap: 8px;
+  }
+
+  .app-body {
+    padding-top: calc(58px + env(safe-area-inset-top));
   }
 
   .navbar-left {
