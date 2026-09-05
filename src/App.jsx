@@ -17,7 +17,7 @@ import { Settings } from './pages/Settings';
 const ADMIN_ONLY_PAGES = ['dashboard', 'settings'];
 
 function MainLayout() {
-  const { activeRole } = useApp();
+  const { activeRole, activeBoutique, activeBoutiqueId } = useApp();
   const isAdmin = activeRole === 'admin';
   const [requestedPage, setActivePage] = useState('dashboard');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -26,8 +26,15 @@ function MainLayout() {
   const activePage =
     !isAdmin && ADMIN_ONLY_PAGES.includes(requestedPage) ? 'pos' : requestedPage;
 
+  // Légère teinte de fond aux couleurs de la boutique active, pour repérer
+  // en un coup d'œil dans quelle boutique on se trouve.
+  const shellStyle =
+    activeBoutiqueId !== 'all' && activeBoutique?.color
+      ? { '--boutique-tint': activeBoutique.color }
+      : undefined;
+
   return (
-    <div className="app-shell">
+    <div className="app-shell" style={shellStyle}>
       <Navbar onOpenMenu={() => setMenuOpen(true)} />
 
       <div className="app-body">

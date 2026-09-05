@@ -167,6 +167,11 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background-image: radial-gradient(
+    1200px 640px at 50% -12%,
+    color-mix(in srgb, var(--boutique-tint, transparent) 12%, transparent),
+    transparent 65%
+  );
 }
 
 .app-body {
