@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Gestock 3B — Gestion Multi-Boutiques",
-  "short_name": "Gestock 3B",
-  "description": "Gérez les stocks, ventes, dettes et finances de vos boutiques de Conakry, même hors ligne.",
+  "name": "Dramera Chicha — Gestion Multi-Boutiques",
+  "short_name": "Dramera Chicha",
+  "description": "Gérez les stocks, ventes, dettes et finances des boutiques Dramera Chicha de Conakry, même hors ligne.",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",

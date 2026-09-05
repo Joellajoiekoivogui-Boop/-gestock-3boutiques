@@ -425,7 +425,7 @@ export const FeuillVente = () => {
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('GESTOCK 3B — FEUILLE DE VENTE JOURNALIÈRE', 14, 14);
+    doc.text('DRAMERA CHICHA — FEUILLE DE VENTE JOURNALIÈRE', 14, 14);
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(203, 213, 225);

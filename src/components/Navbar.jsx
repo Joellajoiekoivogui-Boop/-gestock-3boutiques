@@ -70,8 +70,8 @@ export const Navbar = ({ onOpenMenu }) => {
             <Sparkles className="w-5 h-5 text-indigo-400" />
           </div>
           <div className="brand-text">
-            <span className="brand-title">GESTOCK</span>
-            <span className="brand-badge">3B</span>
+            <span className="brand-title">DRAMERA</span>
+            <span className="brand-badge">CHICHA</span>
           </div>
         </div>
 

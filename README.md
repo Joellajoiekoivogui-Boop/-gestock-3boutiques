@@ -1,4 +1,4 @@
-# Gestock 3B
+# Dramera Chicha
 
 Application de gestion multi-boutiques (stocks, ventes, dettes, dépenses) pour 3 boutiques à Conakry : **Kissosso**, **Tombolia**, **Sangoyah**.
 

@@ -29,7 +29,7 @@ export const Login = () => {
             <Sparkles className="w-6 h-6 text-indigo-400" />
           </div>
           <div>
-            <h1 className="auth-title">GESTOCK 3B</h1>
+            <h1 className="auth-title">DRAMERA CHICHA</h1>
             <p className="auth-subtitle">Gestion Multi-Boutiques — Conakry</p>
           </div>
         </div>
@@ -102,7 +102,7 @@ export const Login = () => {
         </form>
       </div>
 
-      <p className="auth-footer">© {new Date().getFullYear()} Gestock 3B · Tous droits réservés</p>
+      <p className="auth-footer">© {new Date().getFullYear()} Dramera Chicha · Tous droits réservés</p>
     </div>
   );
 };

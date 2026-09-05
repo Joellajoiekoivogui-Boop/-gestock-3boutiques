@@ -10,7 +10,7 @@ const addHeader = (doc, title, subtitle = '') => {
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text('GESTOCK 3B — GESTION MULTI-BOUTIQUES', 14, 16);
+  doc.text('DRAMERA CHICHA — GESTION MULTI-BOUTIQUES', 14, 16);
 
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
@@ -36,7 +36,7 @@ export const generateSaleReceiptPDF = (sale, boutique) => {
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
-  doc.text('GESTOCK 3B', 40, 10, { align: 'center' });
+  doc.text('DRAMERA CHICHA', 40, 10, { align: 'center' });
 
   doc.setFontSize(9);
   doc.setFont('helvetica', 'bold');
@@ -189,7 +189,7 @@ export const generateDailyReportPDF = (stats, boutiqueName, selectedDate) => {
   y = doc.lastAutoTable.finalY + 15;
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text('Document généré automatiquement par Gestock 3B.', 14, y);
+  doc.text('Document généré automatiquement par Dramera Chicha.', 14, y);
 
   doc.save(`Rapport_Caisse_${boutiqueName.replace(/\s+/g, '_')}_${selectedDate}.pdf`);
 };
