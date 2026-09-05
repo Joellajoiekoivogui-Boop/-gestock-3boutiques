@@ -34,6 +34,9 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'PATCH') {
+    if (user.role !== 'admin') {
+      return res.status(403).json({ error: "Accès refusé : seul l'administrateur peut modifier un produit." });
+    }
     const { id, ...fields } = readBody(req);
     if (!id) return res.status(400).json({ error: 'Produit manquant.' });
 

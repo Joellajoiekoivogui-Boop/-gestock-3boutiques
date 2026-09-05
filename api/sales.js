@@ -30,11 +30,25 @@ export default async function handler(req, res) {
       .in('id', items.map((i) => i.productId));
     if (prodErr) throw prodErr;
 
-    const totalAmount = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
-
+    // Ne jamais faire confiance au prix/quantité envoyés par le client : on
+    // recalcule tout à partir du catalogue produit et on rejette les
+    // quantités invalides (une quantité négative permettrait sinon de
+    // regonfler le stock sans passer par le transfert, réservé à l'admin).
+    const resolvedItems = [];
     for (const item of items) {
       const product = productsRows.find((p) => p.id === item.productId);
-      if (!product) continue;
+      if (!product) return res.status(400).json({ error: 'Produit introuvable.' });
+      const quantity = Number(item.quantity);
+      if (!Number.isInteger(quantity) || quantity <= 0) {
+        return res.status(400).json({ error: 'Quantité invalide.' });
+      }
+      resolvedItems.push({ productId: product.id, name: product.name, quantity, unitPrice: Number(product.sell_price) });
+    }
+
+    const totalAmount = resolvedItems.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+
+    for (const item of resolvedItems) {
+      const product = productsRows.find((p) => p.id === item.productId);
       const stocks = { ...(product.stocks || {}) };
       stocks[boutiqueId] = Math.max(0, (stocks[boutiqueId] || 0) - item.quantity);
       const { error } = await db.from('products').update({ stocks }).eq('id', item.productId);
@@ -45,7 +59,7 @@ export default async function handler(req, res) {
       .from('sales')
       .insert({
         boutique_id: boutiqueId,
-        items,
+        items: resolvedItems,
         total_amount: totalAmount,
         payment_method: paymentMethod,
         cash_received: paymentMethod === 'cash' ? Number(cashReceived) : null,
@@ -64,8 +78,9 @@ export default async function handler(req, res) {
       const finalDueDate = dueDate || new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0];
       const finalCustomerName = customerName || 'Client Crédit';
 
-      const { data: matches } = await db.from('customers').select('*').ilike('name', finalCustomerName).limit(1);
-      const existingCustomer = matches?.[0] || null;
+      const { data: boutiqueCustomers } = await db.from('customers').select('*').eq('boutique_id', boutiqueId);
+      const existingCustomer =
+        (boutiqueCustomers || []).find((c) => c.name.toLowerCase() === finalCustomerName.toLowerCase()) || null;
       let resolvedCustomerId;
 
       if (existingCustomer) {

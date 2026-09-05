@@ -84,7 +84,7 @@ export const Reports = () => {
         sum +
         sale.items.reduce((iSum, item) => {
           const prod = products.find((p) => p.id === item.productId);
-          return iSum + item.quantity * (prod ? prod.buyPrice : item.unitPrice * 0.6);
+          return iSum + item.quantity * (prod?.buyPrice ?? item.unitPrice * 0.6);
         }, 0)
       );
     }, 0);
@@ -229,10 +229,12 @@ export const Reports = () => {
             <span>Dépenses Effectuées</span>
             <strong className="text-amber-400">-{formatMoney(dailyStats.expensesTotal)}</strong>
           </div>
-          <div className="rep-stat-box">
-            <span>Bénéfice Net Estimé</span>
-            <strong className="text-purple-400">{formatMoney(dailyStats.netProfit)}</strong>
-          </div>
+          {isAdmin && (
+            <div className="rep-stat-box">
+              <span>Bénéfice Net Estimé</span>
+              <strong className="text-purple-400">{formatMoney(dailyStats.netProfit)}</strong>
+            </div>
+          )}
         </div>
       </div>
 
