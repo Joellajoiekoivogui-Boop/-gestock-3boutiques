@@ -39,9 +39,20 @@ const DEFAULT_INITIAL_LIGNES = [
   { id: 'init-6', category: 'Chicha', designation: 'Tete 100000', pVente: '40000', stock: '', minAlertStock: '', initial: '', nouveau: '', reste: '' }
 ];
 
-// Le gérant ne renseigne que le comptage du jour (Initial / Reste).
-// La création des articles, le prix et le nouveau stock sont réservés à l'admin.
-const GERANT_EDITABLE = ['initial', 'reste'];
+// Le gérant ne renseigne que le "Reste" du jour en cours — l'Initial est
+// calculé automatiquement (report du Reste de la veille), et tout le reste
+// (articles, prix, nouveau stock) est réservé à l'admin.
+const GERANT_EDITABLE = ['reste'];
+
+// Le gérant ne peut saisir que la journée commerciale en cours : elle bascule
+// à 3h du matin (le rangement/comptage d'une soirée se fait parfois après
+// minuit). Passé cette heure, la veille est verrouillée pour lui — seul
+// l'admin peut encore la modifier.
+const currentBusinessDate = () => {
+  const now = new Date();
+  if (now.getHours() < 3) now.setDate(now.getDate() - 1);
+  return now.toISOString().split('T')[0];
+};
 
 const sectionsOf = (lignes) => {
   const order = [];
@@ -66,6 +77,7 @@ const FeuilleBoutique = ({
   lignes,
   canEdit,
   isAdmin,
+  isEditableDate,
   onUpdateLigne,
   onRemoveLigne,
   onAddLigne,
@@ -73,6 +85,13 @@ const FeuilleBoutique = ({
   onRemoveCategory
 }) => {
   const sections = useMemo(() => sectionsOf(lignes), [lignes]);
+
+  const canEditField = (field) => {
+    if (!canEdit) return false;
+    if (isAdmin) return true;
+    if (!GERANT_EDITABLE.includes(field)) return false;
+    return isEditableDate;
+  };
 
   if (sections.length === 0) {
     return (
@@ -126,12 +145,16 @@ const FeuilleBoutique = ({
                     <th style={{ minWidth: 90 }} title="Seuil d'alerte stock bas — réservé à l'administrateur">
                       Alerte {!canEdit && <Lock className="w-3 h-3" style={{ verticalAlign: 'middle' }} />}
                     </th>
-                    <th style={{ minWidth: 80 }}>Initial</th>
+                    <th style={{ minWidth: 80 }} title={canEditField('initial') ? undefined : 'Calculé automatiquement (report du Reste de la veille)'}>
+                      Initial {!canEditField('initial') && <Lock className="w-3 h-3" style={{ verticalAlign: 'middle' }} />}
+                    </th>
                     <th style={{ minWidth: 90 }} title={canEdit ? undefined : "Réservé à l'administrateur"}>
                       Nouveau {!canEdit && <Lock className="w-3 h-3" style={{ verticalAlign: 'middle' }} />}
                     </th>
                     <th style={{ minWidth: 70, background: 'rgba(99,102,241,0.08)' }}>Total</th>
-                    <th style={{ minWidth: 80 }}>Reste</th>
+                    <th style={{ minWidth: 80 }} title={canEditField('reste') ? undefined : !isAdmin && canEdit ? 'Journée verrouillée — seul l\'administrateur peut la modifier' : undefined}>
+                      Reste {canEdit && !isAdmin && !isEditableDate && <Lock className="w-3 h-3" style={{ verticalAlign: 'middle' }} />}
+                    </th>
                     <th style={{ minWidth: 90, background: 'rgba(16,185,129,0.08)' }}>Qté Vendue</th>
                     <th style={{ minWidth: 130, background: 'rgba(16,185,129,0.08)' }}>Somme</th>
                     <th style={{ minWidth: 40 }}></th>
@@ -140,7 +163,6 @@ const FeuilleBoutique = ({
                 <tbody>
                   {sec.lignes.map((l) => {
                     const { total, qteVendue, somme } = calcLigne(l);
-                    const canEditField = (field) => canEdit && (isAdmin || GERANT_EDITABLE.includes(field));
                     return (
                       <tr key={l.id} className="feuille-row">
                         <td>
@@ -303,7 +325,7 @@ export const FeuillVente = () => {
     day: 'numeric'
   });
 
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(currentBusinessDate);
   const [lignes, setLignes] = useState([]);
   const [allBoutiquesData, setAllBoutiquesData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -312,6 +334,8 @@ export const FeuillVente = () => {
 
   const boutiqueName =
     activeBoutiqueId === 'all' ? 'Toutes les Boutiques' : activeBoutique?.name || 'Boutique';
+
+  const isEditableDate = date === currentBusinessDate();
 
   // Charge la feuille (Supabase) pour la boutique + date sélectionnées
   const load = useCallback(async () => {
@@ -490,7 +514,7 @@ export const FeuillVente = () => {
             className="form-input"
             style={{ width: 'auto', fontSize: '0.85rem' }}
           />
-          {!isAllView && (
+          {!isAllView && (isAdmin || isEditableDate) && (
             <button onClick={handleSave} className="btn btn-emerald flex-center gap-2">
               <Save className="w-4 h-4" /> {saved ? 'Sauvegardé ✓' : 'Sauvegarder'}
             </button>
@@ -529,8 +553,9 @@ export const FeuillVente = () => {
       {!isAllView && !isAdmin && (
         <div className="glass-panel feuille-add-section mt-4" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
           <Lock className="w-3.5 h-3.5" />
-          Vous renseignez uniquement le <strong>stock Initial</strong> et le <strong>Reste</strong>.
-          Les articles, le prix et le nouveau stock sont gérés par l'administrateur.
+          {isEditableDate
+            ? "Vous renseignez uniquement le Reste du jour. L'Initial, les articles, le prix et le nouveau stock sont gérés par l'administrateur."
+            : "Cette journée est clôturée (elle n'est plus modifiable après 3h du matin) — seul l'administrateur peut encore la modifier."}
         </div>
       )}
 
@@ -546,7 +571,7 @@ export const FeuillVente = () => {
               >
                 🏬 {b.boutiqueName}
               </div>
-              <FeuilleBoutique lignes={b.lignes} canEdit={false} isAdmin={isAdmin} />
+              <FeuilleBoutique lignes={b.lignes} canEdit={false} isAdmin={isAdmin} isEditableDate={isEditableDate} />
             </div>
           ))}
         </>
@@ -557,6 +582,7 @@ export const FeuillVente = () => {
           lignes={lignes}
           canEdit={true}
           isAdmin={isAdmin}
+          isEditableDate={isEditableDate}
           onUpdateLigne={updateLigne}
           onRemoveLigne={removeLigne}
           onAddLigne={addLigne}

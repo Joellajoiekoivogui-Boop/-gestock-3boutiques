@@ -823,6 +823,16 @@ body {
   width: 100%;
 }
 
+@media (max-width: 480px) {
+  .chart-card,
+  .widget-card {
+    padding: 14px;
+  }
+  .chart-wrapper {
+    height: 220px;
+  }
+}
+
 .col-span-full {
   grid-column: 1 / -1;
 }
@@ -850,6 +860,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 16px;
 }
 

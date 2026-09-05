@@ -69,6 +69,13 @@ function isUuid(v) {
   return typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
 }
 
+// Même règle que côté client : la journée commerciale bascule à 3h du matin.
+function currentBusinessDate() {
+  const now = new Date();
+  if (now.getHours() < 3) now.setDate(now.getDate() - 1);
+  return now.toISOString().split('T')[0];
+}
+
 export default async function handler(req, res) {
   const user = requireUser(req);
   if (!user) return res.status(401).json({ error: 'Session invalide ou expirée.' });
@@ -120,6 +127,12 @@ export default async function handler(req, res) {
     }
     const isAdmin = user.role === 'admin';
 
+    // Un gérant ne peut saisir que la journée commerciale en cours (elle
+    // bascule à 3h du matin) — les jours précédents sont réservés à l'admin.
+    if (!isAdmin && date !== currentBusinessDate()) {
+      return res.status(403).json({ error: "Cette journée est clôturée : seul l'administrateur peut la modifier." });
+    }
+
     try {
       const { data: existingArticles, error: exErr } = await db
         .from('feuille_articles')
@@ -128,6 +141,15 @@ export default async function handler(req, res) {
       if (exErr) throw exErr;
       const existingIds = new Set(existingArticles.map((a) => a.id));
       const postedExistingIds = new Set();
+
+      // Pour un gérant, l'Initial n'est jamais pris du client (il ne doit pas
+      // pouvoir le falsifier) : on le recalcule côté serveur (report du Reste
+      // de la veille, ou valeur déjà enregistrée aujourd'hui).
+      let authoritativeInitial = null;
+      if (!isAdmin) {
+        const current = await buildLignes(db, boutiqueId, date);
+        authoritativeInitial = new Map(current.map((l) => [l.id, l.initial]));
+      }
 
       for (const ligne of lignes) {
         let articleId = ligne.id;
@@ -169,6 +191,8 @@ export default async function handler(req, res) {
           postedExistingIds.add(articleId);
         }
 
+        // Le gérant ne peut modifier que le Reste ; l'Initial est calculé
+        // (report automatique), jamais saisi directement par lui.
         const countPatch = isAdmin
           ? {
               initial: ligne.initial === '' ? null : Number(ligne.initial),
@@ -176,7 +200,10 @@ export default async function handler(req, res) {
               reste: ligne.reste === '' ? null : Number(ligne.reste)
             }
           : {
-              initial: ligne.initial === '' ? null : Number(ligne.initial),
+              initial: (() => {
+                const v = authoritativeInitial.get(articleId);
+                return v === '' || v == null ? null : Number(v);
+              })(),
               reste: ligne.reste === '' ? null : Number(ligne.reste)
             };
 
