@@ -3,7 +3,8 @@ import { useApp } from '../../context/AppContext';
 import { X, Wallet, Plus } from 'lucide-react';
 
 export const ExpenseModal = ({ onClose }) => {
-  const { addExpense, boutiques, activeBoutiqueId } = useApp();
+  const { addExpense, boutiques, activeBoutiqueId, activeRole } = useApp();
+  const isAdmin = activeRole === 'admin';
 
   const [category, setCategory] = useState('Transport');
   const [description, setDescription] = useState('');
@@ -53,17 +54,23 @@ export const ExpenseModal = ({ onClose }) => {
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="form-group">
             <label className="form-label">Boutique Concernée</label>
-            <select
-              value={targetBoutiqueId}
-              onChange={(e) => setTargetBoutiqueId(e.target.value)}
-              className="form-input"
-            >
-              {boutiques.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
+            {isAdmin ? (
+              <select
+                value={targetBoutiqueId}
+                onChange={(e) => setTargetBoutiqueId(e.target.value)}
+                className="form-input"
+              >
+                {boutiques.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="form-input" style={{ color: 'var(--text-muted)', cursor: 'not-allowed' }}>
+                {boutiques.find((b) => b.id === targetBoutiqueId)?.name || 'Votre boutique'}
+              </div>
+            )}
           </div>
 
           <div className="form-group">
