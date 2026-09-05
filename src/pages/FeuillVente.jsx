@@ -293,7 +293,7 @@ const FeuilleBoutique = ({
 };
 
 export const FeuillVente = () => {
-  const { activeBoutique, activeBoutiqueId, addToast, activeRole, apiRequest } = useApp();
+  const { activeBoutique, activeBoutiqueId, addToast, activeRole, apiRequest, refreshData } = useApp();
   const isAdmin = activeRole === 'admin';
 
   const todayStr = new Date().toLocaleDateString('fr-FR', {
@@ -393,6 +393,9 @@ export const FeuillVente = () => {
     setLignes(result.data.lignes || []);
     setSaved(true);
     addToast('Feuille de vente sauvegardée !', 'success');
+    // Le catalogue (Caisse, Tableau de Bord, Rapports) doit refléter les
+    // articles/stocks à l'instant, pas seulement au prochain login.
+    refreshData();
   };
 
   const sections = useMemo(() => sectionsOf(lignes), [lignes]);
