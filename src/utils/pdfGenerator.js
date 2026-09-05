@@ -173,13 +173,13 @@ export const generateDailyReportPDF = (stats, boutiqueName, selectedDate) => {
     startY: y,
     head: [['Indicateur Financier', 'Montant (GNF)']],
     body: [
-      ['Chiffre d\'Affaires Total', formatMoney(stats.totalRevenue)],
-      ['Encaissements Espèces', formatMoney(stats.cashTotal)],
+      ['Chiffre d\'Affaires (Feuille de Vente)', formatMoney(stats.totalRevenue)],
       ['Encaissements Orange Money', formatMoney(stats.omTotal)],
       ['Nouvelles Dettes Accordées', formatMoney(stats.creditTotal)],
       ['Remboursements Dettes Recouvrés', formatMoney(stats.recoveredDebtsTotal)],
       ['Dépenses Totales', formatMoney(stats.expensesTotal)],
-      ['SOLDE NET', formatMoney(stats.netProfit)]
+      ['ESPÈCES PRÉSENTÉES', formatMoney(stats.especesPresentees)],
+      ['TOTAL GAGNÉ', formatMoney(stats.totalGagne)]
     ],
     theme: 'striped',
     headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255] },

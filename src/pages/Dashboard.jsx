@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { StatCard } from '../components/StatCard';
 import { formatMoney, formatDateTime, getPaymentMethodLabel } from '../utils/formatters';
+import { feuilleTotal } from '../utils/feuilleCalc';
 import {
   TrendingUp,
   DollarSign,
@@ -52,8 +53,27 @@ export const Dashboard = ({ onNavigate }) => {
     sales,
     debts,
     expenses,
-    products
+    products,
+    apiRequest
   } = useApp();
+
+  // Chiffre d'affaires du jour issu de la Feuille de Vente (comptage
+  // physique Initial/Nouveau/Reste), par boutique — c'est la source de
+  // vérité pour le CA, plus fiable que les seules ventes passées en Caisse.
+  const [feuilleTotals, setFeuilleTotals] = useState({});
+
+  useEffect(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    apiRequest(`/api/feuille?boutiqueId=all&date=${todayStr}`, 'GET').then((result) => {
+      if (!result.ok) return;
+      const totals = {};
+      for (const b of result.data.boutiques || []) {
+        totals[b.boutiqueId] = feuilleTotal(b.lignes || []);
+      }
+      setFeuilleTotals(totals);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Filter sales, debts, expenses based on activeBoutiqueId
   const filteredSales = activeBoutiqueId === 'all'
@@ -97,9 +117,13 @@ export const Dashboard = ({ onNavigate }) => {
     activeBoutiqueId === 'all' ? products : products.filter((p) => p.boutiqueId === activeBoutiqueId);
   const lowStockProducts = scopedProducts.filter((p) => (p.stock || 0) <= (p.minAlertStock || 0));
 
-  // Bilan du jour par boutique : ventes, Orange Money, dépenses, crédit
-  // accordé et le "reste" (caisse espèces attendue) après déduction de
-  // l'Orange Money, du crédit et des dépenses.
+  // Bilan du jour par boutique. Le Chiffre d'Affaires vient de la Feuille de
+  // Vente (comptage physique) — Orange Money, Crédit et Dépenses viennent des
+  // ventes/dépenses enregistrées. On en tire :
+  //  - Espèces Présentées = CA - Orange Money - Crédit - Dépenses (le cash
+  //    physique attendu en caisse)
+  //  - Total Gagné = CA - Crédit - Dépenses (l'Orange Money reste un gain,
+  //    seuls le crédit non encaissé et les dépenses sont exclus)
   const todayStr = new Date().toISOString().split('T')[0];
   const isToday = (isoDate) => new Date(isoDate).toISOString().split('T')[0] === todayStr;
 
@@ -107,13 +131,14 @@ export const Dashboard = ({ onNavigate }) => {
     const daySales = sales.filter((s) => s.boutiqueId === b.id && isToday(s.date));
     const dayExpenses = expenses.filter((e) => e.boutiqueId === b.id && isToday(e.date));
 
-    const ventes = daySales.reduce((sum, s) => sum + s.totalAmount, 0);
+    const ca = feuilleTotals[b.id] ?? 0;
     const om = daySales.filter((s) => s.paymentMethod === 'orange_money').reduce((sum, s) => sum + s.totalAmount, 0);
     const credit = daySales.filter((s) => s.paymentMethod === 'credit').reduce((sum, s) => sum + s.totalAmount, 0);
     const depenses = dayExpenses.reduce((sum, e) => sum + e.amount, 0);
-    const reste = ventes - om - credit - depenses;
+    const especes = ca - om - credit - depenses;
+    const totalGagne = ca - credit - depenses;
 
-    return { boutique: b, ventes, om, credit, depenses, reste };
+    return { boutique: b, ca, om, credit, depenses, especes, totalGagne };
   });
 
   // Chart Data 1: Sales Trend (Last 7 Days)
@@ -240,23 +265,24 @@ export const Dashboard = ({ onNavigate }) => {
       {/* Bilan du jour par boutique */}
       <div className="glass-panel table-container mt-6">
         <div className="widget-header" style={{ padding: '18px 20px 0' }}>
-          <h3 className="widget-title">📅 Ventes du Jour par Boutique</h3>
-          <span className="chart-subtitle">{todayStr}</span>
+          <h3 className="widget-title">📅 Chiffre d'Affaires du Jour par Boutique</h3>
+          <span className="chart-subtitle">{todayStr} — d'après la Feuille de Vente</span>
         </div>
         <div className="table-responsive" style={{ padding: '12px 20px 20px' }}>
           <table className="data-table">
             <thead>
               <tr>
                 <th>Boutique</th>
-                <th>Ventes</th>
+                <th>Chiffre d'Affaires</th>
                 <th>Orange Money</th>
                 <th>Crédit</th>
                 <th>Dépenses</th>
-                <th>Reste (Caisse)</th>
+                <th>Espèces Présentées</th>
+                <th>Total Gagné</th>
               </tr>
             </thead>
             <tbody>
-              {dailyByBoutique.map(({ boutique: b, ventes, om, credit, depenses, reste }) => (
+              {dailyByBoutique.map(({ boutique: b, ca, om, credit, depenses, especes, totalGagne }) => (
                 <tr key={b.id}>
                   <td>
                     <span className="flex-center gap-2">
@@ -272,14 +298,17 @@ export const Dashboard = ({ onNavigate }) => {
                       <strong>{b.name}</strong>
                     </span>
                   </td>
-                  <td>{formatMoney(ventes)}</td>
+                  <td>{formatMoney(ca)}</td>
                   <td className="text-orange-400">{formatMoney(om)}</td>
                   <td className="text-red-400">{formatMoney(credit)}</td>
                   <td className="text-amber-400">-{formatMoney(depenses)}</td>
                   <td>
-                    <strong className={reste >= 0 ? 'text-emerald-400' : 'text-red-400'}>
-                      {formatMoney(reste)}
+                    <strong className={especes >= 0 ? 'text-emerald-400' : 'text-red-400'}>
+                      {formatMoney(especes)}
                     </strong>
+                  </td>
+                  <td>
+                    <strong className="text-indigo-400">{formatMoney(totalGagne)}</strong>
                   </td>
                 </tr>
               ))}

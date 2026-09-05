@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   generateDailyReportPDF,
@@ -6,6 +6,7 @@ import {
   generateDebtReportPDF
 } from '../utils/pdfGenerator';
 import { formatMoney, formatDate } from '../utils/formatters';
+import { feuilleTotal } from '../utils/feuilleCalc';
 import {
   FileSpreadsheet,
   Download,
@@ -25,7 +26,8 @@ export const Reports = () => {
     products,
     boutiques,
     activeBoutiqueId,
-    activeRole
+    activeRole,
+    apiRequest
   } = useApp();
 
   const isAdmin = activeRole === 'admin';
@@ -39,6 +41,25 @@ export const Reports = () => {
 
   // Un gérant ne peut générer un rapport que pour sa propre boutique
   const effectiveBoutiqueId = isAdmin ? reportBoutiqueId : activeBoutiqueId;
+
+  // Chiffre d'affaires (comptage physique, Feuille de Vente) pour la
+  // boutique + date sélectionnées — source de vérité pour le CA du jour.
+  const [feuilleCA, setFeuilleCA] = useState(0);
+
+  useEffect(() => {
+    apiRequest(`/api/feuille?boutiqueId=${effectiveBoutiqueId}&date=${selectedDate}`, 'GET').then((result) => {
+      if (!result.ok) return setFeuilleCA(0);
+      if (effectiveBoutiqueId === 'all') {
+        const total = (result.data.boutiques || []).reduce(
+          (sum, b) => sum + feuilleTotal(b.lignes || []),
+          0
+        );
+        setFeuilleCA(total);
+      } else {
+        setFeuilleCA(feuilleTotal(result.data.lignes || []));
+      }
+    });
+  }, [effectiveBoutiqueId, selectedDate, apiRequest]);
 
   // Compute daily stats for selected boutique and date
   const computeDailyStats = () => {
@@ -55,10 +76,7 @@ export const Reports = () => {
       return matchBoutique && expDate === selectedDate;
     });
 
-    const totalRevenue = daySales.reduce((sum, s) => sum + s.totalAmount, 0);
-    const cashTotal = daySales
-      .filter((s) => s.paymentMethod === 'cash')
-      .reduce((sum, s) => sum + s.totalAmount, 0);
+    const totalRevenue = feuilleCA;
     const omTotal = daySales
       .filter((s) => s.paymentMethod === 'orange_money')
       .reduce((sum, s) => sum + s.totalAmount, 0);
@@ -78,19 +96,22 @@ export const Reports = () => {
       return sum + dayRepayments.reduce((rSum, r) => rSum + r.amount, 0);
     }, 0);
 
-    // Le prix d'achat n'étant plus suivi par article, le solde net se limite
-    // au chiffre d'affaires moins les dépenses (pas de calcul de marge).
-    const netProfit = totalRevenue - expensesTotal;
+    // Espèces Présentées : le cash physique attendu en caisse (CA moins tout
+    // ce qui n'est pas de l'espèce ou qui est sorti de la caisse).
+    const especesPresentees = totalRevenue - omTotal - creditTotal - expensesTotal;
+    // Total Gagné : le CA réellement acquis, hors crédit non encaissé et
+    // dépenses — l'Orange Money reste compté puisque c'est un gain encaissé.
+    const totalGagne = totalRevenue - creditTotal - expensesTotal;
 
     return {
       boutiqueName: targetBoutique ? targetBoutique.name : 'Toutes Boutiques',
       totalRevenue,
-      cashTotal,
       omTotal,
       creditTotal,
       expensesTotal,
       recoveredDebtsTotal,
-      netProfit,
+      especesPresentees,
+      totalGagne,
       salesCount: daySales.length
     };
   };
@@ -197,12 +218,8 @@ export const Reports = () => {
 
         <div className="report-summary-grid">
           <div className="rep-stat-box">
-            <span>Chiffre d'Affaires</span>
+            <span>Chiffre d'Affaires (Feuille de Vente)</span>
             <strong className="text-indigo-400">{formatMoney(dailyStats.totalRevenue)}</strong>
-          </div>
-          <div className="rep-stat-box">
-            <span>Ventes Espèces</span>
-            <strong className="text-emerald-400">{formatMoney(dailyStats.cashTotal)}</strong>
           </div>
           <div className="rep-stat-box">
             <span>Orange Money</span>
@@ -216,10 +233,14 @@ export const Reports = () => {
             <span>Dépenses Effectuées</span>
             <strong className="text-amber-400">-{formatMoney(dailyStats.expensesTotal)}</strong>
           </div>
+          <div className="rep-stat-box">
+            <span>Espèces Présentées</span>
+            <strong className="text-emerald-400">{formatMoney(dailyStats.especesPresentees)}</strong>
+          </div>
           {isAdmin && (
             <div className="rep-stat-box">
-              <span>Bénéfice Net Estimé</span>
-              <strong className="text-purple-400">{formatMoney(dailyStats.netProfit)}</strong>
+              <span>Total Gagné</span>
+              <strong className="text-purple-400">{formatMoney(dailyStats.totalGagne)}</strong>
             </div>
           )}
         </div>

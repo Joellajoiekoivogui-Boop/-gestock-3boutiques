@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { formatMoney } from '../utils/formatters';
+import { calcLigne } from '../utils/feuilleCalc';
 import { Plus, Trash2, Save, ClipboardList, Printer, Pencil, FolderPlus, Lock } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -16,17 +17,6 @@ const newLigne = (category) => ({
   nouveau: '',
   reste: ''
 });
-
-const calcLigne = (l) => {
-  const pVente = Number(l.pVente) || 0;
-  const initial = Number(l.initial) || 0;
-  const nouveau = Number(l.nouveau) || 0;
-  const reste = Number(l.reste) || 0;
-  const total = initial + nouveau;
-  const qteVendue = Math.max(0, total - reste);
-  const somme = qteVendue * pVente;
-  return { total, qteVendue, somme };
-};
 
 // Catégories libres suggérées au tout premier usage d'une boutique (aucun
 // article enregistré) — l'admin les édite puis les sauvegarde pour de bon.
