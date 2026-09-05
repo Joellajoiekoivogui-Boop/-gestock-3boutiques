@@ -22,6 +22,7 @@ export const Navbar = ({ onOpenMenu }) => {
     logout,
     activeBoutiqueId,
     setActiveBoutiqueId,
+    activeBoutique,
     activeRole,
     theme,
     setTheme,
@@ -30,6 +31,7 @@ export const Navbar = ({ onOpenMenu }) => {
 
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const isAdmin = activeRole === 'admin';
+  const boutiqueColor = activeBoutiqueId === 'all' ? null : activeBoutique?.color;
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -78,8 +80,11 @@ export const Navbar = ({ onOpenMenu }) => {
 
         {/* Boutique : sélecteur pour l'admin, statique pour le gérant */}
         {isAdmin ? (
-          <div className="boutique-selector-wrapper">
-            <Store className="w-4 h-4 text-indigo-400" />
+          <div
+            className="boutique-selector-wrapper"
+            style={boutiqueColor ? { borderColor: boutiqueColor } : undefined}
+          >
+            <Store className="w-4 h-4" style={{ color: boutiqueColor || undefined }} />
             <select
               value={activeBoutiqueId}
               onChange={(e) => setActiveBoutiqueId(e.target.value)}
@@ -95,8 +100,12 @@ export const Navbar = ({ onOpenMenu }) => {
             <ChevronDown className="w-4 h-4 select-arrow" />
           </div>
         ) : (
-          <div className="boutique-static" title="Votre boutique">
-            <Store className="w-4 h-4 text-indigo-400" />
+          <div
+            className="boutique-static"
+            title="Votre boutique"
+            style={boutiqueColor ? { borderColor: boutiqueColor } : undefined}
+          >
+            <Store className="w-4 h-4" style={{ color: boutiqueColor || undefined }} />
             <span>{boutiques.find((b) => b.id === activeBoutiqueId)?.name || 'Ma Boutique'}</span>
           </div>
         )}

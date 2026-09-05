@@ -170,7 +170,7 @@ export const Dashboard = ({ onNavigate }) => {
   return (
     <div className="dashboard-page animate-fade">
       {/* Dashboard Top Banner */}
-      <div className="dashboard-header-banner">
+      <div className="page-header">
         <div>
           <h1 className="page-title">
             {activeBoutiqueId === 'all' ? 'Tableau de Bord Consolidé (3 Boutiques)' : `Tableau de Bord — ${activeBoutique?.name}`}
@@ -179,11 +179,9 @@ export const Dashboard = ({ onNavigate }) => {
             Supervision temps réel des stocks, encaissements, dettes et bénéfices.
           </p>
         </div>
-        <div className="quick-actions-bar">
-          <button onClick={() => onNavigate('pos')} className="btn btn-emerald flex-center gap-2">
-            <TrendingUp className="w-4 h-4" /> Nouvelle Vente Caisse
-          </button>
-        </div>
+        <button onClick={() => onNavigate('pos')} className="btn btn-emerald flex-center gap-2">
+          <TrendingUp className="w-4 h-4" /> Nouvelle Vente Caisse
+        </button>
       </div>
 
       {/* Primary KPI Grid */}

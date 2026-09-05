@@ -586,6 +586,15 @@ body {
   }
 }
 
+/* Sur mobile, le menu (drawer) prend le relais : la barre du haut se limite
+   au logo et à la boutique active — le reste (installer, statut, thème,
+   compte) se trouve dans le tiroir. */
+@media (max-width: 767px) {
+  .navbar-right {
+    display: none;
+  }
+}
+
 .bottom-nav-tab {
   flex: 1;
   display: flex;
@@ -3186,12 +3195,4 @@ button,
 .sidebar-account-btn:hover {
   background: var(--surface-3);
   color: var(--text);
-}
-.sidebar-account-btn-danger {
-  border-color: rgba(239, 68, 68, 0.3);
-  background: rgba(239, 68, 68, 0.1);
-  color: #f87171;
-}
-.sidebar-account-btn-danger:hover {
-  background: rgba(239, 68, 68, 0.18);
 }

@@ -25,10 +25,16 @@ export const Settings = () => {
 
         <div className="settings-boutiques-grid">
           {boutiques.map((b) => (
-            <div key={b.id} className="boutique-setting-card glass-panel">
+            <div
+              key={b.id}
+              className="boutique-setting-card glass-panel"
+              style={{ borderLeft: `3px solid ${b.color}` }}
+            >
               <div className="flex-between">
                 <span className="font-bold text-slate-100">{b.name}</span>
-                <span className="badge badge-info">{b.id.toUpperCase()}</span>
+                <span className="badge" style={{ background: `${b.color}26`, color: b.color }}>
+                  {b.id.toUpperCase()}
+                </span>
               </div>
               <div className="text-sm text-slate-400 mt-2 space-y-1">
                 <div>📍 <strong>Adresse :</strong> {b.location}</div>

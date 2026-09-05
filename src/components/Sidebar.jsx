@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Store, ArrowRightLeft, UserCog, LogOut, X } from 'lucide-react';
+import { Store, ArrowRightLeft, UserCog, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { PwaInstall } from './PwaInstall';
 import { getNavItems } from '../utils/navConfig';
@@ -21,10 +21,19 @@ export const Sidebar = ({ activePage, setActivePage, menuOpen, onClose }) => {
     };
   }, [menuOpen, onClose]);
 
+  const boutiqueColor = activeBoutiqueId === 'all' ? null : activeBoutique?.color;
+
   const StoreInfo = () => (
     <div className="sidebar-store-info">
-      <div className="store-avatar">
-        <Store className="w-5 h-5 text-indigo-400" />
+      <div
+        className="store-avatar"
+        style={
+          boutiqueColor
+            ? { background: `${boutiqueColor}26`, border: `1px solid ${boutiqueColor}` }
+            : undefined
+        }
+      >
+        <Store className="w-5 h-5" style={{ color: boutiqueColor || undefined }} />
       </div>
       <div className="store-meta">
         <span className="store-name">
@@ -76,17 +85,6 @@ export const Sidebar = ({ activePage, setActivePage, menuOpen, onClose }) => {
       >
         <UserCog className="w-4 h-4" />
         <span>Changer d'utilisateur</span>
-      </button>
-      <button
-        type="button"
-        className="sidebar-account-btn sidebar-account-btn-danger"
-        onClick={() => {
-          onNavigate?.();
-          logout();
-        }}
-      >
-        <LogOut className="w-4 h-4" />
-        <span>Se déconnecter</span>
       </button>
     </div>
   );
