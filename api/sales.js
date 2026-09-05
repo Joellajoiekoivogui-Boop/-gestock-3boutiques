@@ -34,34 +34,46 @@ export default async function handler(req, res) {
     // Ne jamais faire confiance au prix/quantité envoyés par le client : on
     // recalcule tout à partir du catalogue (Feuille de Vente) et on rejette
     // les quantités invalides (une quantité négative permettrait sinon de
-    // regonfler le stock arbitrairement).
-    const resolvedItems = [];
+    // regonfler le stock arbitrairement). On agrège d'abord les quantités
+    // par article : un même produit peut apparaître sur plusieurs lignes du
+    // panier, et vérifier/décrémenter ligne par ligne sur le stock d'origine
+    // laisserait passer un total supérieur au stock réellement disponible.
+    const qtyByProductId = new Map();
     for (const item of items) {
-      const article = articleRows.find((a) => a.id === item.productId);
-      if (!article) return res.status(400).json({ error: 'Article introuvable pour cette boutique.' });
       const quantity = Number(item.quantity);
       if (!Number.isInteger(quantity) || quantity <= 0) {
         return res.status(400).json({ error: 'Quantité invalide.' });
       }
-      if (quantity > Number(article.stock)) {
-        return res.status(400).json({ error: `Stock insuffisant pour "${article.designation}".` });
-      }
+      qtyByProductId.set(item.productId, (qtyByProductId.get(item.productId) || 0) + quantity);
+    }
+
+    const resolvedItems = [];
+    for (const item of items) {
+      const article = articleRows.find((a) => a.id === item.productId);
+      if (!article) return res.status(400).json({ error: 'Article introuvable pour cette boutique.' });
       resolvedItems.push({
         productId: article.id,
         name: article.designation,
-        quantity,
+        quantity: Number(item.quantity),
         unitPrice: Number(article.p_vente)
       });
     }
 
+    for (const [productId, totalQty] of qtyByProductId) {
+      const article = articleRows.find((a) => a.id === productId);
+      if (totalQty > Number(article.stock)) {
+        return res.status(400).json({ error: `Stock insuffisant pour "${article.designation}".` });
+      }
+    }
+
     const totalAmount = resolvedItems.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
 
-    for (const item of resolvedItems) {
-      const article = articleRows.find((a) => a.id === item.productId);
+    for (const [productId, totalQty] of qtyByProductId) {
+      const article = articleRows.find((a) => a.id === productId);
       const { error } = await db
         .from('feuille_articles')
-        .update({ stock: Math.max(0, Number(article.stock) - item.quantity) })
-        .eq('id', item.productId);
+        .update({ stock: Math.max(0, Number(article.stock) - totalQty) })
+        .eq('id', productId);
       if (error) throw error;
     }
 

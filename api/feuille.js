@@ -144,11 +144,14 @@ export default async function handler(req, res) {
 
       // Pour un gérant, l'Initial n'est jamais pris du client (il ne doit pas
       // pouvoir le falsifier) : on le recalcule côté serveur (report du Reste
-      // de la veille, ou valeur déjà enregistrée aujourd'hui).
-      let authoritativeInitial = null;
+      // de la veille, ou valeur déjà enregistrée aujourd'hui). On s'en sert
+      // aussi pour borner le Reste qu'il soumet : il ne peut pas être négatif
+      // ni dépasser Initial + Nouveau (ce qui permettrait de camoufler des
+      // ventes non enregistrées ou d'en fabriquer artificiellement).
+      let authoritativeByArticle = null;
       if (!isAdmin) {
         const current = await buildLignes(db, boutiqueId, date);
-        authoritativeInitial = new Map(current.map((l) => [l.id, l.initial]));
+        authoritativeByArticle = new Map(current.map((l) => [l.id, l]));
       }
 
       for (const ligne of lignes) {
@@ -193,19 +196,28 @@ export default async function handler(req, res) {
 
         // Le gérant ne peut modifier que le Reste ; l'Initial est calculé
         // (report automatique), jamais saisi directement par lui.
-        const countPatch = isAdmin
-          ? {
-              initial: ligne.initial === '' ? null : Number(ligne.initial),
-              nouveau: Number(ligne.nouveau) || 0,
-              reste: ligne.reste === '' ? null : Number(ligne.reste)
-            }
-          : {
-              initial: (() => {
-                const v = authoritativeInitial.get(articleId);
-                return v === '' || v == null ? null : Number(v);
-              })(),
-              reste: ligne.reste === '' ? null : Number(ligne.reste)
-            };
+        let countPatch;
+        if (isAdmin) {
+          countPatch = {
+            initial: ligne.initial === '' ? null : Number(ligne.initial),
+            nouveau: Number(ligne.nouveau) || 0,
+            reste: ligne.reste === '' ? null : Number(ligne.reste)
+          };
+        } else {
+          const authoritative = authoritativeByArticle.get(articleId);
+          const initialVal = authoritative?.initial === '' || authoritative?.initial == null ? 0 : Number(authoritative.initial);
+          const nouveauVal = authoritative?.nouveau === '' || authoritative?.nouveau == null ? 0 : Number(authoritative.nouveau);
+          const maxReste = initialVal + nouveauVal;
+          const resteVal = ligne.reste === '' ? null : Number(ligne.reste);
+
+          if (resteVal !== null && (!Number.isFinite(resteVal) || resteVal < 0 || resteVal > maxReste)) {
+            return res.status(400).json({
+              error: `Reste invalide pour "${ligne.designation || 'cet article'}" : doit être compris entre 0 et ${maxReste}.`
+            });
+          }
+
+          countPatch = { initial: initialVal, reste: resteVal };
+        }
 
         const { error: upsertErr } = await db
           .from('feuille_counts')
