@@ -55,13 +55,13 @@ function MainLayout() {
 }
 
 function Root() {
-  const { currentUser, authChecking } = useApp();
+  const { currentUser, authChecking, dataLoading } = useApp();
 
-  if (authChecking) {
+  if (authChecking || (currentUser && dataLoading)) {
     return (
       <div className="auth-shell">
         <div className="auth-card glass-panel" style={{ textAlign: 'center' }}>
-          Vérification de la session…
+          {authChecking ? 'Vérification de la session…' : 'Chargement des données…'}
         </div>
       </div>
     );

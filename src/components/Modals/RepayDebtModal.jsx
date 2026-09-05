@@ -15,18 +15,20 @@ export const RepayDebtModal = ({ debt, onClose }) => {
 
   const boutique = boutiques.find((b) => b.id === debt.boutiqueId);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const numAmount = Number(amount);
     if (!numAmount || numAmount <= 0 || numAmount > debt.remainingAmount) return;
 
-    repayDebt({
+    const updatedDebt = await repayDebt({
       debtId: debt.id,
       amount: numAmount,
       paymentMethod,
       omRef: paymentMethod === 'orange_money' ? omRef : null,
       receivedBy
     });
+
+    if (!updatedDebt) return;
 
     // Auto generate receipt PDF
     const repayment = {

@@ -118,7 +118,7 @@ export const POS = () => {
   const totalCartAmount = cart.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
 
   // Submit Sale
-  const handleCompleteSale = (e) => {
+  const handleCompleteSale = async (e) => {
     e.preventDefault();
     if (cart.length === 0) {
       addToast('Votre panier est vide !', 'error');
@@ -135,7 +135,7 @@ export const POS = () => {
       return;
     }
 
-    const saleResult = addSale({
+    const saleResult = await addSale({
       items: cart,
       paymentMethod,
       cashReceived: paymentMethod === 'cash' ? totalCartAmount : 0,
@@ -144,6 +144,8 @@ export const POS = () => {
       customerName,
       dueDate
     });
+
+    if (!saleResult) return;
 
     setCompletedSale(saleResult);
     // Reset cart

@@ -1,18 +1,9 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import {
-  Settings as SettingsIcon,
-  Store,
-  Shield,
-  RotateCcw,
-  Smartphone,
-  CheckCircle,
-  HelpCircle,
-  Database
-} from 'lucide-react';
+import { Store, Shield, CheckCircle } from 'lucide-react';
 
 export const Settings = () => {
-  const { boutiques, activeRole, resetToDemoData } = useApp();
+  const { boutiques } = useApp();
 
   return (
     <div className="settings-page animate-fade">
@@ -98,27 +89,6 @@ export const Settings = () => {
             </tbody>
           </table>
         </div>
-      </div>
-
-      {/* Maintenance & Demo Reset */}
-      <div className="glass-panel p-6 mt-6 border-red-500/30">
-        <h3 className="text-lg font-bold text-red-400 mb-2 flex-center gap-2">
-          <Database className="w-5 h-5" /> Maintenance & Données de Démonstration
-        </h3>
-        <p className="text-sm text-slate-400 mb-4">
-          Si vous souhaitez réinitialiser l'application avec le jeu de données initial (produits, ventes test, dettes exemples pour les 3 boutiques), cliquez ci-dessous.
-        </p>
-
-        <button
-          onClick={() => {
-            if (confirm('Voulez-vous réinitialiser toutes les données aux valeurs par défaut ?')) {
-              resetToDemoData();
-            }
-          }}
-          className="btn btn-danger flex-center gap-2"
-        >
-          <RotateCcw className="w-4 h-4" /> Réinitialiser les données de démonstration
-        </button>
       </div>
     </div>
   );

@@ -1,19 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import {
-  INITIAL_BOUTIQUES,
-  INITIAL_PRODUCTS,
-  INITIAL_SALES,
-  INITIAL_DEBTS,
-  INITIAL_EXPENSES,
-  INITIAL_CUSTOMERS
-} from '../utils/initialData';
 
 const TOKEN_KEY = 'gestock_3b_token';
 
 const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-  // Persistence key helpers
+  // Persistence key helpers (préférences d'affichage uniquement — les
+  // données métier vivent désormais dans Supabase, plus dans le navigateur)
   const loadLocal = (key, fallback) => {
     try {
       const saved = localStorage.getItem(`gestock_3b_${key}`);
@@ -23,21 +16,22 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const [boutiques] = useState(INITIAL_BOUTIQUES);
   const [currentUser, setCurrentUser] = useState(null);
   const [authChecking, setAuthChecking] = useState(true);
+  const [dataLoading, setDataLoading] = useState(false);
   const [activeBoutiqueId, setActiveBoutiqueId] = useState(() => loadLocal('activeBoutiqueId', 'all'));
   const [theme, setTheme] = useState(() => loadLocal('theme', 'dark'));
 
   // Le rôle découle du compte connecté
   const activeRole = currentUser?.role === 'admin' ? 'admin' : 'gerant';
 
-  // Data States
-  const [products, setProducts] = useState(() => loadLocal('products', INITIAL_PRODUCTS));
-  const [sales, setSales] = useState(() => loadLocal('sales', INITIAL_SALES));
-  const [debts, setDebts] = useState(() => loadLocal('debts', INITIAL_DEBTS));
-  const [expenses, setExpenses] = useState(() => loadLocal('expenses', INITIAL_EXPENSES));
-  const [customers, setCustomers] = useState(() => loadLocal('customers', INITIAL_CUSTOMERS));
+  // Data States — chargées depuis /api/data (Supabase), partagées entre tous les appareils
+  const [boutiques, setBoutiques] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [sales, setSales] = useState([]);
+  const [debts, setDebts] = useState([]);
+  const [expenses, setExpenses] = useState([]);
+  const [customers, setCustomers] = useState([]);
 
   // UI Toast notifications
   const [toasts, setToasts] = useState([]);
@@ -54,6 +48,46 @@ export const AppProvider = ({ children }) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
+  // --- Chargement des données partagées (Supabase, via les fonctions serveur) ---
+  const fetchData = async () => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) return;
+    setDataLoading(true);
+    try {
+      const r = await fetch('/api/data', { headers: { Authorization: `Bearer ${token}` } });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || 'Impossible de charger les données.');
+      setBoutiques(data.boutiques || []);
+      setProducts(data.products || []);
+      setSales(data.sales || []);
+      setDebts(data.debts || []);
+      setExpenses(data.expenses || []);
+      setCustomers(data.customers || []);
+    } catch (err) {
+      addToast(err.message || 'Serveur injoignable. Vérifiez votre connexion.', 'error');
+    } finally {
+      setDataLoading(false);
+    }
+  };
+
+  // Petit utilitaire d'appel API authentifié pour les actions métier
+  const callApi = async (url, method, body) => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    try {
+      const r = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body)
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || 'Une erreur est survenue.');
+      return { ok: true, data };
+    } catch (err) {
+      addToast(err.message || 'Serveur injoignable. Vérifiez votre connexion.', 'error');
+      return { ok: false, error: err.message };
+    }
+  };
+
   // --- Authentification (fonctions serveur Vercel + jeton signé) ---
   const applyUser = (user) => {
     setCurrentUser(user);
@@ -63,7 +97,7 @@ export const AppProvider = ({ children }) => {
   };
 
   // Au démarrage : on valide le jeton auprès du serveur (une session forgée
-  // à la main dans le localStorage est rejetée ici).
+  // à la main dans le localStorage est rejetée ici), puis on charge les données.
   useEffect(() => {
     const token = localStorage.getItem(TOKEN_KEY);
     if (!token) {
@@ -72,7 +106,10 @@ export const AppProvider = ({ children }) => {
     }
     fetch('/api/session', { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error('invalid'))))
-      .then(({ user }) => applyUser(user))
+      .then(({ user }) => {
+        applyUser(user);
+        return fetchData();
+      })
       .catch(() => localStorage.removeItem(TOKEN_KEY))
       .finally(() => setAuthChecking(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -92,6 +129,7 @@ export const AppProvider = ({ children }) => {
       localStorage.setItem(TOKEN_KEY, data.token);
       applyUser(data.user);
       addToast(`Bienvenue ${data.user.name} !`, 'success');
+      await fetchData();
       return { ok: true };
     } catch {
       return { ok: false, error: 'Serveur injoignable. Vérifiez votre connexion.' };
@@ -129,235 +167,87 @@ export const AppProvider = ({ children }) => {
     if (meta) meta.setAttribute('content', theme === 'light' ? '#ffffff' : '#0f172a');
   }, [theme]);
 
-  useEffect(() => {
-    localStorage.setItem('gestock_3b_products', JSON.stringify(products));
-  }, [products]);
-
-  useEffect(() => {
-    localStorage.setItem('gestock_3b_sales', JSON.stringify(sales));
-  }, [sales]);
-
-  useEffect(() => {
-    localStorage.setItem('gestock_3b_debts', JSON.stringify(debts));
-  }, [debts]);
-
-  useEffect(() => {
-    localStorage.setItem('gestock_3b_expenses', JSON.stringify(expenses));
-  }, [expenses]);
-
-  useEffect(() => {
-    localStorage.setItem('gestock_3b_customers', JSON.stringify(customers));
-  }, [customers]);
-
   // Current active boutique details (or null if 'all')
   const activeBoutique = boutiques.find((b) => b.id === activeBoutiqueId) || null;
 
   // Add a sale
-  const addSale = ({ items, paymentMethod, cashReceived, cashChange, omReference, customerName, customerId, dueDate }) => {
+  const addSale = async ({ items, paymentMethod, cashReceived, cashChange, omReference, customerName, customerId, dueDate }) => {
     const targetBoutiqueId = activeBoutiqueId === 'all' ? 'b1' : activeBoutiqueId;
-    const targetBoutique = boutiques.find((b) => b.id === targetBoutiqueId);
 
-    const totalAmount = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
-    const newSaleId = `V-${1000 + sales.length + 1}`;
-
-    const newSale = {
-      id: newSaleId,
+    const result = await callApi('/api/sales', 'POST', {
       boutiqueId: targetBoutiqueId,
-      date: new Date().toISOString(),
       items,
-      totalAmount,
       paymentMethod,
-      cashReceived: paymentMethod === 'cash' ? Number(cashReceived) : null,
-      cashChange: paymentMethod === 'cash' ? Number(cashChange) : null,
-      omReference: paymentMethod === 'orange_money' ? omReference : null,
-      customerName: customerName || 'Client Passant',
-      seller: targetBoutique ? targetBoutique.manager : 'Administrateur'
-    };
+      cashReceived,
+      cashChange,
+      omReference,
+      customerName,
+      customerId,
+      dueDate
+    });
+    if (!result.ok) return null;
 
-    // Deduct stock
-    setProducts((prevProducts) =>
-      prevProducts.map((p) => {
-        const itemInSale = items.find((i) => i.productId === p.id);
-        if (!itemInSale) return p;
-
-        const currentStockInStore = p.stocks[targetBoutiqueId] || 0;
-        const newStockInStore = Math.max(0, currentStockInStore - itemInSale.quantity);
-
-        return {
-          ...p,
-          stocks: {
-            ...p.stocks,
-            [targetBoutiqueId]: newStockInStore
-          }
-        };
-      })
-    );
-
-    // If Credit sale -> Create Debt
-    if (paymentMethod === 'credit') {
-      const debtId = `D-${200 + debts.length + 1}`;
-      const newDebt = {
-        id: debtId,
-        customerId: customerId || `c-${Date.now()}`,
-        customerName: customerName || 'Client Crédit',
-        phone: '',
-        boutiqueId: targetBoutiqueId,
-        saleId: newSaleId,
-        date: new Date().toISOString(),
-        dueDate: dueDate || new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
-        originalAmount: totalAmount,
-        remainingAmount: totalAmount,
-        status: 'pending',
-        repayments: []
-      };
-
-      setDebts((prev) => [newDebt, ...prev]);
-
-      // Update customer debt total
-      setCustomers((prev) => {
-        const existing = prev.find((c) => c.name.toLowerCase() === customerName.toLowerCase());
-        if (existing) {
-          return prev.map((c) => (c.id === existing.id ? { ...c, totalDebt: c.totalDebt + totalAmount } : c));
-        } else {
-          return [
-            ...prev,
-            { id: `c-${Date.now()}`, name: customerName, phone: '', boutiqueId: targetBoutiqueId, totalDebt: totalAmount }
-          ];
-        }
-      });
-    }
-
-    setSales((prev) => [newSale, ...prev]);
-    addToast(`Vente ${newSaleId} enregistrée avec succès ! (${totalAmount.toLocaleString()} GNF)`, 'success');
-    return newSale;
+    await fetchData();
+    addToast(`Vente ${result.data.sale.id} enregistrée avec succès ! (${result.data.sale.totalAmount.toLocaleString()} GNF)`, 'success');
+    return result.data.sale;
   };
 
   // Repay Debt
-  const repayDebt = ({ debtId, amount, paymentMethod, omRef, receivedBy }) => {
-    const numAmount = Number(amount);
+  const repayDebt = async ({ debtId, amount, paymentMethod, omRef, receivedBy }) => {
+    const result = await callApi('/api/debts', 'POST', { debtId, amount, paymentMethod, omRef, receivedBy });
+    if (!result.ok) return null;
 
-    setDebts((prevDebts) =>
-      prevDebts.map((debt) => {
-        if (debt.id !== debtId) return debt;
-
-        const newRemaining = Math.max(0, debt.remainingAmount - numAmount);
-        const isPaid = newRemaining === 0;
-
-        const repaymentEntry = {
-          id: `R-${Date.now()}`,
-          date: new Date().toISOString(),
-          amount: numAmount,
-          paymentMethod,
-          omRef: omRef || null,
-          receivedBy: receivedBy || 'Gérant'
-        };
-
-        return {
-          ...debt,
-          remainingAmount: newRemaining,
-          status: isPaid ? 'paid' : 'partial',
-          repayments: [...debt.repayments, repaymentEntry]
-        };
-      })
-    );
-
-    addToast(`Remboursement de ${numAmount.toLocaleString()} GNF enregistré !`, 'success');
+    await fetchData();
+    addToast(`Remboursement de ${Number(amount).toLocaleString()} GNF enregistré !`, 'success');
+    return result.data.debt;
   };
 
   // Transfer stock between boutiques
-  const transferStock = ({ productId, fromBoutiqueId, toBoutiqueId, quantity }) => {
-    const qty = Number(quantity);
-    if (qty <= 0) return;
+  const transferStock = async ({ productId, fromBoutiqueId, toBoutiqueId, quantity }) => {
+    const result = await callApi('/api/stock', 'POST', { productId, fromBoutiqueId, toBoutiqueId, quantity });
+    if (!result.ok) return null;
 
-    setProducts((prevProducts) =>
-      prevProducts.map((p) => {
-        if (p.id !== productId) return p;
-
-        const currentFrom = p.stocks[fromBoutiqueId] || 0;
-        if (currentFrom < qty) {
-          addToast(`Stock insuffisant dans la boutique source !`, 'error');
-          return p;
-        }
-
-        const currentTo = p.stocks[toBoutiqueId] || 0;
-
-        return {
-          ...p,
-          stocks: {
-            ...p.stocks,
-            [fromBoutiqueId]: currentFrom - qty,
-            [toBoutiqueId]: currentTo + qty
-          }
-        };
-      })
-    );
-
+    await fetchData();
     const product = products.find((p) => p.id === productId);
     const fromB = boutiques.find((b) => b.id === fromBoutiqueId)?.name;
     const toB = boutiques.find((b) => b.id === toBoutiqueId)?.name;
-
-    addToast(`Transfert de ${qty}x ${product?.name} (${fromB} ➔ ${toB}) réalisé !`, 'success');
+    addToast(`Transfert de ${quantity}x ${product?.name} (${fromB} ➔ ${toB}) réalisé !`, 'success');
+    return result.data.product;
   };
 
   // Add Product
-  const addProduct = (newProd) => {
+  const addProduct = async (newProd) => {
     if (activeRole !== 'admin') {
-      addToast('Accès refusé : Seul l\'administrateur peut ajouter de nouveaux produits !', 'error');
-      return;
+      addToast("Accès refusé : Seul l'administrateur peut ajouter de nouveaux produits !", 'error');
+      return null;
     }
-    const id = `p-${Date.now()}`;
-    const productObj = {
-      id,
-      ...newProd,
-      stocks: newProd.stocks || { b1: 0, b2: 0, b3: 0 }
-    };
-    setProducts((prev) => [productObj, ...prev]);
+    const result = await callApi('/api/products', 'POST', newProd);
+    if (!result.ok) return null;
+
+    await fetchData();
     addToast(`Produit "${newProd.name}" ajouté avec succès !`, 'success');
+    return result.data.product;
   };
 
   // Update Product
-  const updateProduct = (id, updatedFields) => {
-    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...updatedFields } : p)));
-    addToast(`Produit mis à jour !`, 'success');
+  const updateProduct = async (id, updatedFields) => {
+    const result = await callApi('/api/products', 'PATCH', { id, ...updatedFields });
+    if (!result.ok) return null;
+
+    await fetchData();
+    addToast('Produit mis à jour !', 'success');
+    return result.data.product;
   };
 
   // Add Expense
-  const addExpense = ({ category, description, amount, boutiqueId }) => {
+  const addExpense = async ({ category, description, amount, boutiqueId }) => {
     const targetBoutiqueId = boutiqueId || (activeBoutiqueId === 'all' ? 'b1' : activeBoutiqueId);
-    const newExpense = {
-      id: `E-${300 + expenses.length + 1}`,
-      boutiqueId: targetBoutiqueId,
-      date: new Date().toISOString(),
-      category,
-      description,
-      amount: Number(amount),
-      recordedBy: activeRole === 'admin' ? 'Administrateur' : 'Gérant'
-    };
+    const result = await callApi('/api/expenses', 'POST', { category, description, amount, boutiqueId: targetBoutiqueId });
+    if (!result.ok) return null;
 
-    setExpenses((prev) => [newExpense, ...prev]);
+    await fetchData();
     addToast(`Dépense de ${Number(amount).toLocaleString()} GNF enregistrée !`, 'info');
-  };
-
-  // Reset to initial demo data — n'efface QUE les données métier
-  // (ni le jeton de session, ni le thème, ni les préférences).
-  const resetToDemoData = () => {
-    setProducts(INITIAL_PRODUCTS);
-    setSales(INITIAL_SALES);
-    setDebts(INITIAL_DEBTS);
-    setExpenses(INITIAL_EXPENSES);
-    setCustomers(INITIAL_CUSTOMERS);
-    try {
-      Object.keys(localStorage)
-        .filter(
-          (k) =>
-            k.startsWith('gestock_3b_feuille_vente') ||
-            ['gestock_3b_products', 'gestock_3b_sales', 'gestock_3b_debts', 'gestock_3b_expenses', 'gestock_3b_customers'].includes(k)
-        )
-        .forEach((k) => localStorage.removeItem(k));
-    } catch {
-      /* localStorage indisponible */
-    }
-    addToast('Données de démonstration réinitialisées avec succès !', 'info');
+    return result.data.expense;
   };
 
   return (
@@ -366,6 +256,7 @@ export const AppProvider = ({ children }) => {
         boutiques,
         currentUser,
         authChecking,
+        dataLoading,
         login,
         logout,
         activeBoutiqueId,
@@ -388,7 +279,7 @@ export const AppProvider = ({ children }) => {
         addProduct,
         updateProduct,
         addExpense,
-        resetToDemoData
+        refreshData: fetchData
       }}
     >
       {children}

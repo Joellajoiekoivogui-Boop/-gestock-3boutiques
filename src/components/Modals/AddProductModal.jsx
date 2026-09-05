@@ -26,7 +26,7 @@ export const AddProductModal = ({ productToEdit, onClose }) => {
     }
   }, [productToEdit]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !buyPrice || !sellPrice) return;
 
@@ -45,9 +45,9 @@ export const AddProductModal = ({ productToEdit, onClose }) => {
     };
 
     if (productToEdit) {
-      updateProduct(productToEdit.id, payload);
+      await updateProduct(productToEdit.id, payload);
     } else {
-      addProduct(payload);
+      await addProduct(payload);
     }
     onClose();
   };

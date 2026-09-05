@@ -13,7 +13,7 @@ export const TransferStockModal = ({ preselectedProduct, onClose }) => {
   const selectedProduct = products.find((p) => p.id === productId);
   const maxAvailable = selectedProduct?.stocks[fromBoutiqueId] || 0;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (fromBoutiqueId === toBoutiqueId) {
       alert('La boutique d\'origine et de destination doivent être différentes.');
@@ -22,7 +22,7 @@ export const TransferStockModal = ({ preselectedProduct, onClose }) => {
     const qty = Number(quantity);
     if (qty <= 0 || qty > maxAvailable) return;
 
-    transferStock({ productId, fromBoutiqueId, toBoutiqueId, quantity: qty });
+    await transferStock({ productId, fromBoutiqueId, toBoutiqueId, quantity: qty });
     onClose();
   };
 

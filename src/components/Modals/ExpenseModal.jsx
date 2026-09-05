@@ -23,11 +23,11 @@ export const ExpenseModal = ({ onClose }) => {
     'Divers'
   ];
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!amount || !description) return;
 
-    addExpense({
+    await addExpense({
       category,
       description,
       amount,
