@@ -35,6 +35,7 @@ function useCountUp(value: number, duration = 0.9) {
       },
       onComplete: () => {
         shown.current = value;
+        setDisplay(value); // valeur exacte, sans arrondi intermédiaire
       },
     });
     return () => controls.stop();
