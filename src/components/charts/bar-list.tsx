@@ -11,7 +11,7 @@ export function BarList({ items, className, emptyLabel }: { items: BarListItem[]
   }
   return (
     <ul className={cn('space-y-3', className)}>
-      {items.map((item) => (
+      {items.map((item, index) => (
         <li key={item.key} title={`${item.label} : ${item.display}`}>
           <div className="mb-1 flex items-baseline justify-between gap-3 text-sm">
             <span className="truncate">{item.label}</span>
@@ -19,8 +19,11 @@ export function BarList({ items, className, emptyLabel }: { items: BarListItem[]
           </div>
           <div className="h-2 w-full rounded-full bg-muted" aria-hidden>
             <div
-              className="h-2 rounded-full bg-primary-strong"
-              style={{ width: `${Math.max(2, (Math.max(0, item.value) / max) * 100)}%` }}
+              className="mg-bar h-2 rounded-full bg-primary-strong"
+              style={{
+                width: `${Math.max(2, (Math.max(0, item.value) / max) * 100)}%`,
+                animationDelay: `${120 + index * 70}ms`,
+              }}
             />
           </div>
           {item.detail && <p className="mt-0.5 text-xs text-muted-foreground">{item.detail}</p>}

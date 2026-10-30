@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { MotionProvider } from '@/components/motion/motion-provider';
 import { Toaster } from '@/components/ui/sonner';
 import './globals.css';
 
@@ -18,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr">
       <body>
-        {children}
+        <MotionProvider>{children}</MotionProvider>
         <Toaster />
       </body>
     </html>

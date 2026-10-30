@@ -1,12 +1,27 @@
 'use client';
 
-import { Check, CheckCircle2, Loader2, Minus, PackageX, Plus, Printer, Receipt, Search, ShoppingCart, Trash2 } from 'lucide-react';
+import {
+  Check,
+  CheckCircle2,
+  Loader2,
+  Minus,
+  PackageX,
+  Plus,
+  Printer,
+  Receipt,
+  Search,
+  ShoppingCart,
+  Trash2,
+} from 'lucide-react';
+import { AnimatePresence, motion, useAnimate } from 'motion/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { EmptyState } from '@/components/app/empty-state';
+import { AnimatedMoney } from '@/components/motion/animated-number';
+import { SuccessBurst } from '@/components/motion/success-burst';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -68,12 +83,25 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
   // Clé d'idempotence : identique tant que le panier ne change pas, pour qu'un
   // nouvel essai après une coupure réseau ne crée jamais de seconde vente.
   const keyRef = useRef<string>('');
+  // « +1 » qui s'envole d'une carte produit à chaque ajout.
+  const [flyers, setFlyers] = useState<{ key: number; productId: string }[]>([]);
+  const flyerKey = useRef(0);
+  const [cartBarScope, animateCartBar] = useAnimate<HTMLDivElement>();
+  const previousCount = useRef(0);
   const searchRef = useRef<HTMLInputElement>(null);
 
   const money = (value: number) => formatMoney(value, currency);
   const discount = canDiscount ? Number(discountInput || 0) : 0;
   const totals = cartTotals(lines, discount);
   const discountInvalid = canDiscount && (!Number.isInteger(discount) || discount < 0 || discount > totals.subtotal);
+
+  // La barre du panier mobile rebondit quand on ajoute un article.
+  useEffect(() => {
+    if (totals.itemCount > previousCount.current && cartBarScope.current) {
+      animateCartBar(cartBarScope.current, { scale: [1, 1.04, 1] }, { duration: 0.3, ease: 'easeOut' });
+    }
+    previousCount.current = totals.itemCount;
+  }, [totals.itemCount, animateCartBar, cartBarScope]);
 
   // Toute modification du panier invalide la clé précédente.
   useEffect(() => {
@@ -117,6 +145,9 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
       toast.warning(`Stock insuffisant pour « ${product.name} » (disponible : ${product.maxQuantity}).`);
       return;
     }
+    flyerKey.current += 1;
+    const key = flyerKey.current;
+    setFlyers((current) => [...current, { key, productId: product.id }]);
     setLines((current) =>
       addToCart(current, {
         productId: product.id,
@@ -180,6 +211,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
     <CartPanel
       lines={lines}
       money={money}
+      currency={currency}
       totals={totals}
       canDiscount={canDiscount}
       discountInput={discountInput}
@@ -210,7 +242,10 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
             </Button>
           </div>
           <div className="relative">
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+            <Search
+              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden
+            />
             <Input
               ref={searchRef}
               type="search"
@@ -229,11 +264,18 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
                 aria-selected={category === c.id}
                 onClick={() => setCategory(c.id)}
                 className={cn(
-                  'h-10 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors',
-                  category === c.id ? 'border-primary bg-primary text-primary-foreground' : 'bg-card hover:bg-muted',
+                  'relative h-10 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors',
+                  category === c.id ? 'border-primary text-primary-foreground' : 'bg-card hover:bg-muted',
                 )}
               >
-                {c.name}
+                {category === c.id && (
+                  <motion.span
+                    layoutId="pos-category"
+                    className="absolute inset-0 rounded-full bg-primary"
+                    transition={{ type: 'spring', stiffness: 520, damping: 40 }}
+                  />
+                )}
+                <span className="relative">{c.name}</span>
               </button>
             ))}
           </div>
@@ -249,7 +291,10 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
           ) : visibleProducts.length === 0 ? (
             <EmptyState icon={Search} title="Aucun résultat" description="Modifiez la recherche ou la catégorie." />
           ) : (
-            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            <ul
+              key={category}
+              className="mg-stagger grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+            >
               {visibleProducts.map((p) => {
                 const remaining = p.maxQuantity === null ? null : p.maxQuantity - inCart(p.id);
                 const soldOut = p.maxQuantity !== null && p.maxQuantity <= 0;
@@ -262,14 +307,20 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
                       disabled={soldOut}
                       aria-label={`Ajouter ${p.name}, ${money(p.price)}`}
                       className={cn(
-                        'group relative flex h-full w-full flex-col overflow-hidden rounded-xl border bg-card text-left shadow-xs transition hover:border-primary focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-55',
+                        'mg-lift group relative flex h-full w-full flex-col overflow-hidden rounded-xl border bg-card text-left shadow-xs hover:border-primary focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-55',
                         qty > 0 && 'border-primary ring-1 ring-primary',
                       )}
                     >
                       {showImages && (
                         <div className="relative aspect-[4/3] w-full bg-muted">
                           {p.imageUrl ? (
-                            <Image src={p.imageUrl} alt="" fill sizes="(max-width: 640px) 50vw, 220px" className="object-cover" />
+                            <Image
+                              src={p.imageUrl}
+                              alt=""
+                              fill
+                              sizes="(max-width: 640px) 50vw, 220px"
+                              className="object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
                           ) : (
                             <span className="absolute inset-0 flex items-center justify-center text-2xl font-semibold text-muted-foreground/60">
                               {p.name.slice(0, 1).toUpperCase()}
@@ -287,10 +338,31 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
                         ) : null}
                       </div>
                       {qty > 0 && (
-                        <span className="absolute top-2 right-2 inline-flex min-w-7 items-center justify-center rounded-full bg-foreground px-2 py-0.5 text-xs font-bold text-background">
+                        <motion.span
+                          key={qty}
+                          initial={{ scale: 1.6 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: 'spring', stiffness: 600, damping: 18 }}
+                          className="absolute top-2 right-2 inline-flex min-w-7 items-center justify-center rounded-full bg-foreground px-2 py-0.5 text-xs font-bold text-background"
+                        >
                           ×{qty}
-                        </span>
+                        </motion.span>
                       )}
+                      {flyers
+                        .filter((f) => f.productId === p.id)
+                        .map((f) => (
+                          <motion.span
+                            key={f.key}
+                            aria-hidden
+                            className="pointer-events-none absolute top-1/3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-2.5 py-0.5 text-sm font-bold text-primary-foreground shadow-md"
+                            initial={{ opacity: 0, y: 0, scale: 0.6 }}
+                            animate={{ opacity: [0, 1, 1, 0], y: -40, scale: 1 }}
+                            transition={{ duration: 0.75, ease: 'easeOut' }}
+                            onAnimationComplete={() => setFlyers((current) => current.filter((x) => x.key !== f.key))}
+                          >
+                            +1
+                          </motion.span>
+                        ))}
                     </button>
                   </li>
                 );
@@ -307,12 +379,14 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
 
       {/* Panier — barre + tiroir sur tablette / téléphone */}
       <div className="no-print fixed inset-x-0 bottom-0 z-20 border-t bg-card p-3 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] lg:hidden">
-        <Button size="xl" className="w-full justify-between" onClick={() => setCartOpen(true)}>
-          <span className="flex items-center gap-2">
-            <ShoppingCart aria-hidden /> Panier ({totals.itemCount})
-          </span>
-          <span className="tabular-nums">{money(totals.total)}</span>
-        </Button>
+        <div ref={cartBarScope}>
+          <Button size="xl" className="w-full justify-between" onClick={() => setCartOpen(true)}>
+            <span className="flex items-center gap-2">
+              <ShoppingCart aria-hidden /> Panier ({totals.itemCount})
+            </span>
+            <AnimatedMoney value={totals.total} currency={currency} duration={0.45} />
+          </Button>
+        </div>
       </div>
       <Sheet open={cartOpen} onOpenChange={setCartOpen}>
         <SheetContent side="bottom" className="h-[90dvh] gap-0 p-0">
@@ -360,13 +434,15 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
       <Dialog open={!!success} onOpenChange={(open) => !open && setSuccess(null)}>
         <DialogContent>
           <DialogHeader className="items-center text-center">
-            <CheckCircle2 className="mb-2 size-12 text-primary" aria-hidden />
+            <SuccessBurst />
             <DialogTitle>Vente enregistrée</DialogTitle>
             <DialogDescription>
               Reçu n° <strong className="text-foreground">{success?.receipt_number}</strong>
             </DialogDescription>
           </DialogHeader>
-          <p className="text-center text-3xl font-bold tabular-nums">{success ? money(Number(success.total_amount)) : ''}</p>
+          <p className="text-center text-3xl font-bold">
+            {success ? <AnimatedMoney value={Number(success.total_amount)} currency={currency} duration={0.7} /> : ''}
+          </p>
           <DialogFooter className="sm:justify-center">
             <Button variant="outline" onClick={() => setSuccess(null)}>
               Nouvelle vente
@@ -391,6 +467,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
 function CartPanel({
   lines,
   money,
+  currency,
   totals,
   canDiscount,
   discountInput,
@@ -407,6 +484,7 @@ function CartPanel({
 }: {
   lines: CartLine[];
   money: (value: number) => string;
+  currency: string;
   totals: ReturnType<typeof cartTotals>;
   canDiscount: boolean;
   discountInput: string;
@@ -426,7 +504,9 @@ function CartPanel({
       <div className="flex items-center justify-between border-b px-4 py-3">
         <h2 className="flex items-center gap-2 font-semibold">
           <ShoppingCart className="size-4" aria-hidden /> Panier
-          <span className="text-sm font-normal text-muted-foreground">({totals.itemCount} article{totals.itemCount > 1 ? 's' : ''})</span>
+          <span className="text-sm font-normal text-muted-foreground">
+            ({totals.itemCount} article{totals.itemCount > 1 ? 's' : ''})
+          </span>
         </h2>
         {lines.length > 0 && (
           <Button variant="ghost" size="sm" onClick={onClear} className="mr-6 text-muted-foreground lg:mr-0">
@@ -440,54 +520,66 @@ function CartPanel({
           <EmptyState icon={ShoppingCart} title="Panier vide" description="Touchez un produit pour l’ajouter." />
         ) : (
           <ul className="divide-y">
-            {lines.map((line) => (
-              <li key={line.productId} className="px-4 py-3">
-                <div className="flex items-start justify-between gap-3">
-                  <p className="text-sm leading-snug font-medium">{line.name}</p>
-                  <p className="shrink-0 text-sm font-semibold tabular-nums">{money(line.unitPrice * line.quantity)}</p>
-                </div>
-                <div className="mt-2 flex items-center justify-between gap-3">
-                  <p className="text-xs text-muted-foreground tabular-nums">{money(line.unitPrice)} / unité</p>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => onQuantity(line.productId, line.quantity - 1)}
-                      aria-label={`Diminuer la quantité de ${line.name}`}
-                    >
-                      <Minus />
-                    </Button>
-                    <Input
-                      type="number"
-                      inputMode="numeric"
-                      min={1}
-                      value={line.quantity}
-                      onChange={(e) => onQuantity(line.productId, Number(e.target.value || 0))}
-                      aria-label={`Quantité de ${line.name}`}
-                      className="h-9 w-14 px-1 text-center tabular-nums"
-                    />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => onQuantity(line.productId, line.quantity + 1)}
-                      disabled={line.maxQuantity !== null && line.quantity >= line.maxQuantity}
-                      aria-label={`Augmenter la quantité de ${line.name}`}
-                    >
-                      <Plus />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onRemove(line.productId)}
-                      aria-label={`Retirer ${line.name}`}
-                      className="text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 />
-                    </Button>
+            <AnimatePresence initial={false} mode="popLayout">
+              {lines.map((line) => (
+                <motion.li
+                  key={line.productId}
+                  layout
+                  initial={{ opacity: 0, x: 28 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -28, transition: { duration: 0.18 } }}
+                  transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                  className="bg-card px-4 py-3"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-sm leading-snug font-medium">{line.name}</p>
+                    <p className="shrink-0 text-sm font-semibold tabular-nums">
+                      {money(line.unitPrice * line.quantity)}
+                    </p>
                   </div>
-                </div>
-              </li>
-            ))}
+                  <div className="mt-2 flex items-center justify-between gap-3">
+                    <p className="text-xs text-muted-foreground tabular-nums">{money(line.unitPrice)} / unité</p>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => onQuantity(line.productId, line.quantity - 1)}
+                        aria-label={`Diminuer la quantité de ${line.name}`}
+                      >
+                        <Minus />
+                      </Button>
+                      <Input
+                        type="number"
+                        inputMode="numeric"
+                        min={1}
+                        value={line.quantity}
+                        onChange={(e) => onQuantity(line.productId, Number(e.target.value || 0))}
+                        aria-label={`Quantité de ${line.name}`}
+                        className="h-9 w-14 px-1 text-center tabular-nums"
+                      />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => onQuantity(line.productId, line.quantity + 1)}
+                        disabled={line.maxQuantity !== null && line.quantity >= line.maxQuantity}
+                        aria-label={`Augmenter la quantité de ${line.name}`}
+                      >
+                        <Plus />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onRemove(line.productId)}
+                        aria-label={`Retirer ${line.name}`}
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 />
+                      </Button>
+                    </div>
+                  </div>
+                </motion.li>
+              ))}
+            </AnimatePresence>
           </ul>
         )}
       </div>
@@ -523,7 +615,9 @@ function CartPanel({
           )}
           <div className="flex items-baseline justify-between pt-1">
             <dt className="text-base font-semibold">Total</dt>
-            <dd className="text-2xl font-bold tabular-nums">{money(totals.total)}</dd>
+            <dd className="text-2xl font-bold">
+              <AnimatedMoney value={totals.total} currency={currency} duration={0.45} />
+            </dd>
           </div>
         </dl>
 
@@ -541,7 +635,9 @@ function CartPanel({
                   aria-pressed={paymentMethod === m.code}
                   className={cn(
                     'flex min-h-11 items-center justify-center gap-1.5 rounded-lg border px-2 py-2 text-sm font-medium',
-                    paymentMethod === m.code ? 'border-primary bg-accent text-accent-foreground ring-1 ring-primary' : 'hover:bg-muted',
+                    paymentMethod === m.code
+                      ? 'border-primary bg-accent text-accent-foreground ring-1 ring-primary'
+                      : 'hover:bg-muted',
                   )}
                 >
                   {paymentMethod === m.code && <Check className="size-4" aria-hidden />}

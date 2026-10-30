@@ -1,5 +1,6 @@
 'use client';
 
+import { useReducedMotion } from 'motion/react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { formatMoney, formatShortDay } from '@/lib/format';
 
@@ -39,6 +40,7 @@ function ChartTooltip({
 }
 
 export function RevenueTrendChart({ data, currency }: { data: Point[]; currency: string }) {
+  const reduceMotion = useReducedMotion();
   const points = data.map((d) => ({
     ...d,
     net: Number(d.net),
@@ -78,7 +80,15 @@ export function RevenueTrendChart({ data, currency }: { data: Point[]; currency:
               />
             )}
           />
-          <Bar dataKey="net" fill={BAR_COLOR} radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false} />
+          <Bar
+            dataKey="net"
+            fill={BAR_COLOR}
+            radius={[4, 4, 0, 0]}
+            maxBarSize={24}
+            isAnimationActive={!reduceMotion}
+            animationDuration={900}
+            animationEasing="ease-out"
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

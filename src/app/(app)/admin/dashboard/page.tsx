@@ -6,6 +6,7 @@ import { PeriodFilter } from '@/components/app/period-filter';
 import { StatCard } from '@/components/app/stat-card';
 import { BarList } from '@/components/charts/bar-list';
 import { RevenueTrendChart } from '@/components/charts/revenue-trend-chart';
+import { AnimatedCount, AnimatedMoney } from '@/components/motion/animated-number';
 import { SalesTable } from '@/components/sales/sales-table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,23 +59,23 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
     <div className="space-y-6">
       <PageHeader title="Tableau de bord" description="Chiffres calculés en temps réel à partir des ventes enregistrées." />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="mg-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard
           label="CA net du jour"
-          value={money(summary.periods.today.net)}
+          value={<AnimatedMoney value={summary.periods.today.net} currency={currency} />}
           hint={`${summary.periods.today.count} vente(s) aujourd’hui`}
           icon={Wallet}
           tone="positive"
         />
         <StatCard
           label="CA net de la semaine"
-          value={money(summary.periods.week.net)}
+          value={<AnimatedMoney value={summary.periods.week.net} currency={currency} />}
           hint={`${summary.periods.week.count} vente(s) depuis lundi`}
           icon={CalendarDays}
         />
         <StatCard
           label="CA net du mois"
-          value={money(summary.periods.month.net)}
+          value={<AnimatedMoney value={summary.periods.month.net} currency={currency} />}
           hint={`${summary.periods.month.count} vente(s) ce mois-ci`}
           icon={CalendarRange}
         />
@@ -83,13 +84,13 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
       <Card>
         <CardContent className="space-y-5">
           <PeriodFilter basePath="/admin/dashboard" period={range.period} from={range.from} to={range.to} />
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard label={`CA net (${periodLabel})`} value={money(report.net_revenue)} icon={TrendingUp} tone="positive" />
-            <StatCard label="Ventes réalisées" value={report.sales_count} hint={`${report.items_sold} article(s) vendus`} icon={ShoppingBag} />
-            <StatCard label="Panier moyen" value={money(report.average_basket)} icon={Wallet} />
+          <div className="mg-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard label={`CA net (${periodLabel})`} value={<AnimatedMoney value={report.net_revenue} currency={currency} />} icon={TrendingUp} tone="positive" />
+            <StatCard label="Ventes réalisées" value={<AnimatedCount value={report.sales_count} />} hint={`${report.items_sold} article(s) vendus`} icon={ShoppingBag} />
+            <StatCard label="Panier moyen" value={<AnimatedMoney value={report.average_basket} currency={currency} />} icon={Wallet} />
             <StatCard
               label="Produits actifs"
-              value={summary.active_products}
+              value={<AnimatedCount value={summary.active_products} />}
               hint={summary.low_stock_products > 0 ? `${summary.low_stock_products} en stock faible` : 'Aucun stock faible'}
               icon={UtensilsCrossed}
               tone={summary.low_stock_products > 0 ? 'warning' : 'default'}

@@ -56,7 +56,7 @@ export function ReceiptToolbar({
     if (autoPrint && !printed.current) {
       printed.current = true;
       // Laisse le temps au reçu (et au logo) de s'afficher.
-      const timer = setTimeout(print, 350);
+      const timer = setTimeout(print, 600);
       return () => clearTimeout(timer);
     }
   }, [autoPrint, print]);

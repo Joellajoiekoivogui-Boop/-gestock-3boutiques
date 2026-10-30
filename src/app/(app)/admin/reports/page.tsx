@@ -5,6 +5,7 @@ import { PeriodFilter } from '@/components/app/period-filter';
 import { StatCard } from '@/components/app/stat-card';
 import { BarList } from '@/components/charts/bar-list';
 import { RevenueTrendChart } from '@/components/charts/revenue-trend-chart';
+import { AnimatedCount, AnimatedMoney } from '@/components/motion/animated-number';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -54,25 +55,25 @@ export default async function ReportsPage({ searchParams }: PageProps<'/admin/re
 
       <PeriodFilter basePath="/admin/reports" period={range.period} from={range.from} to={range.to} />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Chiffre d’affaires net" value={money(report.net_revenue)} icon={TrendingUp} tone="positive" hint="Ventes brutes − remboursements" />
-        <StatCard label="Ventes brutes" value={money(report.gross_sales)} icon={Wallet} hint={`Remises accordées : ${money(report.discount_total)}`} />
-        <StatCard label="Nombre de ventes" value={report.sales_count} icon={ShoppingBag} hint={`Panier moyen : ${money(report.average_basket)}`} />
+      <div className="mg-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard label="Chiffre d’affaires net" value={<AnimatedMoney value={report.net_revenue} currency={currency} />} icon={TrendingUp} tone="positive" hint="Ventes brutes − remboursements" />
+        <StatCard label="Ventes brutes" value={<AnimatedMoney value={report.gross_sales} currency={currency} />} icon={Wallet} hint={`Remises accordées : ${money(report.discount_total)}`} />
+        <StatCard label="Nombre de ventes" value={<AnimatedCount value={report.sales_count} />} icon={ShoppingBag} hint={`Panier moyen : ${money(report.average_basket)}`} />
         <StatCard
           label="Remboursements"
-          value={money(report.refunds_total)}
+          value={<AnimatedMoney value={report.refunds_total} currency={currency} />}
           icon={Undo2}
           hint={`${report.refunds_count} remboursement(s)`}
         />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="mg-stagger grid gap-4 sm:grid-cols-2">
         <StatCard
           label="Ventes annulées (exclues du CA)"
-          value={money(report.cancelled_amount)}
+          value={<AnimatedMoney value={report.cancelled_amount} currency={currency} />}
           icon={Ban}
           hint={`${report.cancelled_count} vente(s) annulée(s)`}
         />
-        <StatCard label="Articles vendus" value={report.items_sold} icon={ShoppingBag} />
+        <StatCard label="Articles vendus" value={<AnimatedCount value={report.items_sold} />} icon={ShoppingBag} />
       </div>
 
       {empty ? (

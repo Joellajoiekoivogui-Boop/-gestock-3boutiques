@@ -23,7 +23,7 @@ export default async function ReceiptPage({ params, searchParams }: PageProps<'/
   return (
     <div className="mx-auto max-w-3xl">
       <ReceiptToolbar data={data} format={format} backHref={backHref} autoPrint={query.print === '1'} />
-      <div className="overflow-x-auto rounded-xl border bg-white py-4 shadow-xs print:overflow-visible print:border-0 print:py-0 print:shadow-none">
+      <div className="mg-receipt-in overflow-x-auto rounded-xl border bg-white py-4 shadow-xs print:overflow-visible print:border-0 print:py-0 print:shadow-none">
         <ReceiptView data={data} format={format} />
       </div>
       <p className="no-print mt-3 text-center text-xs text-muted-foreground">

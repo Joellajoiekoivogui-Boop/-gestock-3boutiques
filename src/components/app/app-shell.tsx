@@ -1,6 +1,7 @@
 'use client';
 
 import { LogOut, Menu } from 'lucide-react';
+import { LayoutGroup, motion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -24,65 +25,85 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function SidebarContent({ profile, brand, onNavigate }: Omit<ShellProps, 'children'> & { onNavigate?: () => void }) {
+function SidebarContent({
+  profile,
+  brand,
+  onNavigate,
+  group,
+}: Omit<ShellProps, 'children'> & { onNavigate?: () => void; group: string }) {
   const pathname = usePathname();
   const sections = navFor(profile);
   return (
-    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
-      <div className="flex items-center gap-3 px-4 py-5">
-        <Logo logoUrl={brand.logoUrl} name={brand.name} size={40} className="rounded-lg bg-white" />
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">{brand.name}</p>
-          <p className="text-xs text-sidebar-muted">Gestion restaurant</p>
-        </div>
-      </div>
-      <nav aria-label="Navigation principale" className="flex-1 space-y-5 overflow-y-auto px-3 pb-4">
-        {sections.map((section) => (
-          <div key={section.title}>
-            <p className="px-2 pb-1.5 text-[11px] font-semibold tracking-wider text-sidebar-muted uppercase">{section.title}</p>
-            <ul className="space-y-0.5">
-              {section.items.map((item) => {
-                const active = isActive(pathname, item.href);
-                const Icon = item.icon;
-                return (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      onClick={onNavigate}
-                      aria-current={active ? 'page' : undefined}
-                      className={cn(
-                        'flex items-center gap-3 rounded-md px-2.5 py-2 text-sm transition-colors',
-                        active
-                          ? 'bg-primary font-semibold text-primary-foreground'
-                          : 'text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-foreground',
-                      )}
-                    >
-                      <Icon className="size-4" aria-hidden />
-                      {item.label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+    <LayoutGroup id={group}>
+      <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
+        <div className="flex items-center gap-3 px-4 py-5">
+          <Logo logoUrl={brand.logoUrl} name={brand.name} size={40} className="rounded-lg bg-white" />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold">{brand.name}</p>
+            <p className="text-xs text-sidebar-muted">Gestion restaurant</p>
           </div>
-        ))}
-      </nav>
-      <div className="border-t border-white/10 p-3">
-        <div className="mb-2 px-2">
-          <p className="truncate text-sm font-medium">{profile.full_name || profile.email}</p>
-          <p className="text-xs text-sidebar-muted">{ROLE_LABELS[profile.role]}</p>
         </div>
-        <form action={signOutAction}>
-          <Button
-            type="submit"
-            variant="ghost"
-            className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
-          >
-            <LogOut aria-hidden /> Se déconnecter
-          </Button>
-        </form>
+        <nav aria-label="Navigation principale" className="flex-1 space-y-5 overflow-y-auto px-3 pb-4">
+          {sections.map((section) => (
+            <div key={section.title}>
+              <p className="px-2 pb-1.5 text-[11px] font-semibold tracking-wider text-sidebar-muted uppercase">
+                {section.title}
+              </p>
+              <ul className="space-y-0.5">
+                {section.items.map((item) => {
+                  const active = isActive(pathname, item.href);
+                  const Icon = item.icon;
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        onClick={onNavigate}
+                        aria-current={active ? 'page' : undefined}
+                        className={cn(
+                          'group relative flex items-center gap-3 rounded-md px-2.5 py-2 text-sm transition-colors',
+                          active
+                            ? 'font-semibold text-primary-foreground'
+                            : 'text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-foreground',
+                        )}
+                      >
+                        {active && (
+                          // Pastille verte qui glisse d'un lien à l'autre.
+                          <motion.span
+                            layoutId="nav-active"
+                            className="absolute inset-0 rounded-md bg-primary"
+                            transition={{ type: 'spring', stiffness: 520, damping: 42 }}
+                          />
+                        )}
+                        <Icon
+                          className="relative size-4 transition-transform duration-200 group-hover:scale-110"
+                          aria-hidden
+                        />
+                        <span className="relative">{item.label}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </nav>
+        <div className="border-t border-white/10 p-3">
+          <div className="mb-2 px-2">
+            <p className="truncate text-sm font-medium">{profile.full_name || profile.email}</p>
+            <p className="text-xs text-sidebar-muted">{ROLE_LABELS[profile.role]}</p>
+          </div>
+          <form action={signOutAction}>
+            <Button
+              type="submit"
+              variant="ghost"
+              className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            >
+              <LogOut aria-hidden /> Se déconnecter
+            </Button>
+          </form>
+        </div>
       </div>
-    </div>
+    </LayoutGroup>
   );
 }
 
@@ -99,7 +120,7 @@ export function AppShell({ profile, brand, children }: ShellProps) {
   return (
     <div className="min-h-dvh lg:pl-64 print:pl-0">
       <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-64 lg:block">
-        <SidebarContent profile={profile} brand={brand} />
+        <SidebarContent profile={profile} brand={brand} group="desktop" />
       </aside>
 
       <header className="no-print sticky top-0 z-20 flex h-14 items-center gap-3 border-b bg-card px-4 lg:hidden">
@@ -111,7 +132,7 @@ export function AppShell({ profile, brand, children }: ShellProps) {
           </SheetTrigger>
           <SheetContent side="left" className="w-72 border-none p-0">
             <SheetTitle className="sr-only">Menu</SheetTitle>
-            <SidebarContent profile={profile} brand={brand} onNavigate={() => setOpen(false)} />
+            <SidebarContent profile={profile} brand={brand} onNavigate={() => setOpen(false)} group="mobile" />
           </SheetContent>
         </Sheet>
         <Logo logoUrl={brand.logoUrl} name={brand.name} size={30} />

@@ -115,3 +115,171 @@
     margin: 0 !important;
   }
 }
+
+/* --- Motion design -------------------------------------------------------
+   Animations courtes (≤ 0,5 s), uniquement transform / opacity / clip-path :
+   fluides sur les tablettes modestes. Toutes désactivées par le réglage
+   « réduire les animations » de l'appareil (voir plus bas). */
+@keyframes mg-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@keyframes mg-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes mg-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6) rotate(-8deg);
+  }
+}
+@keyframes mg-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes mg-receipt-print {
+  from {
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(-16px);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    transform: none;
+  }
+}
+@keyframes mg-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes mg-drift-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(8vw, 6vh) scale(1.15);
+  }
+}
+@keyframes mg-drift-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1.1);
+  }
+  50% {
+    transform: translate(-10vw, -4vh) scale(0.9);
+  }
+}
+
+/* Entrée de page (la mise en page reste sans transform une fois finie :
+   les éléments position: fixed ne sont pas décalés). */
+@media screen {
+  .mg-page {
+    animation: mg-page-in 0.38s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+}
+
+/* Apparition en cascade des éléments d'une grille ou d'une liste. */
+.mg-stagger > * {
+  animation: mg-rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.mg-stagger > *:nth-child(2) { animation-delay: 45ms; }
+.mg-stagger > *:nth-child(3) { animation-delay: 90ms; }
+.mg-stagger > *:nth-child(4) { animation-delay: 135ms; }
+.mg-stagger > *:nth-child(5) { animation-delay: 180ms; }
+.mg-stagger > *:nth-child(6) { animation-delay: 220ms; }
+.mg-stagger > *:nth-child(7) { animation-delay: 255ms; }
+.mg-stagger > *:nth-child(8) { animation-delay: 285ms; }
+.mg-stagger > *:nth-child(n + 9) { animation-delay: 310ms; }
+
+/* Lignes de tableaux. */
+[data-slot='table-body'] > tr {
+  animation: mg-rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+[data-slot='table-body'] > tr:nth-child(2) { animation-delay: 25ms; }
+[data-slot='table-body'] > tr:nth-child(3) { animation-delay: 50ms; }
+[data-slot='table-body'] > tr:nth-child(4) { animation-delay: 75ms; }
+[data-slot='table-body'] > tr:nth-child(5) { animation-delay: 100ms; }
+[data-slot='table-body'] > tr:nth-child(6) { animation-delay: 120ms; }
+[data-slot='table-body'] > tr:nth-child(n + 7) { animation-delay: 140ms; }
+
+/* Barres horizontales des répartitions. */
+.mg-bar {
+  transform-origin: left center;
+  animation: mg-grow-x 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/* Le reçu « sort » de l'imprimante (écran uniquement). */
+@media screen {
+  .mg-receipt-in {
+    animation: mg-receipt-print 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.1s backwards;
+  }
+}
+
+/* Halo animé de la page de connexion. */
+.mg-aurora {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(70px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.mg-aurora-a {
+  animation: mg-drift-a 16s ease-in-out infinite;
+}
+.mg-aurora-b {
+  animation: mg-drift-b 20s ease-in-out infinite;
+}
+.mg-pop-in {
+  animation: mg-pop-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+.mg-rise {
+  animation: mg-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/* Squelettes de chargement : reflet qui balaie. */
+.mg-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.mg-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.6), transparent);
+  animation: mg-shimmer 1.4s ease-in-out infinite;
+}
+
+/* Cartes interactives : légère élévation au survol. */
+.mg-lift {
+  transition:
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.2s ease;
+}
+@media (hover: hover) {
+  .mg-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px -12px rgb(17 17 17 / 0.25);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .mg-aurora {
+    animation: none !important;
+  }
+}

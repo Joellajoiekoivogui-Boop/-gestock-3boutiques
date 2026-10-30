@@ -17,7 +17,7 @@ export function EmptyState({
 }) {
   return (
     <div className={cn('flex flex-col items-center justify-center gap-2 px-4 py-12 text-center', className)}>
-      <span className="mb-1 inline-flex size-11 items-center justify-center rounded-full bg-muted text-muted-foreground">
+      <span className="mg-pop-in mb-1 inline-flex size-11 items-center justify-center rounded-full bg-muted text-muted-foreground">
         <Icon className="size-5" aria-hidden />
       </span>
       <p className="font-medium">{title}</p>

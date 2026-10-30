@@ -65,7 +65,7 @@ export default async function InventoryPage({ searchParams }: PageProps<'/admin/
         </p>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="mg-stagger grid gap-4 sm:grid-cols-3">
         <StatCard label="Produits suivis" value={tracked.length} icon={Boxes} />
         <StatCard label="Stock faible" value={lowCount} icon={AlertTriangle} tone={lowCount ? 'warning' : 'default'} />
         <StatCard label="En rupture" value={outCount} icon={PackageX} tone={outCount ? 'warning' : 'default'} />
