@@ -13,7 +13,7 @@
   /* Texte noir sur le vert : contraste 8,7:1 (AA/AAA). */
   --primary: #0abf65;
   --primary-foreground: #111111;
-  --primary-strong: #078a49;
+  --primary-strong: #067a40; /* ≥ 4,5:1 sur blanc et sur les fonds gris */
   --secondary: #eef0f2;
   --secondary-foreground: #111111;
   --muted: #eef0f2;
@@ -26,6 +26,7 @@
   --warning-foreground: #7a5400;
   --destructive: #d92d20;
   --destructive-foreground: #ffffff;
+  --destructive-strong: #b42318; /* texte rouge sur fond rouge pâle : 5,5:1 */
   --border: #e2e5e9;
   --input: #d5d9de;
   --ring: #0abf65;
@@ -65,6 +66,7 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-strong: var(--destructive-strong);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -94,6 +96,14 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: 'tnum' 1;
+    caret-color: var(--primary-strong);
+    accent-color: var(--primary);
+    scrollbar-color: color-mix(in srgb, var(--foreground) 28%, transparent) transparent;
+    scrollbar-width: thin;
+  }
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-foreground);
   }
   button:not(:disabled),
   [role='button']:not(:disabled) {
@@ -181,26 +191,26 @@
    les éléments position: fixed ne sont pas décalés). */
 @media screen {
   .mg-page {
-    animation: mg-page-in 0.38s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    animation: mg-page-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) backwards;
   }
 }
 
 /* Apparition en cascade des éléments d'une grille ou d'une liste. */
 .mg-stagger > * {
-  animation: mg-rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation: mg-rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
-.mg-stagger > *:nth-child(2) { animation-delay: 45ms; }
-.mg-stagger > *:nth-child(3) { animation-delay: 90ms; }
-.mg-stagger > *:nth-child(4) { animation-delay: 135ms; }
-.mg-stagger > *:nth-child(5) { animation-delay: 180ms; }
-.mg-stagger > *:nth-child(6) { animation-delay: 220ms; }
-.mg-stagger > *:nth-child(7) { animation-delay: 255ms; }
-.mg-stagger > *:nth-child(8) { animation-delay: 285ms; }
-.mg-stagger > *:nth-child(n + 9) { animation-delay: 310ms; }
+.mg-stagger > *:nth-child(2) { animation-delay: 35ms; }
+.mg-stagger > *:nth-child(3) { animation-delay: 70ms; }
+.mg-stagger > *:nth-child(4) { animation-delay: 105ms; }
+.mg-stagger > *:nth-child(5) { animation-delay: 140ms; }
+.mg-stagger > *:nth-child(6) { animation-delay: 170ms; }
+.mg-stagger > *:nth-child(7) { animation-delay: 195ms; }
+.mg-stagger > *:nth-child(8) { animation-delay: 215ms; }
+.mg-stagger > *:nth-child(n + 9) { animation-delay: 230ms; }
 
 /* Lignes de tableaux. */
 [data-slot='table-body'] > tr {
-  animation: mg-rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation: mg-rise 0.3s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 [data-slot='table-body'] > tr:nth-child(2) { animation-delay: 25ms; }
 [data-slot='table-body'] > tr:nth-child(3) { animation-delay: 50ms; }
@@ -270,16 +280,41 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-delay: 0ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+/* Réduire les animations : plus aucun déplacement, mais les changements
+   d'état restent perceptibles grâce à de brefs fondus (pas de coupure nette). */
+@keyframes mg-fade {
+  from {
+    opacity: 0;
   }
-  .mg-aurora {
+}
+@media (prefers-reduced-motion: reduce) {
+  .mg-page,
+  .mg-stagger > *,
+  [data-slot='table-body'] > tr,
+  .mg-rise,
+  .mg-pop-in,
+  .mg-bar,
+  .mg-receipt-in {
+    animation: mg-fade 0.15s ease-out backwards !important;
+  }
+  .mg-aurora,
+  .mg-shimmer::after {
     animation: none !important;
+  }
+  .mg-lift,
+  .mg-lift:hover {
+    transform: none;
+  }
+  /* Fenêtres et tiroirs (tw-animate-css) : fondu seul, sans zoom ni glissement. */
+  :root {
+    --tw-enter-scale: 1;
+    --tw-exit-scale: 1;
+    --tw-enter-translate-x: 0;
+    --tw-enter-translate-y: 0;
+    --tw-exit-translate-x: 0;
+    --tw-exit-translate-y: 0;
+  }
+  [data-slot='button'] {
+    transition-property: color, background-color, box-shadow;
   }
 }

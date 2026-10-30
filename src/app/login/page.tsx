@@ -34,7 +34,7 @@ export default async function LoginPage({ searchParams }: PageProps<'/login'>) {
       {/* Halo vert de la marque, qui dérive lentement en arrière-plan. */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="mg-aurora mg-aurora-a top-[-10%] left-[-8%] size-[48vmax] bg-primary/45" />
-        <div className="mg-aurora mg-aurora-b right-[-12%] bottom-[-14%] size-[42vmax] bg-[#9be7bf]/60" />
+        <div className="mg-aurora mg-aurora-b right-[-12%] bottom-[-14%] size-[42vmax] bg-chart-5/60" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0,var(--background)_70%)]" />
       </div>
 

@@ -264,7 +264,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
                 aria-selected={category === c.id}
                 onClick={() => setCategory(c.id)}
                 className={cn(
-                  'relative h-10 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors',
+                  'relative h-11 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors',
                   category === c.id ? 'border-primary text-primary-foreground' : 'bg-card hover:bg-muted',
                 )}
               >

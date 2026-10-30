@@ -5,8 +5,8 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { formatMoney, formatShortDay } from '@/lib/format';
 
 // Série unique : CA net par jour. Couleur des barres = vert foncé de la
-// charte (#078a49, contraste ≥ 3:1 sur blanc) ; textes en encre neutre.
-const BAR_COLOR = '#078a49';
+// charte (#067a40, contraste ≥ 4,5:1 sur blanc) ; textes en encre neutre.
+const BAR_COLOR = '#067a40'; // = --primary-strong
 const GRID_COLOR = '#e2e5e9';
 const TEXT_MUTED = '#5b6168';
 
