@@ -11,9 +11,10 @@ export async function proxy(request: NextRequest) {
   const env = getSupabaseEnv();
   const { pathname } = request.nextUrl;
 
+  // Base pas encore branchée : toutes les pages mènent à « Bientôt disponible ».
   if (!env) {
-    if (pathname === '/configuration') return NextResponse.next();
-    return NextResponse.redirect(new URL('/configuration', request.url));
+    if (pathname === '/bientot-disponible') return NextResponse.next();
+    return NextResponse.redirect(new URL('/bientot-disponible', request.url));
   }
 
   let response = NextResponse.next({ request });
