@@ -1,4 +1,4 @@
-import { AlertTriangle, CalendarDays, CalendarRange, ShoppingBag, TrendingUp, UtensilsCrossed, Wallet } from 'lucide-react';
+import { AlertTriangle, CalendarDays, CalendarRange, ShoppingBag, ShoppingCart, TrendingUp, UtensilsCrossed, Wallet } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { PageHeader } from '@/components/app/page-header';
@@ -33,6 +33,8 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
     tz,
   );
 
+  const today = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: tz }).format(new Date());
+
   const supabase = await createClient();
   const [summary, report, latest, lowStock] = await Promise.all([
     getDashboardSummary(),
@@ -57,7 +59,17 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Tableau de bord" description="Chiffres calculés en temps réel à partir des ventes enregistrées." />
+      <PageHeader
+        title="Tableau de bord"
+        description={<span className="inline-block first-letter:uppercase">{today} · chiffres en temps réel</span>}
+        actions={
+          <Button asChild size="lg">
+            <Link href="/pos">
+              <ShoppingCart aria-hidden /> Ouvrir la caisse
+            </Link>
+          </Button>
+        }
+      />
 
       <div className="mg-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard

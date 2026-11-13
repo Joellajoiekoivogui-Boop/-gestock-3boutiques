@@ -1,10 +1,10 @@
 'use client';
 
 import { Archive, ArchiveRestore, Eye, EyeOff, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { ProductThumb } from '@/components/app/product-thumb';
 import { EmptyState } from '@/components/app/empty-state';
 import {
   AlertDialog,
@@ -78,9 +78,9 @@ export function ProductsTable({
           <TableRow>
             <TableHead className="w-14">Photo</TableHead>
             <TableHead>Produit</TableHead>
-            <TableHead>Catégorie</TableHead>
+            <TableHead className="hidden sm:table-cell">Catégorie</TableHead>
             <TableHead className="text-right">Prix</TableHead>
-            <TableHead className="text-right">Stock</TableHead>
+            <TableHead className="hidden text-right md:table-cell">Stock</TableHead>
             <TableHead>Statut</TableHead>
             <TableHead className="w-12">
               <span className="sr-only">Actions</span>
@@ -93,17 +93,16 @@ export function ProductsTable({
             return (
               <TableRow key={p.id} className={p.is_archived ? 'opacity-60' : undefined}>
                 <TableCell>
-                  <div className="relative size-10 overflow-hidden rounded-md bg-muted">
-                    {p.image_url && <Image src={p.image_url} alt="" fill sizes="40px" className="object-cover" />}
-                  </div>
+                  <ProductThumb name={p.name} imageUrl={p.image_url} toneKey={p.category_id} sizes="40px" className="size-10 rounded-md" textClassName="text-xs" />
                 </TableCell>
                 <TableCell>
                   <p className="font-medium">{p.name}</p>
-                  {p.description && <p className="line-clamp-1 max-w-xs text-xs text-muted-foreground">{p.description}</p>}
+                  {p.description && <p className="line-clamp-1 hidden max-w-xs text-xs text-muted-foreground sm:block">{p.description}</p>}
+                  {p.category_id && <p className="text-xs text-muted-foreground sm:hidden">{categoryName.get(p.category_id)}</p>}
                 </TableCell>
-                <TableCell>{p.category_id ? categoryName.get(p.category_id) : <span className="text-muted-foreground">—</span>}</TableCell>
+                <TableCell className="hidden sm:table-cell">{p.category_id ? categoryName.get(p.category_id) : <span className="text-muted-foreground">—</span>}</TableCell>
                 <TableCell className="text-right font-medium whitespace-nowrap tabular-nums">{formatMoney(p.price, currency)}</TableCell>
-                <TableCell className="text-right tabular-nums">
+                <TableCell className="hidden text-right tabular-nums md:table-cell">
                   {p.track_stock ? (
                     <span className={low ? 'font-semibold text-warning-foreground' : undefined}>{p.stock_quantity}</span>
                   ) : (

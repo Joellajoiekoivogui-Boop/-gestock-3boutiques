@@ -1,8 +1,10 @@
 'use client';
 
 import {
+  Banknote,
   Check,
   CheckCircle2,
+  Landmark,
   Loader2,
   Minus,
   PackageX,
@@ -11,14 +13,17 @@ import {
   Receipt,
   Search,
   ShoppingCart,
+  Smartphone,
   Trash2,
+  Wallet,
+  X,
 } from 'lucide-react';
 import { AnimatePresence, motion, useAnimate } from 'motion/react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { ProductThumb } from '@/components/app/product-thumb';
 import { EmptyState } from '@/components/app/empty-state';
 import { AnimatedMoney } from '@/components/motion/animated-number';
 import { SuccessBurst } from '@/components/motion/success-burst';
@@ -138,6 +143,12 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
     );
   }, [products, category, search]);
 
+  const countByCategory = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of products) if (p.categoryId) counts.set(p.categoryId, (counts.get(p.categoryId) ?? 0) + 1);
+    return counts;
+  }, [products]);
+
   const inCart = (id: string) => lines.find((l) => l.productId === id)?.quantity ?? 0;
 
   function add(product: PosProduct) {
@@ -232,7 +243,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
     <div className="lg:-m-6 lg:grid lg:h-dvh lg:grid-cols-[minmax(0,1fr)_400px]">
       {/* Zone produits */}
       <section aria-label="Produits" className="flex min-h-0 flex-col pb-24 lg:overflow-hidden lg:p-6 lg:pb-6">
-        <div className="mb-4 flex flex-col gap-3">
+        <div className="sticky top-14 z-10 -mx-4 mb-4 flex flex-col gap-3 bg-background px-4 pt-1 pb-3 sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:bg-transparent lg:p-0">
           <div className="flex items-center justify-between gap-3">
             <h1 className="text-2xl font-bold tracking-tight">Caisse</h1>
             <Button asChild variant="outline" size="sm" className="no-print">
@@ -251,13 +262,34 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Rechercher un produit…  (raccourci : /)"
+              placeholder="Rechercher un produit…"
               aria-label="Rechercher un produit"
-              className="h-11 pl-9 text-base"
+              className="h-11 pr-11 pl-9 text-base [&::-webkit-search-cancel-button]:hidden"
             />
+            {!search && (
+              <kbd
+                aria-hidden
+                className="pointer-events-none absolute top-1/2 right-3 hidden -translate-y-1/2 rounded border bg-muted px-1.5 py-0.5 font-sans text-xs text-muted-foreground pointer-fine:block"
+              >
+                /
+              </kbd>
+            )}
+            {search && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch('');
+                  searchRef.current?.focus();
+                }}
+                aria-label="Effacer la recherche"
+                className="absolute top-1/2 right-1 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <X className="size-4" aria-hidden />
+              </button>
+            )}
           </div>
           <div role="tablist" aria-label="Catégories" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-            {[{ id: 'all', name: 'Tout' }, ...categories].map((c) => (
+            {[{ id: 'all', name: 'Tout' }, ...categories.filter((c) => countByCategory.has(c.id))].map((c) => (
               <button
                 key={c.id}
                 role="tab"
@@ -275,7 +307,12 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
                     transition={{ type: 'spring', stiffness: 520, damping: 40 }}
                   />
                 )}
-                <span className="relative">{c.name}</span>
+                <span className="relative">
+                  {c.name}
+                  <span className={cn('ml-1.5 text-xs tabular-nums', category === c.id ? 'opacity-80' : 'text-muted-foreground')}>
+                    {c.id === 'all' ? products.length : (countByCategory.get(c.id) ?? 0)}
+                  </span>
+                </span>
               </button>
             ))}
           </div>
@@ -312,21 +349,15 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
                       )}
                     >
                       {showImages && (
-                        <div className="relative aspect-[4/3] w-full bg-muted">
-                          {p.imageUrl ? (
-                            <Image
-                              src={p.imageUrl}
-                              alt=""
-                              fill
-                              sizes="(max-width: 640px) 50vw, 220px"
-                              className="object-cover transition-transform duration-500 group-hover:scale-105"
-                            />
-                          ) : (
-                            <span className="absolute inset-0 flex items-center justify-center text-2xl font-semibold text-muted-foreground/60">
-                              {p.name.slice(0, 1).toUpperCase()}
-                            </span>
-                          )}
-                        </div>
+                        <ProductThumb
+                          name={p.name}
+                          imageUrl={p.imageUrl}
+                          toneKey={p.categoryId}
+                          sizes="(max-width: 640px) 50vw, 220px"
+                          className={cn('w-full', p.imageUrl ? 'aspect-[4/3]' : 'aspect-[5/2] sm:aspect-[2/1]')}
+                          imageClassName="transition-transform duration-500 group-hover:scale-105"
+                          textClassName="text-xl opacity-70"
+                        />
                       )}
                       <div className="flex flex-1 flex-col gap-1 p-3">
                         <span className="line-clamp-2 text-sm leading-snug font-medium">{p.name}</span>
@@ -462,6 +493,15 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
       </Dialog>
     </div>
   );
+}
+
+// Pictogramme du mode de paiement, pour le reconnaître sans lire le libellé.
+function PaymentIcon({ code }: { code: string }) {
+  const className = 'size-4 shrink-0 text-muted-foreground';
+  if (code === 'cash') return <Banknote className={className} aria-hidden />;
+  if (code === 'bank_transfer') return <Landmark className={className} aria-hidden />;
+  if (/money|momo|mobile/.test(code)) return <Smartphone className={className} aria-hidden />;
+  return <Wallet className={className} aria-hidden />;
 }
 
 function CartPanel({
@@ -640,8 +680,12 @@ function CartPanel({
                       : 'hover:bg-muted',
                   )}
                 >
-                  {paymentMethod === m.code && <Check className="size-4" aria-hidden />}
-                  {m.label}
+                  {paymentMethod === m.code ? (
+                    <Check className="size-4 shrink-0" aria-hidden />
+                  ) : (
+                    <PaymentIcon code={m.code} />
+                  )}
+                  <span className="truncate">{m.label}</span>
                 </button>
               ))}
             </div>

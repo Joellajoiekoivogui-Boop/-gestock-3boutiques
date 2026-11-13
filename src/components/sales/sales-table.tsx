@@ -3,6 +3,7 @@ import { EmptyState } from '@/components/app/empty-state';
 import { SaleStatusBadge } from '@/components/app/status-badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { SaleRow } from '@/lib/database.types';
+import { cn } from '@/lib/utils';
 import { formatDateTime, formatMoney } from '@/lib/format';
 
 export function SalesTable({
@@ -29,11 +30,11 @@ export function SalesTable({
       <TableHeader>
         <TableRow>
           <TableHead>Reçu</TableHead>
-          <TableHead>Date</TableHead>
+          <TableHead className={compact ? 'hidden sm:table-cell' : undefined}>Date</TableHead>
           {showCashier && !compact && <TableHead>Caissier</TableHead>}
           {!compact && <TableHead className="text-right">Articles</TableHead>}
           <TableHead className="text-right">Montant</TableHead>
-          <TableHead>Paiement</TableHead>
+          <TableHead className={compact ? 'hidden sm:table-cell' : undefined}>Paiement</TableHead>
           <TableHead>Statut</TableHead>
           {!compact && <TableHead className="text-right">Actions</TableHead>}
         </TableRow>
@@ -46,13 +47,13 @@ export function SalesTable({
                 {sale.receipt_number}
               </Link>
             </TableCell>
-            <TableCell className="whitespace-nowrap">{formatDateTime(sale.created_at, timeZone)}</TableCell>
+            <TableCell className={cn('whitespace-nowrap', compact && 'hidden sm:table-cell')}>{formatDateTime(sale.created_at, timeZone)}</TableCell>
             {showCashier && !compact && <TableCell>{sale.cashier_name}</TableCell>}
             {!compact && <TableCell className="text-right tabular-nums">{sale.item_count}</TableCell>}
             <TableCell className="text-right font-medium whitespace-nowrap tabular-nums">
               {formatMoney(sale.total_amount, currency)}
             </TableCell>
-            <TableCell className="whitespace-nowrap">{sale.payment_method_label}</TableCell>
+            <TableCell className={cn('whitespace-nowrap', compact && 'hidden sm:table-cell')}>{sale.payment_method_label}</TableCell>
             <TableCell>
               <SaleStatusBadge status={sale.sale_status} />
             </TableCell>

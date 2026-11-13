@@ -48,7 +48,6 @@ export function RevenueTrendChart({ data, currency }: { data: Point[]; currency:
     refunds: Number(d.refunds),
     count: Number(d.count),
   }));
-  const interval = points.length > 16 ? Math.ceil(points.length / 8) - 1 : 0;
 
   return (
     <div className="h-72 w-full" role="img" aria-label="Évolution du chiffre d’affaires net par jour">
@@ -58,7 +57,8 @@ export function RevenueTrendChart({ data, currency }: { data: Point[]; currency:
           <XAxis
             dataKey="day"
             tickFormatter={formatShortDay}
-            interval={interval}
+            interval="preserveStartEnd"
+            minTickGap={28}
             tickLine={false}
             axisLine={{ stroke: GRID_COLOR }}
             tick={{ fill: TEXT_MUTED, fontSize: 12 }}
