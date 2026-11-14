@@ -30,13 +30,13 @@ export function SalesTable({
       <TableHeader>
         <TableRow>
           <TableHead>Reçu</TableHead>
-          <TableHead className={compact ? 'hidden sm:table-cell' : undefined}>Date</TableHead>
-          {showCashier && !compact && <TableHead>Caissier</TableHead>}
-          {!compact && <TableHead className="text-right">Articles</TableHead>}
+          <TableHead className="hidden sm:table-cell">Date</TableHead>
+          {showCashier && !compact && <TableHead className="hidden lg:table-cell">Caissier</TableHead>}
+          {!compact && <TableHead className="hidden text-right md:table-cell">Articles</TableHead>}
           <TableHead className="text-right">Montant</TableHead>
-          <TableHead className={compact ? 'hidden sm:table-cell' : undefined}>Paiement</TableHead>
+          <TableHead className={compact ? 'hidden sm:table-cell' : 'hidden md:table-cell'}>Paiement</TableHead>
           <TableHead>Statut</TableHead>
-          {!compact && <TableHead className="text-right">Actions</TableHead>}
+          {!compact && <TableHead className="hidden text-right sm:table-cell">Actions</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -46,19 +46,22 @@ export function SalesTable({
               <Link href={`${detailBase}/${sale.id}`} className="hover:underline">
                 {sale.receipt_number}
               </Link>
+              <p className="text-xs font-normal text-muted-foreground sm:hidden">
+                {formatDateTime(sale.created_at, timeZone)}
+              </p>
             </TableCell>
-            <TableCell className={cn('whitespace-nowrap', compact && 'hidden sm:table-cell')}>{formatDateTime(sale.created_at, timeZone)}</TableCell>
-            {showCashier && !compact && <TableCell>{sale.cashier_name}</TableCell>}
-            {!compact && <TableCell className="text-right tabular-nums">{sale.item_count}</TableCell>}
+            <TableCell className="hidden whitespace-nowrap sm:table-cell">{formatDateTime(sale.created_at, timeZone)}</TableCell>
+            {showCashier && !compact && <TableCell className="hidden lg:table-cell">{sale.cashier_name}</TableCell>}
+            {!compact && <TableCell className="hidden text-right tabular-nums md:table-cell">{sale.item_count}</TableCell>}
             <TableCell className="text-right font-medium whitespace-nowrap tabular-nums">
               {formatMoney(sale.total_amount, currency)}
             </TableCell>
-            <TableCell className={cn('whitespace-nowrap', compact && 'hidden sm:table-cell')}>{sale.payment_method_label}</TableCell>
+            <TableCell className={cn('hidden whitespace-nowrap', compact ? 'sm:table-cell' : 'md:table-cell')}>{sale.payment_method_label}</TableCell>
             <TableCell>
               <SaleStatusBadge status={sale.sale_status} />
             </TableCell>
             {!compact && (
-              <TableCell className="text-right whitespace-nowrap">
+              <TableCell className="hidden text-right whitespace-nowrap sm:table-cell">
                 <Link href={`${detailBase}/${sale.id}`} className="text-sm font-medium text-primary-strong hover:underline">
                   Détail
                 </Link>

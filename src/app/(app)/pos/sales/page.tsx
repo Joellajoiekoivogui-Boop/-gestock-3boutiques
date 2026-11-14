@@ -1,10 +1,17 @@
+import { Banknote, Plus, Receipt, Wallet } from 'lucide-react';
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import { CollapsibleFilters } from '@/components/app/collapsible-filters';
 import { PageHeader } from '@/components/app/page-header';
 import { Pagination, parsePage } from '@/components/app/pagination';
 import { SalesFiltersForm } from '@/components/sales/sales-filters';
+import { StatCard } from '@/components/app/stat-card';
 import { SalesTable } from '@/components/sales/sales-table';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { getSettings, requireUser } from '@/lib/auth';
+import { dayRangeUtc, todayIn } from '@/lib/dates';
+import { formatMoney } from '@/lib/format';
 import { listSales, parseSalesFilters } from '@/lib/sales-query';
 import { createClient } from '@/lib/supabase/server';
 
@@ -19,26 +26,72 @@ export default async function MySalesPage({ searchParams }: PageProps<'/pos/sale
   const page = parsePage(params.page);
   const settings = await getSettings();
   const tz = settings?.timezone ?? 'Africa/Conakry';
+  const currency = settings?.currency ?? 'GNF';
   const supabase = await createClient();
+  const today = todayIn(tz);
+  const todayRange = dayRangeUtc(today, today, tz);
 
-  const [{ rows, count }, methods] = await Promise.all([
+  const [{ rows, count }, methods, todaySales] = await Promise.all([
     listSales(supabase, filters, tz, { offset: (page - 1) * PAGE_SIZE, limit: PAGE_SIZE, cashierId: session.userId }),
     supabase.from('payment_methods').select('code, label').order('sort_order'),
+    // Ma journée : mes ventes d'aujourd'hui (hors ventes annulées), nettes des remboursements.
+    supabase
+      .from('sales')
+      .select('total_amount, refunded_amount, payment_method, sale_status')
+      .eq('cashier_id', session.userId)
+      .gte('created_at', todayRange.start)
+      .lt('created_at', todayRange.end)
+      .neq('sale_status', 'cancelled')
+      .limit(2000),
   ]);
+
+  const day = (todaySales.data ?? []).reduce(
+    (acc, sale) => {
+      const net = Number(sale.total_amount) - Number(sale.refunded_amount);
+      acc.count += 1;
+      acc.total += net;
+      if (sale.payment_method === 'cash') acc.cash += net;
+      return acc;
+    },
+    { count: 0, total: 0, cash: 0 },
+  );
 
   return (
     <div>
-      <PageHeader title="Mes ventes" description="Vos ventes et leurs reçus, à réimprimer si besoin." />
+      <PageHeader
+        title="Mes ventes"
+        description="Vos ventes et leurs reçus, à réimprimer si besoin."
+        actions={
+          <Button asChild size="lg">
+            <Link href="/pos">
+              <Plus aria-hidden /> Nouvelle vente
+            </Link>
+          </Button>
+        }
+      />
+      <section aria-label="Ma journée" className="mg-stagger mb-4 grid gap-3 sm:grid-cols-3">
+        <StatCard
+          label="Encaissé aujourd’hui"
+          value={formatMoney(day.total, currency)}
+          hint="Hors ventes annulées, remboursements déduits"
+          icon={Wallet}
+          tone="positive"
+        />
+        <StatCard label="Ventes aujourd’hui" value={day.count} hint={day.count > 0 ? `Panier moyen ${formatMoney(Math.round(day.total / day.count), currency)}` : 'Aucune vente pour le moment'} icon={Receipt} />
+        <StatCard label="Dont espèces" value={formatMoney(day.cash, currency)} hint="Ventes payées en espèces" icon={Banknote} />
+      </section>
       <Card className="mb-4">
         <CardContent>
-          <SalesFiltersForm action="/pos/sales" filters={filters} methods={methods.data ?? []} />
+          <CollapsibleFilters activeCount={Object.values(filters).filter(Boolean).length}>
+            <SalesFiltersForm action="/pos/sales" filters={filters} methods={methods.data ?? []} />
+          </CollapsibleFilters>
         </CardContent>
       </Card>
       <Card className="py-0">
         <CardContent className="px-0 pb-4">
           <SalesTable
             rows={rows}
-            currency={settings?.currency ?? 'GNF'}
+            currency={currency}
             timeZone={tz}
             detailBase="/pos/sales"
             showCashier={false}
