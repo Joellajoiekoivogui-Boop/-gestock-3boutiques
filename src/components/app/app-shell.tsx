@@ -51,6 +51,7 @@ function Selvedge({ brand, who }: { brand: string; who: string }) {
     return () => window.clearInterval(timer);
   }, []);
   return (
+    <>
     <div className="flex h-8 items-center gap-4 bg-foreground px-4 font-display text-[13px] font-semibold tracking-[0.14em] text-background uppercase sm:px-6">
       <span className="truncate">{brand}</span>
       <span aria-hidden className="hidden text-background/40 sm:inline">
@@ -59,12 +60,13 @@ function Selvedge({ brand, who }: { brand: string; who: string }) {
       <span className="hidden truncate text-background/80 sm:inline">Hôtellerie — Restaurant</span>
       <span className="ml-auto hidden truncate text-background/80 md:inline">{today}</span>
       <span className="hidden truncate lg:inline">{who}</span>
-      <span aria-hidden className="mg-selvedge-dots shrink-0">
-        {TONES.map((t) => (
-          <span key={t} style={{ backgroundColor: `var(--cat-${t})` }} />
-        ))}
-      </span>
     </div>
+    <div aria-hidden className="flex h-1">
+      {TONES.map((t) => (
+        <span key={t} className="flex-1" style={{ backgroundColor: `var(--cat-${t})` }} />
+      ))}
+    </div>
+    </>
   );
 }
 
@@ -104,7 +106,6 @@ export function AppShell({ profile, brand, children }: ShellProps) {
   const name = profile.full_name || profile.email;
   const role = ROLE_LABELS[profile.role];
   const manageActive = manage.find((item) => isActive(pathname, item.href));
-  const current = [...primary, ...manage].find((item) => isActive(pathname, item.href));
 
   // Menu mobile : fermé automatiquement si l'écran s'élargit.
   useEffect(() => {
@@ -157,7 +158,7 @@ export function AppShell({ profile, brand, children }: ShellProps) {
             )}
           </nav>
 
-          <span className="min-w-0 flex-1 truncate font-display text-xl font-bold md:hidden">{current?.label}</span>
+          <span className="min-w-0 flex-1 truncate font-display text-xl font-bold md:hidden">MassaGui</span>
 
           <div className="ml-auto hidden items-center gap-3 md:flex">
             <div className="hidden text-right leading-tight lg:block">

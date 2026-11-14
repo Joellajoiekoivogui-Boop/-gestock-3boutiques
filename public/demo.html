@@ -27,7 +27,7 @@
   --cat-4: #73306e; --cat-4-fg: #fff; --cat-5: #e2a62a; --cat-5-fg: #111; --cat-6: #1d201e; --cat-6-fg: #fff;
   --sans: 'Barlow', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
   --display: 'Barlow Condensed', 'Barlow', 'Arial Narrow', ui-sans-serif, sans-serif;
-  --header: 96px;
+  --header: 100px;
   color-scheme: light;
 }
 * { box-sizing: border-box; }
@@ -51,8 +51,8 @@ p { margin: 0; }
   font: 600 13px/1 var(--display); letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap; overflow: hidden; }
 .selvedge .soft { color: rgb(255 255 255 / 0.75); }
 .selvedge .push { margin-left: auto; }
-.dots { display: inline-flex; gap: 5px; flex: none; }
-.dots span { width: 9px; height: 9px; border-radius: 50%; }
+.stripe { display: flex; height: 4px; }
+.stripe span { flex: 1; }
 .bar { height: 64px; background: var(--card); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; padding: 0 max(12px, env(safe-area-inset-right, 0px)) 0 max(12px, env(safe-area-inset-left, 0px)); }
 .logo { width: 40px; height: 40px; border-radius: 6px; background: var(--primary); color: var(--ink); display: grid; place-items: center; font: 700 16px var(--display); flex: none; }
 .brand { font: 700 20px var(--display); margin: 0 8px 0 10px; }
@@ -104,15 +104,16 @@ p { margin: 0; }
 .prod:hover:not(:disabled) { border-color: rgb(17 17 17 / 0.4); }
 .prod:active:not(:disabled) { transform: scale(0.97); }
 .prod.in { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
-.prod:disabled { opacity: 0.5; }
-.band { height: 80px; display: grid; place-items: center; font: 700 30px var(--display); letter-spacing: 0.04em; }
-.pbody { display: flex; flex-direction: column; gap: 6px; padding: 12px; flex: 1; }
-.pname { font-weight: 600; font-size: 17px; line-height: 1.3; }
-.price { margin-top: auto; font: 700 26px/1 var(--display); }
+.prod:disabled .pbody { color: var(--muted-ink); }
+.band { position: relative; height: 28px; display: block; }
+.band .badge { position: absolute; left: 8px; bottom: 4px; }
+.pbody { display: flex; flex-direction: column; gap: 8px; padding: 14px; flex: 1; }
+.pname { font-weight: 600; font-size: 18px; line-height: 1.3; }
+.price { margin-top: auto; font: 700 28px/1 var(--display); }
 .price small { font: 600 16px var(--sans); color: var(--muted-ink); margin-left: 4px; }
 .badge { display: inline-block; width: fit-content; border-radius: 999px; padding: 1px 10px; font-size: 13px; font-weight: 600; }
 .badge.warn { background: var(--warn); color: var(--warn-ink); }
-.badge.bad { background: var(--danger-bg); color: var(--danger); }
+.badge.bad { background: var(--danger); color: #fff; }
 .badge.ok { background: var(--accent); color: var(--accent-ink); }
 .qty { position: absolute; top: 8px; right: 8px; height: 32px; min-width: 32px; padding: 0 8px; border-radius: 999px; background: var(--ink); color: #fff; display: grid; place-items: center; font: 700 18px var(--display); }
 .empty { text-align: center; color: var(--muted-ink); padding: 48px 16px; }
@@ -127,7 +128,7 @@ p { margin: 0; }
 .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .line .lname { font-weight: 600; font-size: 17px; line-height: 1.3; }
 .line .ltotal { font: 700 20px var(--display); white-space: nowrap; }
-.line small { color: var(--muted-ink); font-size: 14px; }
+.line small { color: var(--muted-ink); font-size: 15px; }
 .step { display: flex; align-items: center; gap: 4px; }
 .step button { width: 44px; height: 44px; border: 1px solid var(--input); background: var(--card); border-radius: 6px; display: grid; place-items: center; }
 .step button:hover:not(:disabled) { background: var(--muted); }
@@ -159,11 +160,12 @@ p { margin: 0; }
 .phead h1 { font: 700 32px/1 var(--display); }
 .phead p { color: var(--muted-ink); margin-top: 8px; }
 .panel { background: var(--card); border: 1px solid var(--border); border-radius: 8px; min-width: 0; }
-.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.stat { padding: 16px 20px; display: grid; gap: 6px; }
+.dayline { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 32px; padding: 16px 20px; }
+.dayline .big { font: 700 44px/1 var(--display); margin-top: 4px; }
+.dayline dl { display: flex; flex-wrap: wrap; gap: 12px 32px; margin: 0; padding-bottom: 4px; }
+.dayline dt { color: var(--muted-ink); font-size: 14px; }
+.dayline dd { margin: 0; font: 700 24px/1.2 var(--display); }
 .label { font: 600 14px var(--display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-ink); }
-.stat b { font: 700 36px/1 var(--display); }
-.stat small { color: var(--muted-ink); font-size: 14px; }
 .cols { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
 .panel.pad { padding: 20px; }
 .panel h2 { font-size: 18px; font-weight: 600; }
@@ -211,8 +213,7 @@ td .sub { display: none; color: var(--muted-ink); font-size: 13px; }
   .tab svg { display: none; }
   .prow .btn { display: none; }
   .pgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .band { height: 64px; font-size: 24px; }
-  .stats, .cols { grid-template-columns: minmax(0, 1fr); }
+  .cols { grid-template-columns: minmax(0, 1fr); }
   .page { padding: 16px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px)); }
   .hide-sm { display: none; }
   td .sub { display: block; }
@@ -228,8 +229,8 @@ td .sub { display: none; color: var(--muted-ink); font-size: 13px; }
     <span class="soft hide-sm">Hôtellerie — Restaurant</span>
     <span class="push soft hide-sm" id="today"></span>
     <span class="hide-sm">Awa Camara · Gérant / Caissier</span>
-    <span class="dots push-sm" aria-hidden="true"><span style="background:var(--cat-1)"></span><span style="background:var(--cat-2)"></span><span style="background:var(--cat-3)"></span><span style="background:var(--cat-4)"></span><span style="background:var(--cat-5)"></span><span style="background:var(--cat-6)"></span></span>
   </div>
+  <div class="stripe" aria-hidden="true"><span style="background:var(--cat-1)"></span><span style="background:var(--cat-2)"></span><span style="background:var(--cat-3)"></span><span style="background:var(--cat-4)"></span><span style="background:var(--cat-5)"></span><span style="background:var(--cat-6)"></span></div>
   <div class="bar">
     <span class="logo" role="img" aria-label="Logo MassaGui Fils SARL.U">MG</span>
     <span class="brand">MassaGui</span>
@@ -286,7 +287,6 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&
 const norm = (s) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 const prod = (id) => PRODUCTS.find((p) => p.id === id);
 const toneOf = (catId) => (CATS.find((c) => c.id === catId) || { tone: 6 }).tone;
-const initials = (name) => { const w = name.trim().split(/\s+/); return (w[1] ? w[0][0] + w[1][0] : w[0].slice(0, 2)).toUpperCase(); };
 const inCart = (id) => (state.cart.find((l) => l.id === id) || { q: 0 }).q;
 const cartTotal = () => state.cart.reduce((s, l) => s + prod(l.id).price * l.q, 0);
 const cartCount = () => state.cart.reduce((s, l) => s + l.q, 0);
@@ -358,9 +358,8 @@ function viewCaisse() {
   const cards = list.map((p) => {
     const tone = toneOf(p.cat), qty = inCart(p.id), left = p.stock === null ? null : p.stock - qty, out = p.stock === 0;
     return `<li><button type="button" class="prod${qty ? ' in' : ''}" data-add="${p.id}" ${out ? 'disabled' : ''} aria-label="Ajouter ${esc(p.name)}, ${money(p.price)}">
-      <span class="band" style="background:var(--cat-${tone});color:var(--cat-${tone}-fg)" aria-hidden="true">${initials(p.name)}</span>
-      <span class="pbody"><span class="pname">${esc(p.name)}</span><span class="price">${fmt(p.price)}<small>GNF</small></span>
-      ${out ? '<span class="badge bad">Rupture</span>' : left !== null && left <= 5 ? `<span class="badge warn">Reste ${left}</span>` : ''}</span>
+      <span class="band" style="background:${out ? 'var(--muted)' : `var(--cat-${tone})`}">${out ? '<span class="badge bad">Rupture</span>' : left !== null && left <= 5 ? `<span class="badge warn">Reste ${left}</span>` : ''}</span>
+      <span class="pbody"><span class="pname">${esc(p.name)}</span><span class="price">${fmt(p.price)}<small>GNF</small></span></span>
       ${qty ? `<span class="qty">×${qty}</span>` : ''}</button></li>`;
   }).join('');
   const total = cartTotal(), received = Number(state.received || 0), change = received - total;
@@ -412,13 +411,13 @@ function viewVentes() {
   const total = sum(state.sales), cash = sum(state.sales.filter((s) => s.pay === 'cash')), n = state.sales.length;
   return `<div class="page">
     <div class="phead"><div><h1>Mes ventes</h1><p>Vos ventes et leurs reçus, à réimprimer si besoin.</p></div><button type="button" class="btn primary" data-go="caisse">${icon('plus')} Nouvelle vente</button></div>
-    <div class="stats">
-      <div class="panel stat"><span class="label">Encaissé aujourd’hui</span><b>${money(total)}</b><small>Hors ventes annulées</small></div>
-      <div class="panel stat"><span class="label">Ventes aujourd’hui</span><b>${n}</b><small>Panier moyen ${money(Math.round(total / n))}</small></div>
-      <div class="panel stat"><span class="label">Dont espèces</span><b>${money(cash)}</b><small>Ventes payées en espèces</small></div>
-    </div>${salesTable(50)}</div>`;
+    ${dayLine('Encaissé aujourd’hui', money(total), [['Ventes', n], ['Panier moyen', money(Math.round(total / n))], ['Dont espèces', money(cash)]])}${salesTable(50)}</div>`;
 }
 
+function dayLine(label, value, facts) {
+  return `<div class="panel dayline"><div><span class="label">${label}</span><p class="big">${value}</p></div>
+    <dl>${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl></div>`;
+}
 function barList(items, fmtValue) {
   const max = Math.max(...items.map((i) => i.value), 1);
   return `<div class="bars">${items.map((i) => `<div><div class="row"><span>${esc(i.label)}</span><b style="font-weight:600">${fmtValue(i)}</b></div>
@@ -433,11 +432,7 @@ function viewBord() {
   const low = PRODUCTS.filter((p) => p.stock !== null && p.stock <= 6);
   return `<div class="page">
     <div class="phead"><div><h1>Tableau de bord</h1><p>${document.getElementById('today').textContent} · chiffres de la démonstration</p></div><button type="button" class="btn primary" data-go="caisse">${icon('cart')} Ouvrir la caisse</button></div>
-    <div class="stats">
-      <div class="panel stat"><span class="label">CA net du jour</span><b>${money(total)}</b><small>${n} vente(s) aujourd’hui</small></div>
-      <div class="panel stat"><span class="label">Panier moyen</span><b>${money(Math.round(total / n))}</b><small>${state.sales.reduce((s, r) => s + r.lines.reduce((a, l) => a + l.q, 0), 0)} article(s) vendus</small></div>
-      <div class="panel stat"><span class="label">Produits actifs</span><b>${PRODUCTS.length}</b><small>${low.length} en stock faible</small></div>
-    </div>
+    ${dayLine('CA net du jour', money(total), [['Ventes aujourd’hui', n], ['Panier moyen', money(Math.round(total / n))], ['Articles vendus', state.sales.reduce((s, r) => s + r.lines.reduce((a, l) => a + l.q, 0), 0)], ['Stock faible', low.length + ' produit(s)']])}
     <div class="cols">
       <div class="panel pad"><h2>Produits les plus vendus</h2><p>Par quantité, aujourd’hui</p>${barList(top, (i) => i.value + ' vendu(s)')}</div>
       <div class="panel pad"><h2>Répartition des paiements</h2><p>Ventes par mode de paiement</p>${barList(byPay, (i) => money(i.value))}</div>

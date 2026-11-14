@@ -19,7 +19,7 @@ import {
   Wallet,
   X,
 } from 'lucide-react';
-import { AnimatePresence, motion, useAnimate } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
@@ -94,8 +94,6 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
   // Clé d'idempotence : identique tant que le panier ne change pas, pour qu'un
   // nouvel essai après une coupure réseau ne crée jamais de seconde vente.
   const keyRef = useRef<string>('');
-  const [cartBarScope, animateCartBar] = useAnimate<HTMLDivElement>();
-  const previousCount = useRef(0);
   const searchRef = useRef<HTMLInputElement>(null);
 
   const money = (value: number) => formatMoney(value, currency);
@@ -103,14 +101,6 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
   const totals = cartTotals(lines, discount);
   const discountInvalid = canDiscount && (!Number.isInteger(discount) || discount < 0 || discount > totals.subtotal);
   const toneOf = useMemo(() => new Map(categories.map((c) => [c.id, c.tone])), [categories]);
-
-  // La barre du panier mobile rebondit quand on ajoute un article.
-  useEffect(() => {
-    if (totals.itemCount > previousCount.current && cartBarScope.current) {
-      animateCartBar(cartBarScope.current, { scale: [1, 1.03, 1] }, { duration: 0.25, ease: 'easeOut' });
-    }
-    previousCount.current = totals.itemCount;
-  }, [totals.itemCount, animateCartBar, cartBarScope]);
 
   // Toute modification du panier invalide la clé précédente.
   useEffect(() => {
@@ -242,7 +232,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
   const categoryButtons = [{ id: 'all', name: 'Tout', tone: -1 }, ...shownCategories];
 
   return (
-    <div className="-m-4 sm:-m-6 lg:grid lg:h-[calc(100dvh-6rem)] lg:grid-cols-[13rem_minmax(0,1fr)_26rem]">
+    <div className="-m-4 sm:-m-6 lg:grid lg:h-[calc(100dvh-6.25rem)] lg:grid-cols-[13rem_minmax(0,1fr)_26rem]">
       {/* Catégories : rail vertical sur grand écran */}
       <nav aria-label="Catégories" className="hidden min-h-0 flex-col gap-1 overflow-y-auto border-r bg-card p-3 lg:flex">
         {categoryButtons.map((c) => (
@@ -259,9 +249,9 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
 
       {/* Plats */}
       <section aria-label="Produits" className="flex min-h-0 flex-col">
-        <div className="sticky top-24 z-10 flex flex-col gap-3 border-b bg-background px-4 pt-4 pb-3 sm:px-6 lg:static lg:border-b-0 lg:pt-5">
+        <div className="sticky top-[6.25rem] z-10 flex flex-col gap-3 border-b bg-background px-4 pt-4 pb-3 sm:px-6 lg:static lg:border-b-0 lg:pt-5">
           <div className="flex items-center gap-3">
-            <h1 className="font-display text-[2rem] leading-none font-bold">Caisse</h1>
+            <h1 className="sr-only font-display text-[2rem] leading-none font-bold sm:not-sr-only">Caisse</h1>
             <div className="relative ml-auto min-w-0 flex-1 sm:max-w-md">
               <Search
                 className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-muted-foreground"
@@ -327,7 +317,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
           ) : visibleProducts.length === 0 ? (
             <EmptyState icon={Search} title="Aucun résultat" description="Modifiez la recherche ou choisissez « Tout »." />
           ) : (
-            <ul key={category} className="mg-stagger grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(11rem,1fr))]">
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(11rem,1fr))]">
               {visibleProducts.map((p) => {
                 const qty = inCart(p.id);
                 const remaining = p.maxQuantity === null ? null : p.maxQuantity - qty;
@@ -341,32 +331,40 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
                       disabled={soldOut}
                       aria-label={`Ajouter ${p.name}, ${money(p.price)}`}
                       className={cn(
-                        'group relative flex h-full w-full flex-col overflow-hidden rounded-lg border bg-card text-left transition-[transform,box-shadow,border-color] duration-150 hover:border-foreground/40 focus-visible:ring-[3px] focus-visible:ring-ring/60 focus-visible:outline-none active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50',
+                        'group relative flex h-full w-full flex-col overflow-hidden rounded-lg border bg-card text-left transition-[transform,box-shadow,border-color] duration-150 hover:border-foreground/40 focus-visible:ring-[3px] focus-visible:ring-ring/60 focus-visible:outline-none active:scale-[0.97] disabled:cursor-not-allowed',
                         qty > 0 && 'border-primary shadow-[0_0_0_2px_var(--primary)]',
                       )}
                     >
-                      {showImages && (
-                        <ProductThumb
-                          name={p.name}
-                          imageUrl={p.imageUrl}
-                          tone={tone}
-                          sizes="(max-width: 640px) 50vw, 220px"
-                          className={cn('w-full', p.imageUrl ? 'aspect-[4/3]' : 'h-16 sm:h-20')}
-                          imageClassName="transition-transform duration-500 group-hover:scale-105"
-                          textClassName="text-2xl sm:text-3xl"
-                        />
-                      )}
-                      <span className="flex flex-1 flex-col gap-1.5 p-3">
-                        <span className="line-clamp-2 text-[17px] leading-snug font-semibold">{p.name}</span>
-                        <span className="mt-auto font-display text-[1.65rem] leading-none font-bold tabular-nums">
+                      {/* Bande de la catégorie : porte l'état du stock, pour que les prix restent alignés. */}
+                      <span className="relative block">
+                        {showImages && p.imageUrl ? (
+                          <ProductThumb
+                            name={p.name}
+                            imageUrl={p.imageUrl}
+                            tone={tone}
+                            sizes="(max-width: 640px) 50vw, 220px"
+                            className={cn('aspect-[16/9] w-full', soldOut && 'opacity-50 grayscale')}
+                            imageClassName="transition-transform duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <span aria-hidden className="block h-7 w-full" style={toneStyle(soldOut ? 0 : tone)} />
+                        )}
+                        {soldOut ? (
+                          <Badge className="absolute bottom-1 left-2 border-transparent bg-destructive-strong text-destructive-foreground">
+                            Rupture
+                          </Badge>
+                        ) : remaining !== null && remaining <= 5 ? (
+                          <Badge variant="warning" className="absolute bottom-1 left-2 border-warning-foreground/20">
+                            Reste {remaining}
+                          </Badge>
+                        ) : null}
+                      </span>
+                      <span className={cn('flex flex-1 flex-col gap-2 p-3.5', soldOut && 'text-muted-foreground')}>
+                        <span className="line-clamp-2 text-lg leading-snug font-semibold">{p.name}</span>
+                        <span className="mt-auto font-display text-[1.75rem] leading-none font-bold tabular-nums">
                           {formatAmount(p.price)}
                           <span className="ml-1 text-base font-semibold text-muted-foreground">{currency}</span>
                         </span>
-                        {soldOut ? (
-                          <Badge variant="destructive">Rupture</Badge>
-                        ) : remaining !== null && remaining <= 5 ? (
-                          <Badge variant="warning">Reste {remaining}</Badge>
-                        ) : null}
                       </span>
                       {qty > 0 && (
                         <motion.span
@@ -374,7 +372,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
                           initial={{ scale: 1.5 }}
                           animate={{ scale: 1 }}
                           transition={{ type: 'spring', stiffness: 600, damping: 20 }}
-                          className="absolute top-2 right-2 inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-foreground px-2 font-display text-lg font-bold text-background"
+                          className="absolute top-2 right-2.5 inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-foreground px-2 font-display text-lg font-bold text-background"
                         >
                           ×{qty}
                         </motion.span>
@@ -395,7 +393,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
 
       {/* Ticket : barre + tiroir sur tablette en portrait et téléphone */}
       <div className="no-print fixed inset-x-0 bottom-0 z-20 border-t bg-card p-3 lg:hidden">
-        <div ref={cartBarScope}>
+        <div>
           <Button size="xl" className="w-full justify-between" onClick={() => setCartOpen(true)}>
             <span className="flex items-center gap-2">
               <ShoppingCart aria-hidden className="size-6" /> Panier ({totals.itemCount})
@@ -581,7 +579,7 @@ function TicketPanel({
                     <p className="shrink-0 font-display text-xl font-bold tabular-nums">{money(line.unitPrice * line.quantity)}</p>
                   </div>
                   <div className="mt-1.5 flex items-center justify-between gap-3">
-                    <p className="text-sm text-muted-foreground tabular-nums">{money(line.unitPrice)} l’unité</p>
+                    <p className="text-[15px] text-muted-foreground tabular-nums">{money(line.unitPrice)} l’unité</p>
                     <div className="flex items-center gap-1">
                       <Button
                         variant="outline"
