@@ -15,16 +15,17 @@ Direction imposée par l'utilisateur : il a fourni une maquette de référence d
 
 THESIS: La caisse se présente comme la carte d'un bon restaurant : photos des plats en cartes blanches arrondies, catégories en pastilles rondes à pictogramme, vert sapin et or pour l'identité. Refuse le tableau de cases plates et la barre noire technique.
 
-OWN-WORLD: Fond blanc cassé chaud, cartes blanches arrondies (14-16 px) à ombre douce, vert sapin #0f3d2c pour les éléments choisis, badges et boutons ronds « + », or #b8914a pour les filets et le sous-titre, vert MassaGui #0abf65 pour Encaisser. Playfair Display pour la marque et les titres, Inter pour tout le reste, prix en Inter gras.
+OWN-WORLD: Fond gris très clair légèrement vert (#f3f5f2), cartes blanches arrondies (14-16 px) à ombre douce, vert sapin #0f3d2c pour les éléments choisis, badges et boutons ronds « + », or #b8914a pour les filets et le sous-titre, vert MassaGui #0abf65 pour Encaisser. Playfair Display pour la marque et les titres, Inter pour tout le reste, prix en Inter gras.
 
 STORY: Le caissier touche une pastille de catégorie, voit les plats en photo, touche une carte, le ticket se remplit, il choisit le paiement et encaisse. Le gérant et le patron lisent la journée dans un bandeau vert sapin en tête du tableau de bord.
 
 FIRST VIEWPORT: Tablette paysage. En haut, barre blanche : logo, « MassaGui Fils » en Playfair avec « • Hôtellerie — Restaurant • » en or, onglets en pastilles au centre, utilisateur à droite. Corps : rangée de pastilles rondes de catégories, titre de section en Playfair, grille de cartes plats (photo, badge, nom, description, prix, bouton rond +) ; ticket blanc à droite terminé par la pilule verte « Encaisser 125 000 GNF ». Sur téléphone, barre d'onglets en bas avec bouton rond central Panier.
 
-FORM: Maquette de référence fournie par l'utilisateur (direction imposée, pas de tirage) ; seed: none (unavailable).
+FORM: Maquette de référence « Taste Haven » fournie par l'utilisateur : direction imposée par l'utilisateur, aucun tirage de direction effectué (le tirage ne s'applique pas à une direction imposée).
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
 ## Décisions ouvertes
 - Photos d'exemple : téléchargement depuis Wikimedia Commons bloqué (limite de débit) ; emplacements illustrés en attendant.
+- Badge « Populaire » : présent dans la démo ; dans l'application, il faudrait une fonction de base donnant les meilleures ventes à tous les rôles (les caissiers ne voient que leurs propres ventes).
 - Prise de commande en salle et clôture de caisse : hors périmètre.

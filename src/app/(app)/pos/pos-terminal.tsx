@@ -251,7 +251,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
     <div className="-m-4 sm:-m-6 lg:grid lg:h-[calc(100dvh-4.5rem-1px)] lg:grid-cols-[minmax(0,1fr)_26rem]">
       {/* Plats */}
       <section aria-label="Produits" className="flex min-h-0 flex-col lg:overflow-y-auto">
-        <div className="flex shrink-0 flex-col gap-5 px-4 pt-5 sm:px-6 lg:pt-6">
+        <div className="sticky top-[4.5rem] z-10 flex shrink-0 flex-col gap-4 border-b bg-background px-4 pt-4 pb-3 sm:px-6 lg:top-0 lg:pt-5">
           <div className="flex items-center gap-3">
             <h1 className="sr-only">Caisse</h1>
             <div className="relative min-w-0 flex-1">
@@ -316,7 +316,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
           </div>
         </div>
 
-        <div className="flex-1 px-4 pt-3 pb-8 sm:px-6">
+        <div className="flex-1 px-4 pt-4 pb-8 sm:px-6">
           {products.length === 0 ? (
             <EmptyState
               icon={PackageX}
@@ -350,9 +350,9 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
                           imageUrl={showImages ? p.imageUrl : null}
                           tone={tone}
                           sizes="(max-width: 640px) 50vw, 240px"
-                          className={cn('aspect-[16/10] w-full rounded-lg', soldOut && 'opacity-60 grayscale')}
+                          className={cn('w-full rounded-lg', showImages && p.imageUrl ? 'aspect-[16/10]' : 'aspect-[3/1] lg:aspect-[4/1]', soldOut && 'opacity-60 grayscale')}
                           imageClassName="transition-transform duration-500 group-hover:scale-105"
-                          iconClassName="size-10 sm:size-12"
+                          iconClassName="size-8"
                         />
                         {soldOut ? (
                           <Badge className="absolute top-4 left-4 border-transparent bg-destructive-strong text-destructive-foreground">
@@ -375,12 +375,12 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
                           </motion.span>
                         )}
                       </span>
-                      <span className={cn('flex flex-1 flex-col gap-1 p-3 sm:p-3.5', soldOut && 'text-muted-foreground')}>
-                        <span className="line-clamp-2 text-base leading-snug font-bold">{p.name}</span>
+                      <span className={cn('flex flex-1 flex-col gap-1 px-3 pt-2.5 pb-3 sm:px-3.5', soldOut && 'text-muted-foreground')}>
+                        <span className="line-clamp-2 text-lg leading-snug font-bold">{p.name}</span>
                         {p.description && (
                           <span className="line-clamp-2 hidden text-sm leading-snug text-muted-foreground sm:block">{p.description}</span>
                         )}
-                        <span className="mt-auto flex items-end justify-between gap-2 pt-2">
+                        <span className="mt-auto flex items-end justify-between gap-2 pt-1.5">
                           <span className="text-lg leading-none font-bold tracking-tight whitespace-nowrap tabular-nums sm:text-xl">
                             {formatAmount(p.price)}
                             <span className="ml-1 text-xs font-semibold text-muted-foreground">{currency}</span>

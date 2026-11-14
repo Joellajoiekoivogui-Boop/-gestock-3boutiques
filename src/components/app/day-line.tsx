@@ -24,7 +24,7 @@ export function DayLine({
       )}
     >
       <div className="shrink-0">
-        <p className="text-xs font-semibold tracking-[0.18em] text-gold uppercase">{label}</p>
+        <p className="text-sm font-semibold text-[#e3c88f]">{label}</p>
         <p className="mt-1.5 text-[2.5rem] leading-none font-bold tracking-tight tabular-nums">{value}</p>
       </div>
       <dl className="flex flex-wrap gap-x-10 gap-y-3 sm:pb-1">
@@ -48,11 +48,11 @@ export function FactRow({
   className?: string;
 }) {
   return (
-    <dl className={cn('grid grid-cols-2 gap-x-8 gap-y-4 sm:flex sm:flex-wrap sm:gap-x-12', className)}>
+    <dl className={cn('grid grid-cols-1 gap-y-4 min-[420px]:grid-cols-2 min-[420px]:gap-x-6 sm:flex sm:flex-wrap sm:gap-x-12', className)}>
       {facts.map((fact) => (
-        <div key={fact.label}>
+        <div key={fact.label} className="min-w-0">
           <dt className="text-sm text-muted-foreground">{fact.label}</dt>
-          <dd className="text-2xl leading-tight font-bold tracking-tight tabular-nums">{fact.value}</dd>
+          <dd className="text-2xl leading-tight font-bold tracking-tight break-words tabular-nums">{fact.value}</dd>
           {fact.hint && <dd className="text-sm text-muted-foreground">{fact.hint}</dd>}
         </div>
       ))}

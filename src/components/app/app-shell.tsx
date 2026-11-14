@@ -101,10 +101,14 @@ export function AppShell({ profile, brand, children }: ShellProps) {
     return () => wide.removeEventListener('change', onChange);
   }, []);
 
-  // Barre du bas (téléphone) : deux onglets de chaque côté du bouton rond.
+  // Barre du bas (téléphone) : autant d'emplacements de chaque côté du
+  // bouton rond, « Plus » compris, pour qu'il reste au centre.
   const bottomItems = primary.slice(0, 3);
-  const left = bottomItems.slice(0, 2);
-  const right = bottomItems.slice(2);
+  const slots = bottomItems.length + 1; // + « Plus »
+  const half = Math.ceil(slots / 2);
+  const left = bottomItems.slice(0, half);
+  const right = bottomItems.slice(half);
+  const spacers = Math.max(0, left.length - (right.length + 1));
 
   return (
     <div className="min-h-dvh pb-24 md:pb-0">
@@ -172,15 +176,6 @@ export function AppShell({ profile, brand, children }: ShellProps) {
             <SignOut compact />
           </div>
 
-          <Button
-            variant="outline"
-            size="icon-lg"
-            className="ml-auto md:hidden"
-            aria-label="Ouvrir le menu"
-            onClick={() => setMenuOpen(true)}
-          >
-            <Menu className="size-6" />
-          </Button>
         </div>
       </header>
 
@@ -223,6 +218,9 @@ export function AppShell({ profile, brand, children }: ShellProps) {
         </div>
         {right.map((item) => (
           <BottomTab key={item.href} item={item} active={isActive(pathname, item.href)} />
+        ))}
+        {Array.from({ length: spacers }, (_, i) => (
+          <span key={`spacer-${i}`} aria-hidden className="flex-1" />
         ))}
         <button
           type="button"
