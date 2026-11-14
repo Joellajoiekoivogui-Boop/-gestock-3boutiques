@@ -7,22 +7,25 @@ related_targets: ["src/components/app/app-shell.tsx","src/app/globals.css"]
 
 # Surface : application MassaGui (caisse, ventes, tableau de bord, gestion)
 
-Mode : Operate. Utilisateurs : caissiers peu à l'aise au comptoir sur tablette, gérant sur place, patron à distance sur téléphone. Tâche principale : encaisser une vente en un minimum de touches ; ensuite suivre ventes et chiffres. Contraintes : charte vert #0ABF65 / noir #111111, français, GNF sans décimale, imprimante thermique, droits par rôle inchangés. Plaintes de l'utilisateur : illisible et trop petit, aspect fade et générique, navigation confuse, trop d'étapes pour vendre.
+Mode : Operate. Utilisateurs : caissiers peu à l'aise au comptoir sur tablette, gérant sur place, patron à distance sur téléphone. Tâche principale : encaisser une vente en un minimum de touches ; ensuite suivre ventes et chiffres. Contraintes : charte vert #0ABF65 (gardé pour les actions), français, GNF sans décimale, imprimante thermique, droits par rôle inchangés.
+
+Direction imposée par l'utilisateur : il a fourni une maquette de référence d'application de restaurant (« Taste Haven ») et demandé d'en reprendre le design, vert sapin et or, avec des photos de plats (exemples dans la démo, ses photos dans l'application), en gardant le vert MassaGui. Elle remplace la direction « lisière de pagne ».
 
 ## Direction contract
 
-THESIS: La caisse se lit comme un pagne : une lisière imprimée en tête porte l'état du service, et chaque catégorie a sa colorie franche qui la fait trouver d'un coup d'œil. Refuse la barre latérale noire générique, les cartes grises toutes pareilles et la confirmation en fenêtre.
+THESIS: La caisse se présente comme la carte d'un bon restaurant : photos des plats en cartes blanches arrondies, catégories en pastilles rondes à pictogramme, vert sapin et or pour l'identité. Refuse le tableau de cases plates et la barre noire technique.
 
-OWN-WORLD: Fond gris très clair teinté vert, panneaux blancs, encre noire #111. Vert MassaGui pour l'action principale et la sélection. Coloris de catégorie : indigo, brique, vert, prune, ocre, noir, en aplats pleins. Barlow pour le texte, Barlow Condensed pour les prix, les totaux et la lisière, en capitales espacées. Coins nets (6 px), filets de 1 px, pas d'ombre décorative.
+OWN-WORLD: Fond gris très clair légèrement vert (#f3f5f2), cartes blanches arrondies (14-16 px) à ombre douce, vert sapin #0f3d2c pour les éléments choisis, badges et boutons ronds « + », or #b8914a pour les filets et le sous-titre, vert MassaGui #0abf65 pour Encaisser. Playfair Display pour la marque et les titres, Inter pour tout le reste, prix en Inter gras.
 
-STORY: Le caissier voit tout de suite les catégories et les plats en gros, touche, voit le ticket se remplir, choisit le paiement, encaisse, imprime. Le gérant et le patron retrouvent la journée en une ligne et les ventes en un tableau.
+STORY: Le caissier touche une pastille de catégorie, voit les plats en photo, touche une carte, le ticket se remplit, il choisit le paiement et encaisse. Le gérant et le patron lisent la journée dans un bandeau vert sapin en tête du tableau de bord.
 
-FIRST VIEWPORT: Tablette paysage. En haut, lisière noire (28 px) : MASSAGUI FILS · date · caissier · encaissé du jour. Dessous, barre de navigation blanche à onglets larges (Caisse, Ventes, Tableau de bord, Gestion). Corps en trois colonnes : rail des catégories avec pastilles de couleur (190 px), grille de plats à grandes tuiles avec bandeau coloré et prix condensé 24 px, ticket à droite (400 px) terminé par le bouton vert « Encaisser 125 000 GNF ».
+FIRST VIEWPORT: Tablette paysage. En haut, barre blanche : logo, « MassaGui Fils » en Playfair avec « • Hôtellerie — Restaurant • » en or, onglets en pastilles au centre, utilisateur à droite. Corps : rangée de pastilles rondes de catégories, titre de section en Playfair, grille de cartes plats (photo, badge, nom, description, prix, bouton rond +) ; ticket blanc à droite terminé par la pilule verte « Encaisser 125 000 GNF ». Sur téléphone, barre d'onglets en bas avec bouton rond central Panier.
 
-FORM: Lisière de pagne, candidat 4 de la liste ordonnée, seed:45bfd420a376914e (tirage dégradé, sans challengers).
+FORM: Maquette de référence « Taste Haven » fournie par l'utilisateur : direction imposée par l'utilisateur, aucun tirage de direction effectué (le tirage ne s'applique pas à une direction imposée).
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
 ## Décisions ouvertes
-- Prise de commande en salle par les serveurs : hors périmètre de cette refonte.
-- Clôture de caisse : hors périmètre ; l'aide au rendu de monnaie reste un affichage, rien n'est enregistré.
+- Photos d'exemple : téléchargement depuis Wikimedia Commons bloqué (limite de débit) ; emplacements illustrés en attendant.
+- Badge « Populaire » : présent dans la démo ; dans l'application, il faudrait une fonction de base donnant les meilleures ventes à tous les rôles (les caissiers ne voient que leurs propres ventes).
+- Prise de commande en salle et clôture de caisse : hors périmètre.

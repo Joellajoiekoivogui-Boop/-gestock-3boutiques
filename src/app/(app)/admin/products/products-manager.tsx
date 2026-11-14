@@ -94,7 +94,7 @@ export function ProductsTable({
             return (
               <TableRow key={p.id} className={p.is_archived ? 'opacity-60' : undefined}>
                 <TableCell>
-                  <ProductThumb name={p.name} imageUrl={p.image_url} tone={p.category_id ? categoryTone.get(p.category_id) : 0} sizes="48px" className="size-12 rounded-md" textClassName="text-base" />
+                  <ProductThumb name={p.name} imageUrl={p.image_url} tone={p.category_id ? categoryTone.get(p.category_id) : 0} sizes="48px" className="size-12 rounded-lg" iconClassName="size-5" />
                 </TableCell>
                 <TableCell>
                   <p className="font-medium">{p.name}</p>

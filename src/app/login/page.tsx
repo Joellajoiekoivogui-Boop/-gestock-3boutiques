@@ -29,28 +29,22 @@ export default async function LoginPage({ searchParams }: PageProps<'/login'>) {
   const inactive = params.error === 'inactive';
 
   return (
-    <main className="grid min-h-dvh bg-background lg:grid-cols-[minmax(0,1fr)_minmax(0,32rem)]">
-      {/* Bandeau de marque : lisière noire, nom de l'établissement, coloris. */}
-      <section className="flex flex-col justify-between gap-8 bg-foreground px-6 py-8 text-background sm:px-10 lg:py-12">
-        <Logo logoUrl={branding.logo_url} name={branding.name} size={56} className="mg-pop-in" />
-        <div className="mg-rise">
-          <h1 className="font-display text-5xl leading-[0.95] font-bold tracking-tight sm:text-6xl lg:text-7xl">{branding.name}</h1>
+    <main className="grid min-h-dvh bg-background lg:grid-cols-[minmax(0,1fr)_minmax(0,34rem)]">
+      {/* Bandeau de marque, vert sapin et or. */}
+      <section className="flex flex-col justify-between gap-10 bg-forest px-6 py-8 text-forest-foreground sm:px-12 lg:py-14">
+        <Logo logoUrl={branding.logo_url} name={branding.name} size={56} className="mg-pop-in rounded-2xl" />
+        <div className="mg-rise max-w-xl">
+          <h1 className="font-serif text-5xl leading-[1.05] font-bold sm:text-6xl">{branding.name}</h1>
           {branding.tagline && (
-            <p className="mt-4 font-display text-lg font-semibold tracking-[0.16em] text-background/75 uppercase">
-              {branding.tagline}
-            </p>
+            <p className="mt-5 text-sm font-semibold tracking-[0.24em] text-gold uppercase">• {branding.tagline} •</p>
           )}
         </div>
-        <div aria-hidden className="flex gap-2">
-          {[1, 2, 3, 4, 5, 6].map((t) => (
-            <span key={t} className="h-2 flex-1 rounded-full" style={{ backgroundColor: `var(--cat-${t})` }} />
-          ))}
-        </div>
+        <p className="max-w-sm text-forest-foreground/75">Caisse, reçus, stocks et chiffres du restaurant, au même endroit.</p>
       </section>
 
-      <section className="flex items-center justify-center px-6 py-10 sm:px-10">
+      <section className="flex items-center justify-center px-6 py-12 sm:px-12">
         <div className="mg-rise w-full max-w-sm [animation-delay:120ms]">
-          <h2 className="font-display text-4xl font-bold">Connexion</h2>
+          <h2 className="font-serif text-4xl font-bold">Connexion</h2>
           <p className="mt-2 mb-8 text-muted-foreground">Accès réservé au personnel. Les comptes sont créés par l’administrateur.</p>
           <LoginForm next={next} initialError={inactive ? 'Votre compte est désactivé. Contactez l’administrateur.' : null} />
         </div>

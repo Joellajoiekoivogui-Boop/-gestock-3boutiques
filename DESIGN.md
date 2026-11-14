@@ -1,361 +1,409 @@
 ---
 name: MassaGui Fils SARL.U
-description: Caisse et gestion d'un hôtel-restaurant guinéen, habillée comme la lisière imprimée d'un pagne.
+description: Caisse et gestion d'un hôtel-restaurant guinéen, présentée comme la carte d'un bon restaurant, vert sapin et or.
 colors:
-  ground: "#edf0ed"
-  ink: "#111111"
-  panel: "#ffffff"
+  menu-ground: "#f3f5f2"
+  ink: "#16201b"
+  plate-white: "#ffffff"
   massagui-green: "#0abf65"
-  massagui-green-hover: "#09ad5b"
-  forest-ink: "#067a40"
-  mist: "#e3e8e4"
-  slate-ink: "#4a524d"
-  mint-wash: "#dcf5e7"
+  massagui-green-ink: "#0b1a12"
+  massagui-green-strong: "#067a40"
+  forest: "#0f3d2c"
+  forest-soft: "#e7efe9"
+  gold: "#b8914a"
+  gold-strong: "#82621f"
+  gold-light: "#e3c88f"
+  mist: "#eaede8"
+  slate-ink: "#5b605b"
+  mint-wash: "#e3f4ea"
   deep-leaf: "#0b5c34"
-  butter-wash: "#fdf0cc"
-  umber-ink: "#6e4b00"
+  butter-wash: "#fbefd2"
+  umber-ink: "#6b4a00"
   brick-alarm: "#c8321f"
   brick-alarm-strong: "#a8281a"
-  hairline: "#d5dcd7"
-  field-edge: "#bcc6bf"
-  cat-indigo: "#2b3c92"
+  hairline: "#e0e4dd"
+  field-edge: "#cdd3cb"
+  cat-forest: "#0f3d2c"
   cat-brick: "#b3432a"
-  cat-green: "#087a43"
-  cat-plum: "#73306e"
-  cat-ochre: "#e2a62a"
-  cat-black: "#1d201e"
+  cat-lagoon: "#1f6f8b"
+  cat-plum: "#7a3d6e"
+  cat-ochre: "#a8781c"
+  cat-charcoal: "#3c4540"
 typography:
   display:
-    fontFamily: "Barlow Condensed, Barlow, ui-sans-serif, system-ui, Arial Narrow, sans-serif"
-    fontSize: "2.75rem"
+    fontFamily: "Playfair Display, Georgia, Times New Roman, serif"
+    fontSize: "3.75rem"
     fontWeight: 700
-    lineHeight: 1
-    fontFeature: "'tnum' 1"
+    lineHeight: 1.05
   headline:
-    fontFamily: "Barlow Condensed, Barlow, ui-sans-serif, system-ui, Arial Narrow, sans-serif"
+    fontFamily: "Playfair Display, Georgia, Times New Roman, serif"
     fontSize: "2rem"
+    fontWeight: 700
+    lineHeight: 1.25
+  title:
+    fontFamily: "Playfair Display, Georgia, Times New Roman, serif"
+    fontSize: "1.5rem"
+    fontWeight: 700
+    lineHeight: 1.25
+  card-title:
+    fontFamily: "Playfair Display, Georgia, Times New Roman, serif"
+    fontSize: "1.25rem"
+    fontWeight: 600
+    lineHeight: 1.25
+  figure:
+    fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif"
+    fontSize: "2.5rem"
     fontWeight: 700
     lineHeight: 1
     letterSpacing: "-0.025em"
+    fontFeature: "'tnum' 1"
   price:
-    fontFamily: "Barlow Condensed, Barlow, ui-sans-serif, system-ui, Arial Narrow, sans-serif"
-    fontSize: "1.75rem"
+    fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif"
+    fontSize: "1.25rem"
     fontWeight: 700
     lineHeight: 1
+    letterSpacing: "-0.025em"
     fontFeature: "'tnum' 1"
-  title:
-    fontFamily: "Barlow, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif"
+  dish-name:
+    fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif"
     fontSize: "1.125rem"
-    fontWeight: 600
-    lineHeight: 1.25
+    fontWeight: 700
+    lineHeight: 1.375
   body:
-    fontFamily: "Barlow, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif"
+    fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif"
     fontSize: "1rem"
     fontWeight: 400
     lineHeight: 1.5
     fontFeature: "'tnum' 1"
   button:
-    fontFamily: "Barlow, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif"
+    fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif"
     fontSize: "15px"
     fontWeight: 600
   label:
-    fontFamily: "Barlow Condensed, Barlow, ui-sans-serif, system-ui, Arial Narrow, sans-serif"
-    fontSize: "0.875rem"
-    fontWeight: 600
-    letterSpacing: "0.05em"
-  selvedge:
-    fontFamily: "Barlow Condensed, Barlow, ui-sans-serif, system-ui, Arial Narrow, sans-serif"
+    fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif"
     fontSize: "13px"
     fontWeight: 600
-    letterSpacing: "0.14em"
+    lineHeight: 1.25
+  tagline:
+    fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif"
+    fontSize: "11px"
+    fontWeight: 600
+    letterSpacing: "0.2em"
 rounded:
-  sm: "2px"
-  md: "4px"
-  lg: "6px"
-  xl: "10px"
+  sm: "8px"
+  md: "10px"
+  lg: "14px"
+  xl: "18px"
   full: "9999px"
 spacing:
   xs: "4px"
   sm: "8px"
   md: "12px"
   lg: "16px"
-  card: "20px"
   xl: "24px"
+  2xl: "40px"
 components:
   button-primary:
     backgroundColor: "{colors.massagui-green}"
-    textColor: "{colors.ink}"
+    textColor: "{colors.massagui-green-ink}"
     typography: "{typography.button}"
-    rounded: "{rounded.md}"
-    padding: "8px 16px"
+    rounded: "{rounded.full}"
+    padding: "8px 20px"
     height: "40px"
   button-primary-hover:
-    backgroundColor: "{colors.massagui-green-hover}"
-    textColor: "{colors.ink}"
-  button-checkout:
+    backgroundColor: "{colors.massagui-green-strong}"
+    textColor: "{colors.plate-white}"
+  button-encaisser:
     backgroundColor: "{colors.massagui-green}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.md}"
+    textColor: "{colors.massagui-green-ink}"
+    rounded: "{rounded.full}"
     padding: "0 20px"
     height: "64px"
   button-dark:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.ground}"
-    rounded: "{rounded.md}"
+    backgroundColor: "{colors.forest}"
+    textColor: "{colors.plate-white}"
+    typography: "{typography.button}"
+    rounded: "{rounded.full}"
+    padding: "8px 20px"
     height: "40px"
   button-outline:
-    backgroundColor: "{colors.panel}"
+    backgroundColor: "{colors.plate-white}"
     textColor: "{colors.ink}"
-    rounded: "{rounded.md}"
+    typography: "{typography.button}"
+    rounded: "{rounded.full}"
+    padding: "8px 20px"
     height: "40px"
-  button-outline-hover:
+  button-ghost-hover:
     backgroundColor: "{colors.mist}"
-  input:
-    backgroundColor: "{colors.panel}"
     textColor: "{colors.ink}"
-    rounded: "{rounded.md}"
+  button-destructive:
+    backgroundColor: "{colors.brick-alarm}"
+    textColor: "{colors.plate-white}"
+    rounded: "{rounded.full}"
+  input:
+    backgroundColor: "{colors.plate-white}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body}"
+    rounded: "{rounded.sm}"
     padding: "4px 12px"
     height: "40px"
   input-search:
-    backgroundColor: "{colors.panel}"
-    rounded: "{rounded.md}"
-    height: "48px"
+    backgroundColor: "{colors.plate-white}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.full}"
+    padding: "0 48px"
+    height: "52px"
   card:
-    backgroundColor: "{colors.panel}"
+    backgroundColor: "{colors.plate-white}"
     textColor: "{colors.ink}"
     rounded: "{rounded.lg}"
     padding: "20px"
-  product-tile:
-    backgroundColor: "{colors.panel}"
+  dish-card:
+    backgroundColor: "{colors.plate-white}"
     textColor: "{colors.ink}"
     rounded: "{rounded.lg}"
-    padding: "14px"
-  category-band:
-    height: "28px"
-  category-rail-item:
-    textColor: "{colors.ink}"
-    rounded: "{rounded.md}"
-    padding: "0 12px"
-    height: "56px"
-  category-rail-item-active:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.ground}"
-  payment-option:
-    backgroundColor: "{colors.panel}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.md}"
-    height: "52px"
-  payment-option-selected:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.ground}"
-  quantity-pip:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.ground}"
+    padding: "8px"
+  dish-add:
+    backgroundColor: "{colors.forest}"
+    textColor: "{colors.plate-white}"
     rounded: "{rounded.full}"
-    height: "32px"
+    size: "36px"
+  category-disc:
+    backgroundColor: "{colors.plate-white}"
+    rounded: "{rounded.full}"
+    size: "64px"
+  category-disc-active:
+    backgroundColor: "{colors.forest}"
+    textColor: "{colors.plate-white}"
+  nav-tab:
+    textColor: "{colors.slate-ink}"
+    typography: "{typography.button}"
+    rounded: "{rounded.full}"
+    height: "44px"
+    padding: "0 16px"
+  nav-tab-active:
+    backgroundColor: "{colors.forest}"
+    textColor: "{colors.plate-white}"
+  nav-track:
+    backgroundColor: "{colors.mist}"
+    rounded: "{rounded.full}"
+    padding: "4px"
+  bottom-bar-centre:
+    backgroundColor: "{colors.forest}"
+    textColor: "{colors.plate-white}"
+    rounded: "{rounded.full}"
+    size: "72px"
+  payment-tile:
+    backgroundColor: "{colors.plate-white}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.lg}"
+    height: "52px"
+  payment-tile-selected:
+    backgroundColor: "{colors.forest}"
+    textColor: "{colors.plate-white}"
+  day-line:
+    backgroundColor: "{colors.forest}"
+    textColor: "{colors.plate-white}"
+    rounded: "{rounded.lg}"
+    padding: "20px 24px"
+  badge:
+    rounded: "{rounded.full}"
+    typography: "{typography.label}"
+    padding: "2px 10px"
+  badge-success:
+    backgroundColor: "{colors.mint-wash}"
+    textColor: "{colors.deep-leaf}"
   badge-warning:
     backgroundColor: "{colors.butter-wash}"
     textColor: "{colors.umber-ink}"
-    rounded: "{rounded.full}"
-    padding: "2px 10px"
-  badge-soldout:
+  badge-stock:
+    backgroundColor: "{colors.forest}"
+    textColor: "{colors.plate-white}"
+  badge-sold-out:
     backgroundColor: "{colors.brick-alarm-strong}"
-    textColor: "{colors.panel}"
+    textColor: "{colors.plate-white}"
+  quantity-pip:
+    backgroundColor: "{colors.massagui-green}"
+    textColor: "{colors.massagui-green-ink}"
     rounded: "{rounded.full}"
-    padding: "2px 10px"
-  selvedge-band:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.ground}"
-    typography: "{typography.selvedge}"
-    padding: "0 16px"
-    height: "32px"
-  tab-bar:
-    backgroundColor: "{colors.panel}"
-    textColor: "{colors.slate-ink}"
-    height: "64px"
-  tab-active:
-    textColor: "{colors.ink}"
-    height: "64px"
-  table-head:
-    textColor: "{colors.slate-ink}"
-    typography: "{typography.label}"
-    height: "44px"
+    size: "32px"
 ---
 
 # Design System: MassaGui Fils SARL.U
 
 ## Overview
 
-**Creative North Star : « La lisière de pagne »**
+**Creative North Star: « La carte du restaurant »**
 
-L'écran se lit comme un pagne wax déplié sur le comptoir. En tête court une lisière noire imprimée en capitales condensées : le nom de la maison, la date, la personne connectée. Elle se termine par une bande de six coloris pleins, comme les repères d'impression d'un tissu. Sous la lisière, tout est sobre : un fond gris très clair teinté de vert, des panneaux blancs, une encre noire. La couleur sert à deux choses seulement : le vert MassaGui pour l'action qui fait avancer la vente, et six coloris francs (indigo, brique, vert, prune, ocre, noir) pour distinguer les catégories de plats en un coup d'œil.
+L'application se lit comme la carte d'un bon restaurant posée sur le comptoir : des plats présentés en cartes blanches arrondies sur un fond gris très clair à peine vert, des catégories en pastilles rondes à pictogramme, et une identité tenue par deux couleurs de maison, le vert sapin et l'or. Le vert MassaGui, vif, n'est pas l'identité : c'est le geste qui encaisse. Ce monde reprend la maquette de référence fournie par l'utilisateur et remplace l'ancienne « lisière de pagne » (bande noire, Barlow).
 
-Le système est dense mais lisible à bout de bras : grandes cibles tactiles (44 à 64 px), chiffres en Barlow Condensed gras et à chasse fixe, libellés courts en Barlow. Les montants en francs guinéens sont l'information la plus grosse de l'écran : le total du ticket et le chiffre du jour s'affichent en 44 px. Les surfaces sont plates et cerclées d'un filet de 1 px ; aucune ombre ne sert à décorer.
+La densité est celle d'un outil de comptoir sur tablette : grandes cibles (44 px au doigt, 64 px pour Encaisser), chiffres en Inter gras à chasse fixe, titres en Playfair Display. La serif donne le ton « maison » ; elle ne porte jamais un prix ni un montant. Les surfaces sont plates à ombre douce, sans dégradé ni texture ; la profondeur vient du blanc posé sur le fond clair.
 
-Ce monde rejette la barre latérale noire générique, la rangée de cartes grises identiques et les dégradés décoratifs. La navigation est une barre d'onglets blanche sous la lisière ; les chiffres de la journée tiennent sur une seule ligne plutôt que dans une grille de tuiles.
+L'application refuse le tableau de cases plates et la barre noire technique de l'ancien monde.
 
 **Key Characteristics:**
-- Lisière noire de 32 px en capitales espacées, terminée par une bande de six coloris de 4 px.
-- Fond `ground` teinté vert, panneaux blancs, filets de 1 px, coins nets (4 à 6 px).
-- Vert MassaGui réservé à l'action principale et au contour de ce qui est déjà au ticket.
-- La sélection d'un choix (catégorie, mode de paiement, montant reçu) s'imprime en noir plein.
-- Barlow Condensed gras à chasse fixe pour tout ce qui est prix, total, compteur ou en-tête.
+- Fond gris-vert clair, cartes blanches arrondies (14 px) à ombre douce.
+- Vert sapin pour tout ce qui est choisi : onglet actif, catégorie active, paiement sélectionné, bouton rond « + ».
+- Or pour la marque : sous-titre « • Hôtellerie — Restaurant • », coche du paiement choisi, libellé du bandeau de journée.
+- Vert MassaGui réservé aux actions qui valident (Encaisser, Ouvrir la caisse) et à la pastille de quantité.
+- Playfair Display pour la marque et les titres, Inter pour tout le reste.
+- Formes rondes partout où l'on touche : pilules, pastilles, boutons ronds.
 
 ## Colors
 
-Une encre et un papier, un vert d'action, et six coloris d'impression réservés aux catégories.
+Une base neutre légèrement verte, deux couleurs de maison (sapin, or) et un vert vif d'action ; les teintes de catégorie ne servent qu'à reconnaître un rayon.
 
 ### Primary
-- **Vert MassaGui** (`massagui-green`) : la couleur de la charte. Fond du bouton principal (« Encaisser », « Se connecter »), contour de 2 px des tuiles déjà au ticket, soulignement de 4 px de l'onglet actif, anneau de focus. Le texte posé dessus est toujours noir (`ink`, contraste 8,7:1), jamais blanc.
-- **Vert MassaGui appuyé** (`massagui-green-hover`) : survol du bouton principal.
-- **Vert forêt** (`forest-ink`) : la version du vert qui peut porter du texte ou un trait fin sur fond clair (≥ 4,5:1). Liens, contour du focus clavier, barres des graphiques et des répartitions.
+- **Vert MassaGui** (massagui-green) : couleur de la charte, gardée pour l'action qui valide : bouton par défaut, pilule « Encaisser », « Ouvrir la caisse », pastille de quantité « ×2 » sur une carte plat, compteur du panier. Toujours avec texte quasi noir (massagui-green-ink), contraste 8,7:1.
+- **Vert MassaGui foncé** (massagui-green-strong) : survol du bouton principal (le texte passe au blanc), liens, curseur de saisie, contour de focus, barres de graphiques.
 
-### Secondary : les coloris de catégorie
-Six aplats attribués dans l'ordre d'affichage des catégories (1 à 6, puis on recommence). Une catégorie garde toujours le même coloris : pastille de 16 px dans le rail, bande de 28 px en tête de chaque tuile de plat, initiales des produits sans photo.
-- **Indigo** (`cat-indigo`), texte blanc.
-- **Brique** (`cat-brick`), texte blanc.
-- **Vert de cuisine** (`cat-green`), texte blanc.
-- **Prune** (`cat-plum`), texte blanc.
-- **Ocre** (`cat-ochre`), texte noir.
-- **Noir de cuisine** (`cat-black`), texte blanc.
+### Secondary
+- **Vert sapin** (forest) : la couleur de l'état choisi et de l'identité. Onglet actif, pastille de catégorie active, mode de paiement sélectionné, bouton rond « + » des cartes plats, bouton central de la barre du bas, bandeau de journée, panneau de marque de la connexion, `themeColor` du navigateur. Bordure de 2 px d'une carte plat déjà au ticket.
+- **Sapin pâle** (forest-soft) : fond des pastilles d'état vide, sélection de texte, fond `accent`.
 
-### Tertiary : états
-- **Lavis menthe** (`mint-wash`) sur **feuille profonde** (`deep-leaf`) : succès, élément actif du menu mobile, sélection de texte.
-- **Lavis beurre** (`butter-wash`) sur **encre terre d'ombre** (`umber-ink`) : avertissement, stock bas (« Reste 3 »).
-- **Brique d'alarme** (`brick-alarm`) : action destructrice. **Brique d'alarme appuyée** (`brick-alarm-strong`) : texte d'erreur, montant manquant, pastille « Rupture ».
+### Tertiary
+- **Or** (gold) : filets et marque sur fond sapin : sous-titre de la connexion, coche du paiement choisi.
+- **Or foncé** (gold-strong) : le même or quand il est posé sur blanc (sous-titre de l'en-tête), lisible à 5,6:1.
+- **Or clair** (gold-light) : libellé du chiffre principal dans le bandeau de journée.
+- **États** : mint-wash / deep-leaf (succès), butter-wash / umber-ink (avertissement, bandeau de démonstration), brick-alarm / brick-alarm-strong (suppression, rupture, monnaie manquante).
+- **Teintes de catégorie** (cat-forest, cat-brick, cat-lagoon, cat-plum, cat-ochre, cat-charcoal) : attribuées dans l'ordre d'affichage des catégories, toujours la même pour la même catégorie. Elles colorent le pictogramme d'une pastille de catégorie et, mélangées à 12 % dans du blanc, le fond de l'emplacement photo d'un plat sans image.
 
 ### Neutral
-- **Encre** (`ink`) : texte, lisière, sélection pleine, pastille de quantité.
-- **Papier** (`panel`) : cartes, tuiles, ticket, barre d'onglets, champs.
-- **Fond de comptoir** (`ground`) : fond de page, gris très clair teinté vert.
-- **Brume** (`mist`) : survols, zone d'aide au rendu de monnaie, en-têtes de tableau (à 60 %).
-- **Ardoise** (`slate-ink`) : texte secondaire, onglets inactifs, devise « GNF » après un prix.
-- **Filet** (`hairline`) : bordures de cartes et séparateurs.
-- **Bord de champ** (`field-edge`) : bordure des champs et des boutons contour, un cran plus foncée que le filet.
+- **Fond de carte** (menu-ground) : fond de toutes les pages.
+- **Encre** (ink) : texte principal, noir légèrement vert.
+- **Blanc d'assiette** (plate-white) : cartes, ticket, en-tête, barre du bas, champs.
+- **Brume** (mist) : rail des onglets, fonds secondaires, en-tête de tableau, zone de monnaie rapide.
+- **Ardoise** (slate-ink) : texte secondaire, onglets inactifs, devise « GNF » à côté d'un prix.
+- **Filet** (hairline) : bordures de cartes et séparateurs.
+- **Bord de champ** (field-edge) : contour des champs et des boutons à contour.
 
 ### Named Rules
-**La règle du vert qui encaisse.** Le vert plein ne remplit qu'un seul bouton par écran : celui qui fait avancer la vente ou la connexion. Ailleurs il n'apparaît qu'en trait (onglet actif, contour de tuile, focus).
+**La règle du sapin choisi.** Tout ce qui est sélectionné passe en vert sapin plein avec texte blanc ; jamais en vert MassaGui. Le vert vif ne signale pas un état, il déclenche une action.
 
-**La règle de l'encre sélectionnée.** Un choix exclusif sélectionné (catégorie, mode de paiement, billet reçu) passe en noir plein avec texte clair. On ne sélectionne pas en vert.
+**La règle de l'or rare.** L'or n'apparaît que sur la marque et sur un détail de sélection (coche, libellé). Jamais en fond, jamais sur un bouton. Sur blanc, toujours gold-strong.
 
-**La règle du coloris fixe.** Les six coloris appartiennent aux catégories et à la lisière. Ils ne servent jamais à signaler un état, ni à décorer un bouton.
+**La règle des teintes de rayon.** Les six teintes de catégorie restent dans les pictogrammes et les emplacements photo ; elles ne colorent ni texte courant, ni bouton, ni graphique.
 
 ## Typography
 
-**Display Font :** Barlow Condensed 500–700 (repli : Barlow, Arial Narrow, sans-serif)
-**Body Font :** Barlow 400–700 (repli : ui-sans-serif, system-ui, Segoe UI, Roboto, Arial)
+**Display Font:** Playfair Display 600–700 (avec Georgia, Times New Roman, serif)
+**Body Font:** Inter 400–700 (avec ui-sans-serif, system-ui, Segoe UI, Roboto, Arial)
 
-**Character :** Barlow, grotesque d'inspiration signalétique, garde les libellés francs et lisibles au doigt ; sa version condensée donne aux prix et aux totaux l'allure d'un afficheur de caisse, gros sans déborder. Les chiffres sont à chasse fixe partout (`tnum` sur `body`).
+Les deux familles sont auto-hébergées via `@fontsource`. Le corps active les chiffres à chasse fixe (`'tnum' 1`) partout.
+
+**Character:** Une serif de carte de restaurant pour nommer, une grotesque nette et grasse pour compter. Le contraste entre les deux suffit à structurer la page sans couleur.
 
 ### Hierarchy
-- **Display** (Barlow Condensed 700, 2,75rem, interligne 1) : le total du ticket, le chiffre du jour de la ligne de journée. Un seul par zone.
-- **Headline** (Barlow Condensed 700, 2rem, interligne 1, approche −0,025em) : titre de page (« Caisse », « Ventes »). Les titres de connexion montent à 2,25rem (h2) et jusqu'à 4,5rem (nom de l'établissement).
-- **Price** (Barlow Condensed 700, 1,75rem, interligne 1) : prix sur les tuiles de plats et chiffres secondaires des lignes de faits ; la devise suit en Barlow 600 1rem ardoise.
-- **Title** (Barlow 600, 1,125rem, interligne 1,25) : titres de cartes, noms de plats (1,125rem également sur les tuiles, 17px dans le ticket).
-- **Body** (Barlow 400, 1rem, interligne 1,5) : texte courant ; 15px dans les tableaux.
-- **Button** (Barlow 600, 15px) : boutons ; 16px en taille `lg`, 18px en `xl`, 20px pour « Encaisser ».
-- **Label** (Barlow Condensed 600, 0,875rem, approche 0,05em, capitales) : en-têtes de colonnes, intitulés des chiffres (« Encaissé aujourd'hui »).
-- **Selvedge** (Barlow Condensed 600, 13px, approche 0,14em, capitales) : la lisière seulement.
+- **Display** (Playfair 700, 3–3,75 rem, 1,05) : nom de l'établissement sur le panneau sapin de la connexion.
+- **Headline** (Playfair 700, 2 rem) : titre de page (`PageHeader`), « Connexion » (2,25 rem).
+- **Title** (Playfair 700, 1,5 rem) : titre de section de la caisse (« Tout le menu »), « Commande » et « Total » du ticket, nom de marque dans l'en-tête (1,25 rem).
+- **Card title** (Playfair 600, 1,25 rem) : titres de cartes, titre d'état vide.
+- **Figure** (Inter 700, 2,5 rem, serré) : chiffre principal du bandeau de journée, total du ticket (1,875–2,25 rem), statistiques (1,75 rem).
+- **Price** (Inter 700, 1,125–1,25 rem, serré) : prix d'une carte plat, suivi de « GNF » en 12 px semi-gras ardoise.
+- **Dish name** (Inter 700, 1,125 rem, 1,375) : nom du plat, deux lignes au plus.
+- **Body** (Inter 400, 16 px, 1,5) : texte courant, descriptions de plats (14 px ardoise, deux lignes au plus).
+- **Button** (Inter 600, 15 px) : boutons et onglets.
+- **Label** (Inter 600, 13 px) : badges, nom de catégorie sous sa pastille.
+- **Tagline** (Inter 600, 11 px, capitales, interlettrage 0,2 em, gold-strong) : uniquement le sous-titre de marque « • Hôtellerie — Restaurant • ».
 
 ### Named Rules
-**La règle de l'afficheur.** Tout montant, compteur ou quantité s'écrit en Barlow Condensed gras à chasse fixe. Un prix en Barlow normal est une erreur.
+**La règle de la serif qui nomme.** Playfair nomme (marque, page, section, carte) ; elle ne porte jamais un prix, un total ni une quantité. Les chiffres sont toujours en Inter gras à chasse fixe.
 
-**La règle des capitales réservées.** Les capitales espacées sont réservées à la lisière, aux en-têtes de tableau, aux intitulés de chiffres et au mot « Total ». Pas de surtitre en capitales au-dessus des titres.
+**La règle des capitales uniques.** Le seul texte en capitales interlettrées de l'interface est la ligne de marque et les en-têtes de colonnes de tableau. Aucun sur-titre au-dessus des titres.
 
 ## Layout
 
-L'en-tête est collant et mesure 100 px : lisière 32 px, bande de coloris 4 px, barre d'onglets blanche 64 px. Le contenu est centré dans une largeur maximale de 1600 px, avec 16 px de marge sur téléphone et 24 px à partir de 640 px.
+En-tête blanc collant de 72 px (`h-[4.5rem]`) : logo arrondi 42 px, marque, rail d'onglets centré, utilisateur et déconnexion à droite. Contenu dans un conteneur de 1600 px au plus, marges 16 px (téléphone) et 24 px (tablette et plus).
 
-La caisse casse cette marge et occupe toute la hauteur restante. À partir de 1024 px, trois colonnes : rail des catégories (13rem, 208 px), grille de plats fluide, ticket (26rem, 416 px), séparés par des filets. La grille de plats remplit des colonnes d'au moins 11rem (176 px), 2 colonnes sur téléphone, avec 12 px d'écart. Sous 1024 px, le rail devient une rangée de puces défilante sous la recherche, et le ticket devient une barre fixe en bas (« Panier (3) » + total) qui ouvre un tiroir de 92 % de la hauteur.
+Caisse (≥ 1024 px) : grille à deux colonnes, menu à gauche, ticket fixe de 26 rem à droite, chacun défilant seul. En tête du menu, une zone collante : champ de recherche en pilule, bouton sombre « Ventes du jour », rangée défilante de pastilles de catégorie (88 px de large chacune), puis titre de section en Playfair et compteur de plats. Grille de cartes plats : deux colonnes sur téléphone, puis remplissage automatique à 200 px minimum, écarts 12 puis 16 px.
 
-La navigation à onglets s'affiche à partir de 768 px ; en dessous, un bouton menu ouvre un tiroir latéral de 320 px. Rythme : 4 / 8 / 12 / 16 / 20 / 24 px ; 20 px est le retrait interne des cartes et du ticket.
+Tablette portrait (768–1023 px) : le ticket devient un tiroir du bas (92 dvh), ouvert par une barre fixe « Panier (n) » en bouton xl.
+
+Téléphone (< 768 px) : rail d'onglets masqué, barre d'onglets fixe en bas (80 px) avec bouton rond central de 72 px qui dépasse de 28 px et ouvre le panier (ou la caisse hors caisse), menu « Plus » en tiroir latéral de 320 px. Le contenu garde 96 px de marge basse.
+
+Rythme : 4, 8, 12, 16, 24, 40 px. Les chiffres d'une ligne de faits sont espacés de 40 à 48 px.
 
 ## Elevation & Depth
 
-Le monde est plat. La profondeur vient du contraste papier blanc sur fond teinté et des filets de 1 px. Les ombres n'apparaissent que sur ce qui flotte au-dessus de la page (menus, tiroirs, fenêtres) et comme réponse à un état.
+Système à ombre douce unique : les surfaces blanches se détachent du fond clair par une ombre ambiante très légère, jamais par un contour fort. Pas de dégradé ni de verre, hormis le flou léger de l'en-tête collant.
 
 ### Shadow Vocabulary
-- **Anneau de sélection** (`box-shadow: 0 0 0 2px var(--primary)`) : tuile de plat déjà au ticket, avec bordure verte.
-- **Soulèvement au survol** (`box-shadow: 0 10px 24px -12px rgb(17 17 17 / 0.25)`, avec `translateY(-2px)`) : cartes interactives `mg-lift`, souris uniquement.
-- **Flottant** (`shadow-md` / `shadow-lg` de Tailwind) : menus déroulants, tiroirs, fenêtres de dialogue.
-- **Anneau de focus** (`0 0 0 3px` en `ring` à 50–60 %) : tout élément interactif au clavier.
+- **Ombre de carte** (`box-shadow: 0 1px 2px rgb(22 32 27 / 0.05), 0 6px 18px -8px rgb(22 32 27 / 0.12)`, `--card-shadow`) : cartes, cartes plats, pastilles de catégorie au repos, champ de recherche.
+- **Ombre portée** (`shadow-md` / `shadow-lg` de Tailwind) : pastille de catégorie active, pastille de quantité, bouton rond central de la barre du bas (entouré d'un anneau blanc de 4 px).
+- **Anneau de sélection** (`box-shadow: 0 0 0 2px var(--forest)`) : carte plat déjà présente au ticket.
 
 ### Named Rules
-**La règle du plat au repos.** Au repos, aucune surface posée sur la page ne porte d'ombre. Une ombre signale un survol, une sélection ou un élément flottant.
+**La règle de l'assiette posée.** Une surface est blanche sur fond clair avec l'ombre de carte, ou elle n'est pas une surface. On n'empile pas de carte dans une carte.
 
 ## Shapes
 
-Coins nets et réguliers dérivés d'un rayon de base de 6 px : 4 px (`md`) pour les boutons, champs, puces de catégorie et options de paiement ; 6 px (`lg`) pour les cartes et les tuiles de plats ; 10 px (`xl`) pour les fenêtres de dialogue et le reçu ; 2 px (`sm`) pour le haut du trait d'onglet actif et les pastilles de catégorie. Le rond complet est réservé aux badges, à la pastille de quantité, aux barres de répartition et aux icônes d'état vide. Les bordures sont des filets de 1 px ; la bande de coloris en tête de tuile est coupée net par l'arrondi de la tuile.
+Formes douces et rondes. Rayon de base 14 px (`--radius`) pour les cartes, cartes plats, tuiles de paiement et bandeau de journée ; 8 px pour les champs et l'emplacement photo dans une carte plat ; 10 px pour les éléments de menu ; 18 px pour les grandes cartes. Tout ce qui se touche en un geste est rond : boutons en pilule, onglets en pilule, pastilles de catégorie circulaires (64 px), bouton « + » circulaire (36 px), badges en pilule, bouton central circulaire (72 px). Bordures d'un pixel en `hairline`, invisibles sur les cartes plats au repos.
 
 ## Components
 
 ### Buttons
-Fermes et tactiles : ils s'enfoncent légèrement (`scale(0.97)`) à l'appui.
-- **Shape :** coins à 4 px (`rounded.md`).
-- **Primary :** vert MassaGui, texte noir, Barlow 600 15px, 40 px de haut (44 px minimum sur écran tactile).
-- **Tailles :** `sm` 36 px, `default` 40 px, `lg` 48 px, `xl` 64 px ; boutons icône de 36 à 48 px.
-- **Hover / Focus :** le vert fonce légèrement ; anneau de focus de 3 px à 50 %. Transition de 150 ms sur couleur, fond, ombre et échelle.
-- **Dark :** encre pleine, texte clair : action forte non commerciale.
-- **Outline :** papier blanc, bordure `field-edge`, survol en brume avec bordure assombrie.
-- **Ghost / Link :** survol en brume ; lien en vert forêt souligné au survol.
-- **Destructive :** brique d'alarme, texte blanc.
+Pilules pleines, franches, qui s'enfoncent légèrement au toucher (`scale 0.97`, 150 ms).
+- **Shape :** pilule (rayon plein). Hauteurs : 36, 40, 48 et 64 px (xl) ; 44 px minimum au doigt.
+- **Primary :** vert MassaGui, texte quasi noir, Inter 600 15 px, 20 px de marge latérale.
+- **Hover / Focus :** survol vers massagui-green-strong avec texte blanc ; focus en anneau sapin de 3 px à 50 %.
+- **Dark :** vert sapin, texte blanc (« Ventes du jour », actions secondaires fortes).
+- **Outline :** blanc, contour field-edge, survol en brume. **Ghost :** sans fond, survol en brume. **Destructive :** brique, texte blanc.
+- **Encaisser :** bouton primaire xl de 64 px, pleine largeur du ticket, icône et libellé à gauche, montant en gras 20 px à droite.
 
-### Chips (puces de catégorie, mobile)
-- **Style :** 48 px de haut, bordure filet, papier blanc, pastille de coloris 16 px, compteur condensé en ardoise.
-- **State :** sélectionnée = encre pleine, texte clair, compteur à 70 %.
+### Chips
+- **Pastilles de catégorie :** disque blanc de 64 px à ombre de carte, pictogramme Lucide 28 px dans la teinte de la catégorie, nom en 13 px semi-gras et nombre de plats en dessous. Active : disque sapin plein, pictogramme blanc, nom en sapin.
+- **Montants rapides :** pilules blanches de 44 px dans une zone brume ; choisie, sapin plein.
+- **Badges :** pilule 13 px semi-gras ; succès (menthe/vert profond), avertissement (beurre/terre d'ombre), destructif (brique à 10 %), « Reste n » en sapin plein, « Rupture » en brique pleine.
 
 ### Cards / Containers
-- **Corner Style :** 6 px.
-- **Background :** papier blanc sur fond de comptoir.
-- **Shadow Strategy :** aucune au repos (voir Elevation & Depth).
-- **Border :** filet de 1 px.
-- **Internal Padding :** 20 px ; titres en Barlow 600 1,125rem.
+- **Corner Style :** 14 px (cartes), 18 px (grandes cartes).
+- **Background :** blanc d'assiette.
+- **Shadow Strategy :** ombre de carte (voir Elevation & Depth).
+- **Border :** filet d'un pixel.
+- **Internal Padding :** 20 px ; titre de carte en Playfair 600 20 px.
 
 ### Inputs / Fields
-- **Style :** papier blanc, bordure `field-edge` 1 px, coins 4 px, 40 px (44 px au doigt), texte 1rem. La recherche de la caisse monte à 48 px et 18px, loupe à gauche, bouton d'effacement à droite.
-- **Focus :** bordure verte et anneau vert de 3 px à 40 %.
-- **Error / Disabled :** bordure brique d'alarme et anneau à 20 % ; désactivé à 50 % d'opacité.
+- **Style :** blanc, contour field-edge, rayon 8 px, 40 px de haut (44 px au doigt), texte 16 px.
+- **Recherche de la caisse :** pilule blanche de 52 px sans contour, ombre de carte, loupe à gauche, effacement rond à droite.
+- **Focus :** contour sapin et anneau sapin de 3 px à 40 %.
+- **Error / Disabled :** contour brique et halo brique à 20 % ; désactivé à 50 % d'opacité.
 
 ### Navigation
-- **Lisière :** bande noire de 32 px, Barlow Condensed 600 13px en capitales espacées : établissement, « Hôtellerie — Restaurant », date en heure de Conakry, personne et rôle (les éléments se révèlent progressivement de 640 à 1024 px). Dessous, la bande de six coloris de 4 px.
-- **Barre d'onglets :** blanche, 64 px, filet en bas. Onglets en Barlow 600 16px avec icône de 20 px ; inactif en ardoise, actif en encre avec un trait vert de 4 px en bas. Les écrans de gestion sont regroupés sous un onglet déroulant « Gestion ».
-- **Mobile :** sous 768 px, tiroir latéral de 320 px, lignes de 48 px ; l'élément actif est en lavis menthe sur feuille profonde.
+- **En-tête :** blanc à 95 % avec flou, filet bas. Marque : logo 42 px arrondi, nom en Playfair 700 20 px, ligne « • Hôtellerie — Restaurant • » en or foncé capitales 11 px.
+- **Onglets :** rail en pilule brume (4 px de marge), onglets en pilule de 44 px, icône 18 px + libellé 15 px semi-gras ; inactif ardoise, survol encre, actif sapin plein texte blanc. Le menu « Gestion » se déroule dans un panneau arrondi de 12 px aux lignes de 44 px.
+- **Téléphone :** barre blanche du bas de 80 px, onglets icône 24 px + libellé 12 px (actif en sapin), bouton rond central sapin de 72 px qui dépasse, anneau blanc, compteur vert MassaGui. Menu « Plus » en tiroir latéral, lignes de 48 px arrondies 14 px, active en sapin plein.
 
-### Tuile de plat (signature)
-Bouton entier de la grille de caisse. Papier blanc, filet, coins 6 px. En tête, une bande de 28 px au coloris de la catégorie (ou la photo en 16:9 si les photos sont activées). Corps à 14 px de retrait : nom en Barlow 600 1,125rem sur deux lignes au plus, prix en `price` calé en bas, devise en ardoise. Les badges « Rupture » (brique appuyée) et « Reste N » (lavis beurre) se posent sur la bande, en bas à gauche, pour que les prix restent alignés. Une fois au ticket, la tuile prend un contour vert de 2 px et une pastille noire « ×N » en haut à droite, qui rebondit à chaque ajout. En rupture, la bande passe en brume et le texte en ardoise.
-
-### Rail des catégories
-Colonne blanche de 208 px. Chaque entrée fait 56 px de haut : pastille de coloris 16 px (icône grille pour « Tout »), nom, compteur condensé. Survol en brume ; sélection en encre pleine.
+### Carte plat (signature)
+Bouton entier, carte blanche 14 px à ombre de carte. En haut, l'emplacement photo arrondi 8 px à 8 px des bords (16:10 avec photo, 3:1 sans), sinon fond teinté de la catégorie avec pictogramme. Badges d'état en haut à gauche, pastille de quantité verte en haut à droite. Dessous : nom (Inter 700 18 px), description (14 px ardoise, masquée sur téléphone), puis prix en Inter gras avec « GNF » en petit, et bouton rond « + » sapin de 36 px qui passe au vert MassaGui au survol. Survol : montée de 2 px et léger zoom de la photo ; au ticket : bord et anneau sapin de 2 px ; en rupture : photo grisée, texte ardoise.
 
 ### Ticket
-Colonne blanche de 416 px. En-tête de 64 px (« Ticket » en condensé 1,5rem + nombre d'articles). Lignes séparées par des filets : nom 17px semi-gras, montant de ligne en condensé 1,25rem, prix unitaire en ardoise, pas-à-pas −/quantité/+ en cases de 44 px. Pied : « TOTAL » en condensé capitales et montant en `display` ; modes de paiement en grille de 3 (52 px, icône + libellé, sélection en encre avec coche verte) ; pour les espèces, zone brume avec trois billets suggérés et un champ « Autre », puis « À rendre » ou « Il manque » en condensé. Le tout se termine par le bouton vert de 64 px « Encaisser » avec le total à droite.
+Panneau blanc à droite. En-tête de 64 px : « Commande » en Playfair 24 px et nombre d'articles. Lignes séparées par des filets : nom 17 px semi-gras, total de ligne en gras, prix unitaire ardoise, contrôles de quantité ronds de 44 px. Pied : sous-total, remise, « Total » en Playfair avec montant en Inter gras 30–36 px, tuiles de paiement en grille de 3 (blanches, 52 px, rayon 14 px ; choisie en sapin avec coche or), zone de monnaie rapide sur fond brume, puis la pilule Encaisser.
 
-### Ligne de journée
-Une carte, un chiffre : intitulé en `label`, valeur en `display`, puis les faits qui l'expliquent côte à côte en condensé 1,5rem. Remplace la rangée de tuiles de statistiques.
+### Bandeau de journée
+Carte sapin pleine sans bordure, rayon 14 px : libellé en or clair, chiffre principal en Inter 700 40 px, puis faits côte à côte (libellé blanc à 75 %, valeur en gras 20 px). En tête du tableau de bord.
 
-### Badges
-Pilules de 13px Barlow 600 : vert (défaut), lavis menthe (succès), lavis beurre (avertissement), brique à 10 % avec texte brique appuyée (erreur), brume (secondaire).
-
-### Tableaux
-Corps en 15px ; en-tête de 44 px sur brume à 60 %, en `label` ardoise ; cellules à 12 px de retrait ; filets entre les lignes, survol en brume à 40 %.
+### Connexion
+Écran en deux colonnes sur grand écran : panneau sapin plein à gauche (logo, nom en Playfair display, ligne de marque en or capitales), formulaire sur fond clair à droite.
 
 ### Mouvement
-Courbe unique `cubic-bezier(0.16, 1, 0.3, 1)`, durées de 0,3 à 0,8 s, uniquement `transform`, `opacity` et `clip-path` : entrée de page (10 px, 0,3 s), cascade des grilles et des lignes de tableau (décalage de 25 à 35 ms), barres qui s'étirent (0,8 s), reçu qui « sort » de l'imprimante (0,75 s). Avec « réduire les animations », tout devient un fondu de 0,15 s.
+Entrées courtes (≤ 0,8 s), uniquement transform / opacity / clip-path, courbe `cubic-bezier(0.16, 1, 0.3, 1)` : page qui monte de 10 px, cascade des grilles et lignes de tableau, barres de répartition qui s'étirent, reçu qui « sort » de l'imprimante. Tout passe à un fondu de 0,15 s sous « réduire les animations ».
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** commencer chaque écran connecté par la lisière noire de 32 px et sa bande de six coloris de 4 px.
-- **Do** écrire chaque montant en Barlow Condensed 700 à chasse fixe, suivi de « GNF » en plus petit et en ardoise.
-- **Do** donner à chaque catégorie son coloris fixe (`cat-1` à `cat-6`, dans l'ordre d'affichage) et le répéter partout où la catégorie apparaît.
-- **Do** poser du texte noir sur le vert MassaGui (8,7:1) et utiliser le vert forêt pour tout texte vert sur fond clair.
-- **Do** garder des cibles tactiles de 44 px minimum, 56 à 64 px pour les gestes de caisse.
-- **Do** marquer un choix exclusif sélectionné en encre pleine.
+- **Do** sélectionner en vert sapin plein (forest) avec texte blanc : onglets, catégories, paiements, montants rapides.
+- **Do** garder le vert MassaGui (massagui-green) pour l'action qui valide, avec texte massagui-green-ink.
+- **Do** poser chaque surface en blanc sur menu-ground avec l'ombre de carte et un rayon de 14 px.
+- **Do** rendre ronds tous les éléments de toucher : pilules pour boutons et onglets, disques pour catégories et « + ».
+- **Do** écrire les montants en Inter gras à chasse fixe, devise « GNF » à part en petit ardoise.
+- **Do** nommer en Playfair Display (marque, page, section, carte, « Total ») et tout le reste en Inter.
+- **Do** utiliser gold-strong pour tout or posé sur blanc.
 
 ### Don't:
-- **Don't** revenir à une barre latérale noire de navigation : la navigation est une barre d'onglets blanche sous la lisière.
-- **Don't** aligner des cartes de statistiques grises identiques : utiliser la ligne de journée.
-- **Don't** mettre de texte blanc sur le vert MassaGui.
-- **Don't** utiliser les coloris de catégorie pour un état, un bouton ou un fond décoratif.
-- **Don't** ajouter d'ombre à une surface au repos.
-- **Don't** demander de confirmation en fenêtre avant d'encaisser : la vente part au premier appui sur « Encaisser ».
+- **Don't** revenir à la bande noire, à Barlow ou au noir #111111 de l'ancienne lisière de pagne.
+- **Don't** mettre un prix, un total ou une quantité en Playfair.
+- **Don't** utiliser l'or en fond ou sur un bouton.
+- **Don't** marquer une sélection en vert MassaGui.
+- **Don't** colorer du texte, des boutons ou des graphiques avec les teintes de catégorie.
+- **Don't** ajouter des sur-titres en capitales au-dessus des titres ; les capitales interlettrées sont réservées à la ligne de marque et aux en-têtes de tableau.
+- **Don't** imbriquer une carte dans une carte ni réduire une cible tactile sous 44 px.
