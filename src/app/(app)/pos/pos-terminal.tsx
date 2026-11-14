@@ -4,6 +4,7 @@ import {
   Banknote,
   Check,
   CheckCircle2,
+  LayoutGrid,
   Landmark,
   Loader2,
   Minus,
@@ -23,26 +24,19 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { ProductThumb } from '@/components/app/product-thumb';
 import { EmptyState } from '@/components/app/empty-state';
+import { ProductThumb, toneStyle } from '@/components/app/product-thumb';
 import { AnimatedMoney } from '@/components/motion/animated-number';
 import { SuccessBurst } from '@/components/motion/success-burst';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { addToCart, cartTotals, removeFromCart, setQuantity, type CartLine } from '@/lib/cart';
 import type { CreateSaleResult } from '@/lib/database.types';
-import { formatMoney } from '@/lib/format';
+import { formatAmount, formatMoney } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { createSaleAction } from './actions';
 
@@ -56,9 +50,11 @@ export type PosProduct = {
   maxQuantity: number | null;
 };
 
+type PosCategory = { id: string; name: string; tone: number };
+
 type Props = {
   products: PosProduct[];
-  categories: { id: string; name: string }[];
+  categories: PosCategory[];
   paymentMethods: { code: string; label: string }[];
   currency: string;
   showImages: boolean;
@@ -74,6 +70,16 @@ function normalize(text: string) {
     .toLowerCase();
 }
 
+// Montants que le client tend le plus souvent : le compte juste, puis les
+// billets ronds au-dessus du total.
+function cashSuggestions(total: number) {
+  if (total <= 0) return [];
+  const steps = [5_000, 10_000, 20_000, 50_000, 100_000];
+  const values = new Set<number>([total]);
+  for (const step of steps) values.add(Math.ceil(total / step) * step);
+  return [...values].sort((a, b) => a - b).slice(0, 4);
+}
+
 export function PosTerminal({ products, categories, paymentMethods, currency, showImages, canDiscount }: Props) {
   const router = useRouter();
   const [lines, setLines] = useState<CartLine[]>([]);
@@ -81,16 +87,13 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
   const [search, setSearch] = useState('');
   const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0]?.code ?? '');
   const [discountInput, setDiscountInput] = useState('');
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [received, setReceived] = useState('');
   const [cartOpen, setCartOpen] = useState(false);
   const [success, setSuccess] = useState<CreateSaleResult | null>(null);
   const [pending, startTransition] = useTransition();
   // Clé d'idempotence : identique tant que le panier ne change pas, pour qu'un
   // nouvel essai après une coupure réseau ne crée jamais de seconde vente.
   const keyRef = useRef<string>('');
-  // « +1 » qui s'envole d'une carte produit à chaque ajout.
-  const [flyers, setFlyers] = useState<{ key: number; productId: string }[]>([]);
-  const flyerKey = useRef(0);
   const [cartBarScope, animateCartBar] = useAnimate<HTMLDivElement>();
   const previousCount = useRef(0);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -99,11 +102,12 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
   const discount = canDiscount ? Number(discountInput || 0) : 0;
   const totals = cartTotals(lines, discount);
   const discountInvalid = canDiscount && (!Number.isInteger(discount) || discount < 0 || discount > totals.subtotal);
+  const toneOf = useMemo(() => new Map(categories.map((c) => [c.id, c.tone])), [categories]);
 
   // La barre du panier mobile rebondit quand on ajoute un article.
   useEffect(() => {
     if (totals.itemCount > previousCount.current && cartBarScope.current) {
-      animateCartBar(cartBarScope.current, { scale: [1, 1.04, 1] }, { duration: 0.3, ease: 'easeOut' });
+      animateCartBar(cartBarScope.current, { scale: [1, 1.03, 1] }, { duration: 0.25, ease: 'easeOut' });
     }
     previousCount.current = totals.itemCount;
   }, [totals.itemCount, animateCartBar, cartBarScope]);
@@ -114,8 +118,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
   }, [lines, paymentMethod, discountInput]);
 
   // Le tiroir du panier n'existe qu'en dessous de 1024 px : on le ferme si
-  // l'écran s'agrandit (rotation d'une tablette), sinon il resterait ouvert
-  // derrière la colonne du panier et bloquerait la page.
+  // l'écran s'agrandit (rotation d'une tablette).
   useEffect(() => {
     const desktop = window.matchMedia('(min-width: 1024px)');
     const onChange = () => desktop.matches && setCartOpen(false);
@@ -136,18 +139,19 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  const countByCategory = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of products) if (p.categoryId) counts.set(p.categoryId, (counts.get(p.categoryId) ?? 0) + 1);
+    return counts;
+  }, [products]);
+  const shownCategories = categories.filter((c) => countByCategory.has(c.id));
+
   const visibleProducts = useMemo(() => {
     const q = normalize(search.trim());
     return products.filter(
       (p) => (category === 'all' || p.categoryId === category) && (!q || normalize(p.name).includes(q)),
     );
   }, [products, category, search]);
-
-  const countByCategory = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const p of products) if (p.categoryId) counts.set(p.categoryId, (counts.get(p.categoryId) ?? 0) + 1);
-    return counts;
-  }, [products]);
 
   const inCart = (id: string) => lines.find((l) => l.productId === id)?.quantity ?? 0;
 
@@ -156,9 +160,6 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
       toast.warning(`Stock insuffisant pour « ${product.name} » (disponible : ${product.maxQuantity}).`);
       return;
     }
-    flyerKey.current += 1;
-    const key = flyerKey.current;
-    setFlyers((current) => [...current, { key, productId: product.id }]);
     setLines((current) =>
       addToCart(current, {
         productId: product.id,
@@ -172,24 +173,20 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
   function resetSale() {
     setLines([]);
     setDiscountInput('');
+    setReceived('');
     setPaymentMethod(paymentMethods[0]?.code ?? '');
   }
 
-  function openConfirm() {
-    if (!lines.length) return;
+  function checkout() {
+    if (pending || !lines.length) return;
     if (!paymentMethod) {
       toast.error('Choisissez un mode de paiement.');
       return;
     }
     if (discountInvalid) {
-      toast.error('La remise est invalide (nombre entier, au plus égal au sous-total).');
+      toast.error('La remise est invalide : nombre entier, au plus égal au sous-total.');
       return;
     }
-    setConfirmOpen(true);
-  }
-
-  function submit() {
-    if (pending) return;
     const idempotencyKey = keyRef.current;
     startTransition(async () => {
       try {
@@ -204,22 +201,20 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
           toast.error(result.error);
           return;
         }
-        setConfirmOpen(false);
         setCartOpen(false);
         setSuccess(result.data);
         resetSale();
         router.refresh();
       } catch {
-        toast.error(
-          'Connexion perdue : la vente n’a peut-être pas été enregistrée. Réessayez — aucun doublon ne sera créé.',
-          { duration: 8000 },
-        );
+        toast.error('Connexion perdue : la vente n’a peut-être pas été enregistrée. Réessayez, aucun doublon ne sera créé.', {
+          duration: 8000,
+        });
       }
     });
   }
 
-  const cartPanel = (
-    <CartPanel
+  const ticket = (
+    <TicketPanel
       lines={lines}
       money={money}
       currency={currency}
@@ -230,95 +225,99 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
       onDiscountChange={setDiscountInput}
       paymentMethods={paymentMethods}
       paymentMethod={paymentMethod}
-      onPaymentMethodChange={setPaymentMethod}
+      onPaymentMethodChange={(code) => {
+        setPaymentMethod(code);
+        setReceived('');
+      }}
+      received={received}
+      onReceivedChange={setReceived}
       onQuantity={(id, q) => setLines((current) => setQuantity(current, id, q))}
       onRemove={(id) => setLines((current) => removeFromCart(current, id))}
       onClear={() => setLines([])}
-      onValidate={openConfirm}
+      onCheckout={checkout}
       pending={pending}
     />
   );
 
+  const categoryButtons = [{ id: 'all', name: 'Tout', tone: -1 }, ...shownCategories];
+
   return (
-    <div className="lg:-m-6 lg:grid lg:h-dvh lg:grid-cols-[minmax(0,1fr)_400px]">
-      {/* Zone produits */}
-      <section aria-label="Produits" className="flex min-h-0 flex-col pb-24 lg:overflow-hidden lg:p-6 lg:pb-6">
-        <div className="sticky top-14 z-10 -mx-4 mb-4 flex flex-col gap-3 bg-background px-4 pt-1 pb-3 sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:bg-transparent lg:p-0">
-          <div className="flex items-center justify-between gap-3">
-            <h1 className="text-2xl font-bold tracking-tight">Caisse</h1>
-            <Button asChild variant="outline" size="sm" className="no-print">
+    <div className="-m-4 sm:-m-6 lg:grid lg:h-[calc(100dvh-6rem)] lg:grid-cols-[13rem_minmax(0,1fr)_26rem]">
+      {/* Catégories : rail vertical sur grand écran */}
+      <nav aria-label="Catégories" className="hidden min-h-0 flex-col gap-1 overflow-y-auto border-r bg-card p-3 lg:flex">
+        {categoryButtons.map((c) => (
+          <CategoryButton
+            key={c.id}
+            category={c}
+            count={c.id === 'all' ? products.length : (countByCategory.get(c.id) ?? 0)}
+            active={category === c.id}
+            onSelect={() => setCategory(c.id)}
+            layout="rail"
+          />
+        ))}
+      </nav>
+
+      {/* Plats */}
+      <section aria-label="Produits" className="flex min-h-0 flex-col">
+        <div className="sticky top-24 z-10 flex flex-col gap-3 border-b bg-background px-4 pt-4 pb-3 sm:px-6 lg:static lg:border-b-0 lg:pt-5">
+          <div className="flex items-center gap-3">
+            <h1 className="font-display text-[2rem] leading-none font-bold">Caisse</h1>
+            <div className="relative ml-auto min-w-0 flex-1 sm:max-w-md">
+              <Search
+                className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-muted-foreground"
+                aria-hidden
+              />
+              <Input
+                ref={searchRef}
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Rechercher un plat…"
+                aria-label="Rechercher un produit"
+                className="h-12 pr-12 pl-11 text-lg [&::-webkit-search-cancel-button]:hidden"
+              />
+              {search ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch('');
+                    searchRef.current?.focus();
+                  }}
+                  aria-label="Effacer la recherche"
+                  className="absolute top-1/2 right-1 inline-flex size-10 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                >
+                  <X className="size-5" aria-hidden />
+                </button>
+              ) : (
+                <kbd
+                  aria-hidden
+                  className="pointer-events-none absolute top-1/2 right-3 hidden -translate-y-1/2 rounded border bg-muted px-1.5 py-0.5 font-sans text-xs text-muted-foreground pointer-fine:block"
+                >
+                  /
+                </kbd>
+              )}
+            </div>
+            <Button asChild variant="outline" size="lg" className="no-print hidden px-4 sm:inline-flex">
               <Link href="/pos/sales">
-                <Receipt /> Ventes récentes
+                <Receipt aria-hidden /> Ventes du jour
               </Link>
             </Button>
           </div>
-          <div className="relative">
-            <Search
-              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden
-            />
-            <Input
-              ref={searchRef}
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Rechercher un produit…"
-              aria-label="Rechercher un produit"
-              className="h-11 pr-11 pl-9 text-base [&::-webkit-search-cancel-button]:hidden"
-            />
-            {!search && (
-              <kbd
-                aria-hidden
-                className="pointer-events-none absolute top-1/2 right-3 hidden -translate-y-1/2 rounded border bg-muted px-1.5 py-0.5 font-sans text-xs text-muted-foreground pointer-fine:block"
-              >
-                /
-              </kbd>
-            )}
-            {search && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearch('');
-                  searchRef.current?.focus();
-                }}
-                aria-label="Effacer la recherche"
-                className="absolute top-1/2 right-1 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
-              >
-                <X className="size-4" aria-hidden />
-              </button>
-            )}
-          </div>
-          <div role="tablist" aria-label="Catégories" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-            {[{ id: 'all', name: 'Tout' }, ...categories.filter((c) => countByCategory.has(c.id))].map((c) => (
-              <button
+          <div role="group" aria-label="Catégories" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6 lg:hidden">
+            {categoryButtons.map((c) => (
+              <CategoryButton
                 key={c.id}
-                role="tab"
-                aria-selected={category === c.id}
-                onClick={() => setCategory(c.id)}
-                className={cn(
-                  'relative h-11 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors',
-                  category === c.id ? 'border-primary text-primary-foreground' : 'bg-card hover:bg-muted',
-                )}
-              >
-                {category === c.id && (
-                  <motion.span
-                    layoutId="pos-category"
-                    className="absolute inset-0 rounded-full bg-primary"
-                    transition={{ type: 'spring', stiffness: 520, damping: 40 }}
-                  />
-                )}
-                <span className="relative">
-                  {c.name}
-                  <span className={cn('ml-1.5 text-xs tabular-nums', category === c.id ? 'opacity-80' : 'text-muted-foreground')}>
-                    {c.id === 'all' ? products.length : (countByCategory.get(c.id) ?? 0)}
-                  </span>
-                </span>
-              </button>
+                category={c}
+                count={c.id === 'all' ? products.length : (countByCategory.get(c.id) ?? 0)}
+                active={category === c.id}
+                onSelect={() => setCategory(c.id)}
+                layout="chip"
+              />
             ))}
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 lg:overflow-y-auto lg:pr-1">
+        <div className="min-h-0 flex-1 px-4 pt-4 pb-28 sm:px-6 lg:overflow-y-auto lg:pt-1 lg:pb-6">
           {products.length === 0 ? (
             <EmptyState
               icon={PackageX}
@@ -326,16 +325,14 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
               description="L’administrateur doit d’abord créer des produits et les rendre disponibles."
             />
           ) : visibleProducts.length === 0 ? (
-            <EmptyState icon={Search} title="Aucun résultat" description="Modifiez la recherche ou la catégorie." />
+            <EmptyState icon={Search} title="Aucun résultat" description="Modifiez la recherche ou choisissez « Tout »." />
           ) : (
-            <ul
-              key={category}
-              className="mg-stagger grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
-            >
+            <ul key={category} className="mg-stagger grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(11rem,1fr))]">
               {visibleProducts.map((p) => {
-                const remaining = p.maxQuantity === null ? null : p.maxQuantity - inCart(p.id);
-                const soldOut = p.maxQuantity !== null && p.maxQuantity <= 0;
                 const qty = inCart(p.id);
+                const remaining = p.maxQuantity === null ? null : p.maxQuantity - qty;
+                const soldOut = p.maxQuantity !== null && p.maxQuantity <= 0;
+                const tone = p.categoryId ? (toneOf.get(p.categoryId) ?? 0) : 0;
                 return (
                   <li key={p.id}>
                     <button
@@ -344,56 +341,44 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
                       disabled={soldOut}
                       aria-label={`Ajouter ${p.name}, ${money(p.price)}`}
                       className={cn(
-                        'mg-lift group relative flex h-full w-full flex-col overflow-hidden rounded-xl border bg-card text-left shadow-xs hover:border-primary focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-55',
-                        qty > 0 && 'border-primary ring-1 ring-primary',
+                        'group relative flex h-full w-full flex-col overflow-hidden rounded-lg border bg-card text-left transition-[transform,box-shadow,border-color] duration-150 hover:border-foreground/40 focus-visible:ring-[3px] focus-visible:ring-ring/60 focus-visible:outline-none active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50',
+                        qty > 0 && 'border-primary shadow-[0_0_0_2px_var(--primary)]',
                       )}
                     >
                       {showImages && (
                         <ProductThumb
                           name={p.name}
                           imageUrl={p.imageUrl}
-                          toneKey={p.categoryId}
+                          tone={tone}
                           sizes="(max-width: 640px) 50vw, 220px"
-                          className={cn('w-full', p.imageUrl ? 'aspect-[4/3]' : 'aspect-[5/2] sm:aspect-[2/1]')}
+                          className={cn('w-full', p.imageUrl ? 'aspect-[4/3]' : 'h-16 sm:h-20')}
                           imageClassName="transition-transform duration-500 group-hover:scale-105"
-                          textClassName="text-xl opacity-70"
+                          textClassName="text-2xl sm:text-3xl"
                         />
                       )}
-                      <div className="flex flex-1 flex-col gap-1 p-3">
-                        <span className="line-clamp-2 text-sm leading-snug font-medium">{p.name}</span>
-                        <span className="mt-auto text-base font-bold tabular-nums">{money(p.price)}</span>
+                      <span className="flex flex-1 flex-col gap-1.5 p-3">
+                        <span className="line-clamp-2 text-[17px] leading-snug font-semibold">{p.name}</span>
+                        <span className="mt-auto font-display text-[1.65rem] leading-none font-bold tabular-nums">
+                          {formatAmount(p.price)}
+                          <span className="ml-1 text-base font-semibold text-muted-foreground">{currency}</span>
+                        </span>
                         {soldOut ? (
                           <Badge variant="destructive">Rupture</Badge>
                         ) : remaining !== null && remaining <= 5 ? (
                           <Badge variant="warning">Reste {remaining}</Badge>
                         ) : null}
-                      </div>
+                      </span>
                       {qty > 0 && (
                         <motion.span
                           key={qty}
-                          initial={{ scale: 1.6 }}
+                          initial={{ scale: 1.5 }}
                           animate={{ scale: 1 }}
-                          transition={{ type: 'spring', stiffness: 600, damping: 18 }}
-                          className="absolute top-2 right-2 inline-flex min-w-7 items-center justify-center rounded-full bg-foreground px-2 py-0.5 text-xs font-bold text-background"
+                          transition={{ type: 'spring', stiffness: 600, damping: 20 }}
+                          className="absolute top-2 right-2 inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-foreground px-2 font-display text-lg font-bold text-background"
                         >
                           ×{qty}
                         </motion.span>
                       )}
-                      {flyers
-                        .filter((f) => f.productId === p.id)
-                        .map((f) => (
-                          <motion.span
-                            key={f.key}
-                            aria-hidden
-                            className="pointer-events-none absolute top-1/3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-2.5 py-0.5 text-sm font-bold text-primary-foreground shadow-md"
-                            initial={{ opacity: 0, y: 0, scale: 0.6 }}
-                            animate={{ opacity: [0, 1, 1, 0], y: -40, scale: 1 }}
-                            transition={{ duration: 0.75, ease: 'easeOut' }}
-                            onAnimationComplete={() => setFlyers((current) => current.filter((x) => x.key !== f.key))}
-                          >
-                            +1
-                          </motion.span>
-                        ))}
                     </button>
                   </li>
                 );
@@ -403,90 +388,57 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
         </div>
       </section>
 
-      {/* Panier — colonne fixe sur ordinateur */}
+      {/* Ticket : colonne fixe sur grand écran */}
       <aside aria-label="Panier" className="hidden min-h-0 border-l bg-card lg:flex lg:flex-col">
-        {cartPanel}
+        {ticket}
       </aside>
 
-      {/* Panier — barre + tiroir sur tablette / téléphone */}
-      <div className="no-print fixed inset-x-0 bottom-0 z-20 border-t bg-card p-3 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] lg:hidden">
+      {/* Ticket : barre + tiroir sur tablette en portrait et téléphone */}
+      <div className="no-print fixed inset-x-0 bottom-0 z-20 border-t bg-card p-3 lg:hidden">
         <div ref={cartBarScope}>
           <Button size="xl" className="w-full justify-between" onClick={() => setCartOpen(true)}>
             <span className="flex items-center gap-2">
-              <ShoppingCart aria-hidden /> Panier ({totals.itemCount})
+              <ShoppingCart aria-hidden className="size-6" /> Panier ({totals.itemCount})
             </span>
-            <AnimatedMoney value={totals.total} currency={currency} duration={0.45} />
+            <span className="font-display text-2xl font-bold">
+              <AnimatedMoney value={totals.total} currency={currency} duration={0.4} />
+            </span>
           </Button>
         </div>
       </div>
       <Sheet open={cartOpen} onOpenChange={setCartOpen}>
-        <SheetContent side="bottom" className="h-[90dvh] gap-0 p-0">
+        <SheetContent side="bottom" className="h-[92dvh] gap-0 p-0">
           <SheetTitle className="sr-only">Panier</SheetTitle>
-          {cartPanel}
+          {ticket}
         </SheetContent>
       </Sheet>
 
-      {/* Confirmation */}
-      <Dialog open={confirmOpen} onOpenChange={(open) => !pending && setConfirmOpen(open)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmer la vente</DialogTitle>
-            <DialogDescription>Vérifiez le montant encaissé avant de valider.</DialogDescription>
-          </DialogHeader>
-          <dl className="grid grid-cols-2 gap-y-2 rounded-lg bg-muted p-4 text-sm">
-            <dt className="text-muted-foreground">Articles</dt>
-            <dd className="text-right tabular-nums">{totals.itemCount}</dd>
-            <dt className="text-muted-foreground">Sous-total</dt>
-            <dd className="text-right tabular-nums">{money(totals.subtotal)}</dd>
-            {totals.discount > 0 && (
-              <>
-                <dt className="text-muted-foreground">Remise</dt>
-                <dd className="text-right tabular-nums">−{money(totals.discount)}</dd>
-              </>
-            )}
-            <dt className="text-muted-foreground">Paiement</dt>
-            <dd className="text-right">{paymentMethods.find((m) => m.code === paymentMethod)?.label}</dd>
-            <dt className="text-base font-semibold">Total</dt>
-            <dd className="text-right text-xl font-bold tabular-nums">{money(totals.total)}</dd>
-          </dl>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)} disabled={pending}>
-              Retour
-            </Button>
-            <Button size="lg" onClick={submit} disabled={pending} autoFocus>
-              {pending && <Loader2 className="animate-spin" aria-hidden />}
-              {pending ? 'Enregistrement…' : 'Valider la vente'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Succès */}
+      {/* Vente enregistrée */}
       <Dialog open={!!success} onOpenChange={(open) => !open && setSuccess(null)}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader className="items-center text-center">
             <SuccessBurst />
-            <DialogTitle>Vente enregistrée</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="font-display text-3xl">Vente enregistrée</DialogTitle>
+            <DialogDescription className="text-base">
               Reçu n° <strong className="text-foreground">{success?.receipt_number}</strong>
             </DialogDescription>
           </DialogHeader>
-          <p className="text-center text-3xl font-bold">
-            {success ? <AnimatedMoney value={Number(success.total_amount)} currency={currency} duration={0.7} /> : ''}
+          <p className="text-center font-display text-5xl font-bold">
+            {success ? <AnimatedMoney value={Number(success.total_amount)} currency={currency} duration={0.6} /> : ''}
           </p>
-          <DialogFooter className="sm:justify-center">
-            <Button variant="outline" onClick={() => setSuccess(null)}>
-              Nouvelle vente
-            </Button>
-            <Button asChild variant="dark">
-              <Link href={`/receipts/${success?.sale_id}`}>
-                <Receipt /> Voir le reçu
-              </Link>
-            </Button>
-            <Button asChild autoFocus>
+          <DialogFooter className="grid grid-cols-2 gap-2 sm:grid-cols-2">
+            <Button asChild size="xl" className="col-span-2" autoFocus>
               <Link href={`/receipts/${success?.sale_id}?print=1`}>
-                <Printer /> Imprimer
+                <Printer aria-hidden /> Imprimer le reçu
               </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link href={`/receipts/${success?.sale_id}`}>
+                <Receipt aria-hidden /> Voir le reçu
+              </Link>
+            </Button>
+            <Button variant="outline" size="lg" onClick={() => setSuccess(null)}>
+              <Plus aria-hidden /> Nouvelle vente
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -495,16 +447,59 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
   );
 }
 
+function CategoryButton({
+  category,
+  count,
+  active,
+  onSelect,
+  layout,
+}: {
+  category: { id: string; name: string; tone: number };
+  count: number;
+  active: boolean;
+  onSelect: () => void;
+  layout: 'rail' | 'chip';
+}) {
+  const swatch =
+    category.tone < 0 ? (
+      <LayoutGrid className="size-5 shrink-0" aria-hidden />
+    ) : (
+      <span aria-hidden className="size-4 shrink-0 rounded-sm" style={toneStyle(category.tone)} />
+    );
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={active}
+      className={cn(
+        'flex shrink-0 items-center gap-3 rounded-md text-left font-semibold transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/60 focus-visible:outline-none',
+        layout === 'rail' ? 'min-h-14 w-full px-3 text-base' : 'h-12 border px-4 text-[15px] whitespace-nowrap',
+        active
+          ? 'border-foreground bg-foreground text-background'
+          : layout === 'rail'
+            ? 'hover:bg-muted'
+            : 'bg-card hover:border-foreground/40',
+      )}
+    >
+      {swatch}
+      <span className={cn('leading-tight', layout === 'rail' && 'flex-1')}>{category.name}</span>
+      <span className={cn('font-display text-base tabular-nums', active ? 'text-background/70' : 'text-muted-foreground')}>
+        {count}
+      </span>
+    </button>
+  );
+}
+
 // Pictogramme du mode de paiement, pour le reconnaître sans lire le libellé.
 function PaymentIcon({ code }: { code: string }) {
-  const className = 'size-4 shrink-0 text-muted-foreground';
+  const className = 'size-5 shrink-0';
   if (code === 'cash') return <Banknote className={className} aria-hidden />;
   if (code === 'bank_transfer') return <Landmark className={className} aria-hidden />;
   if (/money|momo|mobile/.test(code)) return <Smartphone className={className} aria-hidden />;
   return <Wallet className={className} aria-hidden />;
 }
 
-function CartPanel({
+function TicketPanel({
   lines,
   money,
   currency,
@@ -516,10 +511,12 @@ function CartPanel({
   paymentMethods,
   paymentMethod,
   onPaymentMethodChange,
+  received,
+  onReceivedChange,
   onQuantity,
   onRemove,
   onClear,
-  onValidate,
+  onCheckout,
   pending,
 }: {
   lines: CartLine[];
@@ -533,31 +530,39 @@ function CartPanel({
   paymentMethods: { code: string; label: string }[];
   paymentMethod: string;
   onPaymentMethodChange: (code: string) => void;
+  received: string;
+  onReceivedChange: (value: string) => void;
   onQuantity: (productId: string, quantity: number) => void;
   onRemove: (productId: string) => void;
   onClear: () => void;
-  onValidate: () => void;
+  onCheckout: () => void;
   pending: boolean;
 }) {
+  const [showDiscount, setShowDiscount] = useState(false);
+  const discountShown = canDiscount && (showDiscount || discountInput !== '');
+  const isCash = paymentMethod === 'cash';
+  const receivedAmount = Number(received || 0);
+  const change = receivedAmount - totals.total;
+
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex items-center justify-between border-b px-4 py-3">
-        <h2 className="flex items-center gap-2 font-semibold">
-          <ShoppingCart className="size-4" aria-hidden /> Panier
-          <span className="text-sm font-normal text-muted-foreground">
-            ({totals.itemCount} article{totals.itemCount > 1 ? 's' : ''})
+      <div className="flex h-16 shrink-0 items-center justify-between border-b px-5">
+        <h2 className="flex items-baseline gap-2 font-display text-2xl font-bold">
+          Ticket
+          <span className="font-sans text-base font-medium text-muted-foreground">
+            {totals.itemCount} article{totals.itemCount > 1 ? 's' : ''}
           </span>
         </h2>
         {lines.length > 0 && (
-          <Button variant="ghost" size="sm" onClick={onClear} className="mr-6 text-muted-foreground lg:mr-0">
-            Vider
+          <Button variant="ghost" onClick={onClear} className="mr-8 text-muted-foreground lg:mr-0">
+            <Trash2 aria-hidden /> Vider
           </Button>
         )}
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {lines.length === 0 ? (
-          <EmptyState icon={ShoppingCart} title="Panier vide" description="Touchez un produit pour l’ajouter." />
+          <EmptyState icon={ShoppingCart} title="Ticket vide" description="Touchez un plat pour l’ajouter au ticket." />
         ) : (
           <ul className="divide-y">
             <AnimatePresence initial={false} mode="popLayout">
@@ -565,28 +570,27 @@ function CartPanel({
                 <motion.li
                   key={line.productId}
                   layout
-                  initial={{ opacity: 0, x: 28 }}
+                  initial={{ opacity: 0, x: 24 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -28, transition: { duration: 0.18 } }}
-                  transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-                  className="bg-card px-4 py-3"
+                  exit={{ opacity: 0, x: -24, transition: { duration: 0.15 } }}
+                  transition={{ type: 'spring', stiffness: 440, damping: 36 }}
+                  className="bg-card px-5 py-2.5"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm leading-snug font-medium">{line.name}</p>
-                    <p className="shrink-0 text-sm font-semibold tabular-nums">
-                      {money(line.unitPrice * line.quantity)}
-                    </p>
+                    <p className="text-[17px] leading-snug font-semibold">{line.name}</p>
+                    <p className="shrink-0 font-display text-xl font-bold tabular-nums">{money(line.unitPrice * line.quantity)}</p>
                   </div>
-                  <div className="mt-2 flex items-center justify-between gap-3">
-                    <p className="text-xs text-muted-foreground tabular-nums">{money(line.unitPrice)} / unité</p>
+                  <div className="mt-1.5 flex items-center justify-between gap-3">
+                    <p className="text-sm text-muted-foreground tabular-nums">{money(line.unitPrice)} l’unité</p>
                     <div className="flex items-center gap-1">
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => onQuantity(line.productId, line.quantity - 1)}
-                        aria-label={`Diminuer la quantité de ${line.name}`}
+                        className="size-11"
+                        onClick={() => (line.quantity > 1 ? onQuantity(line.productId, line.quantity - 1) : onRemove(line.productId))}
+                        aria-label={line.quantity > 1 ? `Diminuer la quantité de ${line.name}` : `Retirer ${line.name}`}
                       >
-                        <Minus />
+                        {line.quantity > 1 ? <Minus /> : <Trash2 />}
                       </Button>
                       <Input
                         type="number"
@@ -595,25 +599,17 @@ function CartPanel({
                         value={line.quantity}
                         onChange={(e) => onQuantity(line.productId, Number(e.target.value || 0))}
                         aria-label={`Quantité de ${line.name}`}
-                        className="h-9 w-14 px-1 text-center tabular-nums"
+                        className="h-11 w-12 px-1 text-center font-display text-xl font-bold tabular-nums"
                       />
                       <Button
                         variant="outline"
                         size="icon"
+                        className="size-11"
                         onClick={() => onQuantity(line.productId, line.quantity + 1)}
                         disabled={line.maxQuantity !== null && line.quantity >= line.maxQuantity}
                         aria-label={`Augmenter la quantité de ${line.name}`}
                       >
                         <Plus />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onRemove(line.productId)}
-                        aria-label={`Retirer ${line.name}`}
-                        className="text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 />
                       </Button>
                     </div>
                   </div>
@@ -624,16 +620,18 @@ function CartPanel({
         )}
       </div>
 
-      <div className="space-y-3 border-t bg-card p-4">
-        <dl className="space-y-1 text-sm">
-          <div className="flex justify-between">
-            <dt className="text-muted-foreground">Sous-total</dt>
-            <dd className="tabular-nums">{money(totals.subtotal)}</dd>
-          </div>
-          {canDiscount && (
+      <div className="shrink-0 space-y-3 border-t bg-card px-5 pt-3 pb-4">
+        <dl className="space-y-1">
+          {(discountShown || totals.discount > 0) && (
+            <div className="flex justify-between text-muted-foreground">
+              <dt>Sous-total</dt>
+              <dd className="tabular-nums">{money(totals.subtotal)}</dd>
+            </div>
+          )}
+          {discountShown && (
             <div className="flex items-center justify-between gap-3">
               <dt>
-                <Label htmlFor="discount" className="font-normal text-muted-foreground">
+                <Label htmlFor="discount" className="text-base font-normal text-muted-foreground">
                   Remise
                 </Label>
               </dt>
@@ -648,53 +646,115 @@ function CartPanel({
                   onChange={(e) => onDiscountChange(e.target.value)}
                   placeholder="0"
                   aria-invalid={discountInvalid}
-                  className="h-8 w-32 text-right tabular-nums"
+                  autoFocus={showDiscount && discountInput === ''}
+                  className="h-10 w-36 text-right tabular-nums"
                 />
               </dd>
             </div>
           )}
-          <div className="flex items-baseline justify-between pt-1">
-            <dt className="text-base font-semibold">Total</dt>
-            <dd className="text-2xl font-bold">
-              <AnimatedMoney value={totals.total} currency={currency} duration={0.45} />
+          <div className="flex items-baseline justify-between">
+            <dt className="flex items-baseline gap-3">
+              <span className="font-display text-xl font-bold tracking-wide uppercase">Total</span>
+              {canDiscount && !discountShown && lines.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowDiscount(true)}
+                  className="text-sm font-semibold text-primary-strong underline-offset-4 hover:underline"
+                >
+                  Remise
+                </button>
+              )}
+            </dt>
+            <dd className="font-display text-[2.75rem] leading-none font-bold">
+              <AnimatedMoney value={totals.total} currency={currency} duration={0.4} />
             </dd>
           </div>
         </dl>
 
         <fieldset>
-          <legend className="mb-2 text-sm font-medium">Mode de paiement</legend>
+          <legend className="sr-only">Mode de paiement</legend>
           {paymentMethods.length === 0 ? (
-            <p className="text-sm text-destructive">Aucun mode de paiement actif : voir Paramètres.</p>
+            <p className="text-destructive">Aucun mode de paiement actif : voir Paramètres.</p>
           ) : (
-            <div className="grid grid-cols-2 gap-2">
-              {paymentMethods.map((m) => (
-                <button
-                  key={m.code}
-                  type="button"
-                  onClick={() => onPaymentMethodChange(m.code)}
-                  aria-pressed={paymentMethod === m.code}
-                  className={cn(
-                    'flex min-h-11 items-center justify-center gap-1.5 rounded-lg border px-2 py-2 text-sm font-medium',
-                    paymentMethod === m.code
-                      ? 'border-primary bg-accent text-accent-foreground ring-1 ring-primary'
-                      : 'hover:bg-muted',
-                  )}
-                >
-                  {paymentMethod === m.code ? (
-                    <Check className="size-4 shrink-0" aria-hidden />
-                  ) : (
-                    <PaymentIcon code={m.code} />
-                  )}
-                  <span className="truncate">{m.label}</span>
-                </button>
-              ))}
+            <div className="grid grid-cols-3 gap-2">
+              {paymentMethods.map((m) => {
+                const selected = paymentMethod === m.code;
+                return (
+                  <button
+                    key={m.code}
+                    type="button"
+                    onClick={() => onPaymentMethodChange(m.code)}
+                    aria-pressed={selected}
+                    className={cn(
+                      'flex min-h-13 flex-col items-center justify-center gap-0.5 rounded-md border px-1.5 py-1 text-center text-sm leading-tight font-semibold transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/60 focus-visible:outline-none',
+                      selected ? 'border-foreground bg-foreground text-background' : 'bg-card hover:border-foreground/40',
+                    )}
+                  >
+                    {selected ? <Check className="size-5 shrink-0 text-primary" aria-hidden /> : <PaymentIcon code={m.code} />}
+                    <span>{m.label}</span>
+                  </button>
+                );
+              })}
             </div>
           )}
         </fieldset>
 
-        <Button size="xl" className="w-full" onClick={onValidate} disabled={!lines.length || pending || !paymentMethod}>
-          {pending ? <Loader2 className="animate-spin" aria-hidden /> : <CheckCircle2 aria-hidden />}
-          Valider la vente
+        {isCash && totals.total > 0 && (
+          <div className="space-y-1.5 rounded-md bg-muted p-2">
+            <div className="flex gap-1.5" role="group" aria-label="Montant reçu du client">
+              {cashSuggestions(totals.total)
+                .slice(0, 3)
+                .map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => onReceivedChange(receivedAmount === value ? '' : String(value))}
+                    aria-pressed={receivedAmount === value}
+                    className={cn(
+                      'h-11 min-w-0 flex-1 rounded-md border bg-card px-1 font-display text-lg font-semibold tabular-nums transition-colors hover:border-foreground/40',
+                      receivedAmount === value && 'border-foreground bg-foreground text-background',
+                    )}
+                  >
+                    {formatAmount(value)}
+                  </button>
+                ))}
+              <Label htmlFor="cash-received" className="sr-only">
+                Autre montant reçu du client
+              </Label>
+              <Input
+                id="cash-received"
+                type="number"
+                inputMode="numeric"
+                min={0}
+                step={500}
+                value={received}
+                onChange={(e) => onReceivedChange(e.target.value)}
+                placeholder="Autre"
+                className="h-11 w-24 shrink-0 bg-card text-right tabular-nums"
+              />
+            </div>
+            {received !== '' && (
+              <p aria-live="polite" className="flex items-baseline justify-between px-1">
+                <span className="font-semibold">{change >= 0 ? 'À rendre' : 'Il manque'}</span>
+                <span className={cn('font-display text-2xl font-bold tabular-nums', change < 0 && 'text-destructive-strong')}>
+                  {money(Math.abs(change))}
+                </span>
+              </p>
+            )}
+          </div>
+        )}
+
+        <Button
+          size="xl"
+          className="h-16 w-full justify-between px-5 text-xl"
+          onClick={onCheckout}
+          disabled={!lines.length || pending || !paymentMethod}
+        >
+          <span className="flex items-center gap-2">
+            {pending ? <Loader2 className="size-6 animate-spin" aria-hidden /> : <CheckCircle2 className="size-6" aria-hidden />}
+            {pending ? 'Enregistrement…' : 'Encaisser'}
+          </span>
+          {!pending && lines.length > 0 && <span className="font-display text-2xl font-bold">{money(totals.total)}</span>}
         </Button>
       </div>
     </div>

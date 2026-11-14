@@ -12,3 +12,8 @@ npm-debug.log*
 
 # Captures des tests de bout en bout
 e2e-screenshots/
+
+# Impeccable : captures de revue et fichiers de travail
+.impeccable/review/
+.impeccable/tmp/
+.impeccable/questions/

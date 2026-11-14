@@ -1,23 +1,15 @@
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
-// Teintes douces dérivées de la charte (vert, ambre, gris) : chaque catégorie
-// garde toujours la même, pour repérer un produit sans photo d'un coup d'œil.
-// Texte foncé sur fond pâle : contraste ≥ 4,5:1 pour toutes les paires.
-const TONES = [
-  'bg-[#e3f8ec] text-[#0b5c34]',
-  'bg-[#fff4d6] text-[#7a5400]',
-  'bg-[#e8eef7] text-[#274690]',
-  'bg-[#fbe9e7] text-[#8a2c1d]',
-  'bg-[#efe9f7] text-[#5b3b8c]',
-  'bg-[#eef0f2] text-[#3f454b]',
-] as const;
-
-function toneFor(key: string | null | undefined) {
-  if (!key) return TONES[5];
-  let hash = 0;
-  for (let i = 0; i < key.length; i += 1) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
-  return TONES[hash % TONES.length];
+// Coloris de catégorie (1 à 6), attribués dans l'ordre d'affichage des
+// catégories : la même catégorie garde toujours la même couleur.
+export const CATEGORY_TONES = 6;
+export function toneForIndex(index: number) {
+  return index < 0 ? 0 : (index % CATEGORY_TONES) + 1;
+}
+export function toneStyle(tone: number): React.CSSProperties {
+  if (!tone) return { backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' };
+  return { backgroundColor: `var(--cat-${tone})`, color: `var(--cat-${tone}-fg)` };
 }
 
 function initials(name: string) {
@@ -27,11 +19,11 @@ function initials(name: string) {
   return letters.toUpperCase();
 }
 
-/** Photo du produit, ou à défaut ses initiales sur la teinte de sa catégorie. */
+/** Photo du produit, ou à défaut ses initiales sur l'aplat de sa catégorie. */
 export function ProductThumb({
   name,
   imageUrl,
-  toneKey,
+  tone = 0,
   sizes,
   className,
   imageClassName,
@@ -39,21 +31,18 @@ export function ProductThumb({
 }: {
   name: string;
   imageUrl: string | null;
-  toneKey?: string | null;
+  tone?: number;
   sizes: string;
   className?: string;
   imageClassName?: string;
   textClassName?: string;
 }) {
   return (
-    <div className={cn('relative overflow-hidden', !imageUrl && toneFor(toneKey), imageUrl && 'bg-muted', className)}>
+    <div className={cn('relative overflow-hidden', className)} style={imageUrl ? { backgroundColor: 'var(--muted)' } : toneStyle(tone)}>
       {imageUrl ? (
         <Image src={imageUrl} alt="" fill sizes={sizes} className={cn('object-cover', imageClassName)} />
       ) : (
-        <span
-          aria-hidden
-          className={cn('absolute inset-0 flex items-center justify-center font-bold tracking-wide', textClassName)}
-        >
+        <span aria-hidden className={cn('absolute inset-0 flex items-center justify-center font-display font-bold tracking-wide', textClassName)}>
           {initials(name)}
         </span>
       )}

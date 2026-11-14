@@ -4,7 +4,7 @@ import { Archive, ArchiveRestore, Eye, EyeOff, MoreHorizontal, Pencil, Plus, Tra
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { ProductThumb } from '@/components/app/product-thumb';
+import { ProductThumb, toneForIndex } from '@/components/app/product-thumb';
 import { EmptyState } from '@/components/app/empty-state';
 import {
   AlertDialog,
@@ -55,6 +55,7 @@ export function ProductsTable({
   const [deleting, setDeleting] = useState<ProductRow | null>(null);
   const [pending, startTransition] = useTransition();
   const categoryName = new Map(categories.map((c) => [c.id, c.name]));
+  const categoryTone = new Map(categories.map((c, i) => [c.id, toneForIndex(i)]));
 
   function run(action: () => Promise<{ ok: boolean; error?: string }>, success: string) {
     startTransition(async () => {
@@ -93,7 +94,7 @@ export function ProductsTable({
             return (
               <TableRow key={p.id} className={p.is_archived ? 'opacity-60' : undefined}>
                 <TableCell>
-                  <ProductThumb name={p.name} imageUrl={p.image_url} toneKey={p.category_id} sizes="40px" className="size-10 rounded-md" textClassName="text-xs" />
+                  <ProductThumb name={p.name} imageUrl={p.image_url} tone={p.category_id ? categoryTone.get(p.category_id) : 0} sizes="48px" className="size-12 rounded-md" textClassName="text-base" />
                 </TableCell>
                 <TableCell>
                   <p className="font-medium">{p.name}</p>

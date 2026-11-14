@@ -16,13 +16,13 @@ export function StatCard({
   tone?: 'default' | 'positive' | 'warning';
 }) {
   return (
-    <Card className="gap-2 px-5 py-4">
+    <Card className="gap-1.5 px-5 py-4">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="font-display text-sm font-semibold tracking-wider text-muted-foreground uppercase">{label}</p>
         {Icon && (
           <span
             className={cn(
-              'inline-flex size-8 items-center justify-center rounded-md',
+              'inline-flex size-9 items-center justify-center rounded-md',
               tone === 'positive' && 'bg-accent text-accent-foreground',
               tone === 'warning' && 'bg-warning text-warning-foreground',
               tone === 'default' && 'bg-muted text-foreground',
@@ -32,8 +32,8 @@ export function StatCard({
           </span>
         )}
       </div>
-      <p className="text-2xl font-bold tracking-tight tabular-nums">{value}</p>
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+      <p className="font-display text-[2.25rem] leading-none font-bold tabular-nums">{value}</p>
+      {hint && <p className="text-sm text-muted-foreground">{hint}</p>}
     </Card>
   );
 }

@@ -133,11 +133,10 @@ try {
     await cart.getByText('60\u00a0000\u00a0GNF').first().waitFor();
     await cart.getByRole('button', { name: 'Orange Money' }).click();
     await shot('05-caisse-panier');
-    await cart.getByRole('button', { name: 'Valider la vente' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Confirmer la vente' });
-    await dialog.getByText('60\u00a0000\u00a0GNF').last().waitFor();
-    // Double clic : une seule vente doit être créée.
-    await dialog.getByRole('button', { name: 'Valider la vente' }).dblclick();
+    // Le bouton annonce le montant encaissé. Double clic : une seule vente doit être créée.
+    const checkout = cart.getByRole('button', { name: /Encaisser/ });
+    await checkout.getByText('60\u00a0000\u00a0GNF').waitFor();
+    await checkout.dblclick();
     const success = page.getByRole('dialog', { name: 'Vente enregistrée' });
     await success.waitFor();
     receiptNumber = (await success.locator('strong').first().textContent())?.trim() ?? '';
@@ -198,7 +197,7 @@ try {
       await page.getByRole('button', { name: /Panier \(1\)/ }).waitFor();
       await shot(name);
       await page.getByRole('button', { name: /Panier \(1\)/ }).click();
-      await page.getByRole('dialog').getByRole('button', { name: 'Valider la vente' }).waitFor();
+      await page.getByRole('dialog').getByRole('button', { name: /Encaisser/ }).waitFor();
       await page.waitForTimeout(400); // fin de l'animation du tiroir
       await shot(`${name}-panier`);
       await page.keyboard.press('Escape');

@@ -1,10 +1,13 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
-/* Charte MassaGui Fils : vert #0ABF65, noir #111111, blanc, gris clair. */
+/* Charte MassaGui Fils : vert #0ABF65, noir #111111, blanc, gris clair.
+   Monde « lisière de pagne » : fond gris clair teinté vert, panneaux blancs,
+   encre noire, et un coloris franc par catégorie (indigo, brique, vert,
+   prune, ocre, noir), comme les couleurs d'impression d'un wax. */
 :root {
-  --radius: 0.625rem;
-  --background: #f5f6f7;
+  --radius: 0.375rem;
+  --background: #edf0ed;
   --foreground: #111111;
   --card: #ffffff;
   --card-foreground: #111111;
@@ -14,36 +17,50 @@
   --primary: #0abf65;
   --primary-foreground: #111111;
   --primary-strong: #067a40; /* ≥ 4,5:1 sur blanc et sur les fonds gris */
-  --secondary: #eef0f2;
+  --secondary: #e3e8e4;
   --secondary-foreground: #111111;
-  --muted: #eef0f2;
-  --muted-foreground: #5b6168;
-  --accent: #e3f8ec;
+  --muted: #e3e8e4;
+  --muted-foreground: #4a524d;
+  --accent: #dcf5e7;
   --accent-foreground: #0b5c34;
-  --success: #e3f8ec;
+  --success: #dcf5e7;
   --success-foreground: #0b5c34;
-  --warning: #fff4d6;
-  --warning-foreground: #7a5400;
-  --destructive: #d92d20;
+  --warning: #fdf0cc;
+  --warning-foreground: #6e4b00;
+  --destructive: #c8321f;
   --destructive-foreground: #ffffff;
-  --destructive-strong: #b42318; /* texte rouge sur fond rouge pâle : 5,5:1 */
-  --border: #e2e5e9;
-  --input: #d5d9de;
+  --destructive-strong: #a8281a;
+  --border: #d5dcd7;
+  --input: #bcc6bf;
   --ring: #0abf65;
   --sidebar: #111111;
-  --sidebar-foreground: #f2f3f4;
-  --sidebar-muted: #9aa1a8;
-  --sidebar-accent: #1f2422;
+  --sidebar-foreground: #f2f3f2;
+  --sidebar-muted: #a7aea9;
+  --sidebar-accent: #222624;
+  /* Coloris des catégories (aplats) et couleur du texte posé dessus. */
+  --cat-1: #2b3c92;
+  --cat-1-fg: #ffffff;
+  --cat-2: #b3432a;
+  --cat-2-fg: #ffffff;
+  --cat-3: #087a43;
+  --cat-3-fg: #ffffff;
+  --cat-4: #73306e;
+  --cat-4-fg: #ffffff;
+  --cat-5: #e2a62a;
+  --cat-5-fg: #111111;
+  --cat-6: #1d201e;
+  --cat-6-fg: #ffffff;
   --chart-1: #0abf65;
   --chart-2: #111111;
   --chart-3: #6b7280;
   --chart-4: #0b5c34;
   --chart-5: #9be7bf;
-  --chart-6: #f59e0b;
+  --chart-6: #e2a62a;
 }
 
 @theme inline {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: 'Barlow', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-display: 'Barlow Condensed', 'Barlow', ui-sans-serif, system-ui, 'Arial Narrow', sans-serif;
   --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -80,6 +97,12 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
   --color-chart-6: var(--chart-6);
+  --color-cat-1: var(--cat-1);
+  --color-cat-2: var(--cat-2);
+  --color-cat-3: var(--cat-3);
+  --color-cat-4: var(--cat-4);
+  --color-cat-5: var(--cat-5);
+  --color-cat-6: var(--cat-6);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -95,6 +118,8 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+    font-size: 1rem;
+    line-height: 1.5;
     font-feature-settings: 'tnum' 1;
     caret-color: var(--primary-strong);
     accent-color: var(--primary);
@@ -105,10 +130,29 @@
     background: var(--accent);
     color: var(--accent-foreground);
   }
+  h1,
+  h2 {
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline-color: var(--primary-strong);
+  }
   button:not(:disabled),
   [role='button']:not(:disabled) {
     cursor: pointer;
   }
+}
+
+/* --- Lisière : bandeau d'état en tête, comme la lisière imprimée d'un wax,
+   terminée par les points de repérage des couleurs d'impression. ----------- */
+.mg-selvedge-dots {
+  display: inline-flex;
+  gap: 5px;
+}
+.mg-selvedge-dots > span {
+  width: 9px;
+  height: 9px;
+  border-radius: 9999px;
 }
 
 /* --- Impression des reçus ----------------------------------------------- */
@@ -247,7 +291,7 @@
   animation: mg-drift-b 20s ease-in-out infinite;
 }
 .mg-pop-in {
-  animation: mg-pop-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation: mg-pop-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 .mg-rise {
   animation: mg-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
