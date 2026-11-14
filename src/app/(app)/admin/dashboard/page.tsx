@@ -1,9 +1,9 @@
-import { AlertTriangle, CalendarDays, CalendarRange, ShoppingBag, ShoppingCart, TrendingUp, UtensilsCrossed, Wallet } from 'lucide-react';
+import { AlertTriangle, ShoppingCart } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { PageHeader } from '@/components/app/page-header';
 import { PeriodFilter } from '@/components/app/period-filter';
-import { StatCard } from '@/components/app/stat-card';
+import { DayLine, FactRow } from '@/components/app/day-line';
 import { BarList } from '@/components/charts/bar-list';
 import { RevenueTrendChart } from '@/components/charts/revenue-trend-chart';
 import { AnimatedCount, AnimatedMoney } from '@/components/motion/animated-number';
@@ -71,45 +71,35 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
         }
       />
 
-      <div className="mg-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <StatCard
-          label="CA net du jour"
-          value={<AnimatedMoney value={summary.periods.today.net} currency={currency} />}
-          hint={`${summary.periods.today.count} vente(s) aujourd’hui`}
-          icon={Wallet}
-          tone="positive"
-        />
-        <StatCard
-          label="CA net de la semaine"
-          value={<AnimatedMoney value={summary.periods.week.net} currency={currency} />}
-          hint={`${summary.periods.week.count} vente(s) depuis lundi`}
-          icon={CalendarDays}
-        />
-        <StatCard
-          label="CA net du mois"
-          value={<AnimatedMoney value={summary.periods.month.net} currency={currency} />}
-          hint={`${summary.periods.month.count} vente(s) ce mois-ci`}
-          icon={CalendarRange}
-        />
-      </div>
+      <DayLine
+        label="CA net du jour"
+        value={<AnimatedMoney value={summary.periods.today.net} currency={currency} />}
+        facts={[
+          { label: 'Ventes aujourd’hui', value: summary.periods.today.count },
+          {
+            label: 'Panier moyen',
+            value: summary.periods.today.count > 0 ? money(Math.round(summary.periods.today.net / summary.periods.today.count)) : '—',
+          },
+          {
+            label: 'Stock faible',
+            value: summary.low_stock_products > 0 ? `${summary.low_stock_products} produit(s)` : 'Aucun',
+          },
+        ]}
+      />
 
       <Card>
-        <CardContent className="space-y-5">
+        <CardContent className="space-y-6">
           <PeriodFilter basePath="/admin/dashboard" period={range.period} from={range.from} to={range.to} />
-          <div className="mg-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard label={`CA net (${periodLabel})`} value={<AnimatedMoney value={report.net_revenue} currency={currency} />} icon={TrendingUp} tone="positive" />
-            <StatCard label="Ventes réalisées" value={<AnimatedCount value={report.sales_count} />} hint={`${report.items_sold} article(s) vendus`} icon={ShoppingBag} />
-            <StatCard label="Panier moyen" value={<AnimatedMoney value={report.average_basket} currency={currency} />} icon={Wallet} />
-            <StatCard
-              label="Produits actifs"
-              value={<AnimatedCount value={summary.active_products} />}
-              hint={summary.low_stock_products > 0 ? `${summary.low_stock_products} en stock faible` : 'Aucun stock faible'}
-              icon={UtensilsCrossed}
-              tone={summary.low_stock_products > 0 ? 'warning' : 'default'}
-            />
-          </div>
+          <FactRow
+            facts={[
+              { label: `CA net (${periodLabel})`, value: <AnimatedMoney value={report.net_revenue} currency={currency} /> },
+              { label: 'Ventes réalisées', value: <AnimatedCount value={report.sales_count} />, hint: `${report.items_sold} article(s) vendus` },
+              { label: 'Panier moyen', value: <AnimatedMoney value={report.average_basket} currency={currency} /> },
+              { label: 'Produits actifs', value: <AnimatedCount value={summary.active_products} /> },
+            ]}
+          />
           {(Number(report.refunds_total) > 0 || report.cancelled_count > 0) && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground">
               Ventes brutes {money(report.gross_sales)} − remboursements {money(report.refunds_total)} ={' '}
               <strong className="text-foreground">CA net {money(report.net_revenue)}</strong>. {report.cancelled_count} vente(s)
               annulée(s) ({money(report.cancelled_amount)}) exclue(s).

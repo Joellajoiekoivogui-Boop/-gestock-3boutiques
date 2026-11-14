@@ -1,6 +1,13 @@
 import type { Metadata, Viewport } from 'next';
 import { MotionProvider } from '@/components/motion/motion-provider';
 import { Toaster } from '@/components/ui/sonner';
+import '@fontsource/barlow/400.css';
+import '@fontsource/barlow/500.css';
+import '@fontsource/barlow/600.css';
+import '@fontsource/barlow/700.css';
+import '@fontsource/barlow-condensed/500.css';
+import '@fontsource/barlow-condensed/600.css';
+import '@fontsource/barlow-condensed/700.css';
 import './globals.css';
 
 export const metadata: Metadata = {

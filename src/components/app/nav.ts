@@ -56,3 +56,20 @@ export function navFor(profile: ProfileLike): NavSection[] {
 
   return sections;
 }
+
+// Barre du haut : les onglets du travail quotidien, le reste sous « Gestion ».
+const PRIMARY_HREFS = ['/pos', '/pos/sales', '/admin/sales', '/admin/dashboard'];
+const SHORT_LABELS: Record<string, string> = {
+  '/pos/sales': 'Mes ventes',
+  '/admin/sales': 'Ventes',
+};
+
+export function navLayout(profile: ProfileLike): { primary: NavItem[]; manage: NavItem[] } {
+  const items = navFor(profile).flatMap((section) => section.items);
+  const primary = PRIMARY_HREFS.flatMap((href) => {
+    const item = items.find((i) => i.href === href);
+    return item ? [{ ...item, label: SHORT_LABELS[href] ?? item.label }] : [];
+  });
+  const manage = items.filter((i) => !PRIMARY_HREFS.includes(i.href));
+  return { primary, manage };
+}

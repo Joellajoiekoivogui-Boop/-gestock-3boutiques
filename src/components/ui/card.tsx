@@ -5,7 +5,7 @@ function Card({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="card"
-      className={cn('flex min-w-0 flex-col gap-4 rounded-xl border bg-card py-5 text-card-foreground shadow-xs', className)}
+      className={cn('flex min-w-0 flex-col gap-4 rounded-lg border bg-card py-5 text-card-foreground', className)}
       {...props}
     />
   );
@@ -17,7 +17,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
 
 function CardTitle({ className, ...props }: React.ComponentProps<'h2'>) {
   // h2 : les titres de cartes sont les sections directes du h1 de la page.
-  return <h2 data-slot="card-title" className={cn('leading-none font-semibold', className)} {...props} />;
+  return <h2 data-slot="card-title" className={cn('text-lg leading-tight font-semibold', className)} {...props} />;
 }
 
 function CardDescription({ className, ...props }: React.ComponentProps<'p'>) {

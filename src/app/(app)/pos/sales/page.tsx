@@ -1,11 +1,11 @@
-import { Banknote, Plus, Receipt, Wallet } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CollapsibleFilters } from '@/components/app/collapsible-filters';
 import { PageHeader } from '@/components/app/page-header';
 import { Pagination, parsePage } from '@/components/app/pagination';
 import { SalesFiltersForm } from '@/components/sales/sales-filters';
-import { StatCard } from '@/components/app/stat-card';
+import { DayLine } from '@/components/app/day-line';
 import { SalesTable } from '@/components/sales/sales-table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -69,16 +69,17 @@ export default async function MySalesPage({ searchParams }: PageProps<'/pos/sale
           </Button>
         }
       />
-      <section aria-label="Ma journée" className="mg-stagger mb-4 grid gap-3 sm:grid-cols-3">
-        <StatCard
+      <section aria-label="Ma journée" className="mb-4">
+        <DayLine
           label="Encaissé aujourd’hui"
           value={formatMoney(day.total, currency)}
-          hint="Hors ventes annulées, remboursements déduits"
-          icon={Wallet}
-          tone="positive"
+          facts={[
+            { label: 'Ventes', value: day.count },
+            { label: 'Panier moyen', value: day.count > 0 ? formatMoney(Math.round(day.total / day.count), currency) : '—' },
+            { label: 'Dont espèces', value: formatMoney(day.cash, currency) },
+          ]}
         />
-        <StatCard label="Ventes aujourd’hui" value={day.count} hint={day.count > 0 ? `Panier moyen ${formatMoney(Math.round(day.total / day.count), currency)}` : 'Aucune vente pour le moment'} icon={Receipt} />
-        <StatCard label="Dont espèces" value={formatMoney(day.cash, currency)} hint="Ventes payées en espèces" icon={Banknote} />
+        <p className="mt-2 text-sm text-muted-foreground">Hors ventes annulées, remboursements déduits.</p>
       </section>
       <Card className="mb-4">
         <CardContent>

@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { Logo } from '@/components/app/logo';
-import { Card, CardContent } from '@/components/ui/card';
 import { getSession, homePathFor } from '@/lib/auth';
 import type { Branding } from '@/lib/database.types';
 import { createClient } from '@/lib/supabase/server';
@@ -30,32 +29,32 @@ export default async function LoginPage({ searchParams }: PageProps<'/login'>) {
   const inactive = params.error === 'inactive';
 
   return (
-    <main className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-background p-4">
-      {/* Halo vert de la marque, qui dérive lentement en arrière-plan. */}
-      <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="mg-aurora mg-aurora-a top-[-10%] left-[-8%] size-[48vmax] bg-primary/45" />
-        <div className="mg-aurora mg-aurora-b right-[-12%] bottom-[-14%] size-[42vmax] bg-chart-5/60" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0,var(--background)_70%)]" />
-      </div>
-
-      <div className="relative w-full max-w-sm">
-        <div className="mb-6 flex flex-col items-center text-center">
-          <Logo logoUrl={branding.logo_url} name={branding.name} size={72} className="mg-pop-in mb-4 rounded-xl shadow-lg" />
-          <h1 className="mg-rise text-2xl font-bold tracking-tight [animation-delay:120ms]">{branding.name}</h1>
+    <main className="grid min-h-dvh bg-background lg:grid-cols-[minmax(0,1fr)_minmax(0,32rem)]">
+      {/* Bandeau de marque : lisière noire, nom de l'établissement, coloris. */}
+      <section className="flex flex-col justify-between gap-8 bg-foreground px-6 py-8 text-background sm:px-10 lg:py-12">
+        <Logo logoUrl={branding.logo_url} name={branding.name} size={56} className="mg-pop-in" />
+        <div className="mg-rise">
+          <h1 className="font-display text-5xl leading-[0.95] font-bold tracking-tight sm:text-6xl lg:text-7xl">{branding.name}</h1>
           {branding.tagline && (
-            <p className="mg-rise mt-1 text-sm text-muted-foreground [animation-delay:200ms]">{branding.tagline}</p>
+            <p className="mt-4 font-display text-lg font-semibold tracking-[0.16em] text-background/75 uppercase">
+              {branding.tagline}
+            </p>
           )}
         </div>
-        <Card className="mg-rise border-white/60 bg-card/85 shadow-xl backdrop-blur-md [animation-delay:280ms]">
-          <CardContent>
-            <h2 className="mb-4 text-lg font-semibold">Connexion</h2>
-            <LoginForm next={next} initialError={inactive ? 'Votre compte est désactivé. Contactez l’administrateur.' : null} />
-          </CardContent>
-        </Card>
-        <p className="mg-rise mt-6 text-center text-xs text-muted-foreground [animation-delay:380ms]">
-          Accès réservé au personnel. Les comptes sont créés par l’administrateur.
-        </p>
-      </div>
+        <div aria-hidden className="flex gap-2">
+          {[1, 2, 3, 4, 5, 6].map((t) => (
+            <span key={t} className="h-2 flex-1 rounded-full" style={{ backgroundColor: `var(--cat-${t})` }} />
+          ))}
+        </div>
+      </section>
+
+      <section className="flex items-center justify-center px-6 py-10 sm:px-10">
+        <div className="mg-rise w-full max-w-sm [animation-delay:120ms]">
+          <h2 className="font-display text-4xl font-bold">Connexion</h2>
+          <p className="mt-2 mb-8 text-muted-foreground">Accès réservé au personnel. Les comptes sont créés par l’administrateur.</p>
+          <LoginForm next={next} initialError={inactive ? 'Votre compte est désactivé. Contactez l’administrateur.' : null} />
+        </div>
+      </section>
     </main>
   );
 }

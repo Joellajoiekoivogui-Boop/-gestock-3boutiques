@@ -32,7 +32,7 @@ function SheetContent({
           'fixed z-50 flex flex-col gap-4 bg-card shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=open]:duration-300 data-[state=closed]:animate-out data-[state=closed]:duration-200',
           side === 'right' && 'inset-y-0 right-0 h-full w-[88%] border-l data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right sm:max-w-md',
           side === 'left' && 'inset-y-0 left-0 h-full w-72 border-r data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left',
-          side === 'bottom' && 'inset-x-0 bottom-0 max-h-[90dvh] rounded-t-2xl border-t data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom',
+          side === 'bottom' && 'inset-x-0 bottom-0 max-h-[94dvh] rounded-t-md border-t data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom',
           side === 'top' && 'inset-x-0 top-0 border-b data-[state=open]:slide-in-from-top data-[state=closed]:slide-out-to-top',
           className,
         )}

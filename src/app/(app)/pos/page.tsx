@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { requireUser, getSettings } from '@/lib/auth';
 import { can } from '@/lib/permissions';
 import { createClient } from '@/lib/supabase/server';
+import { toneForIndex } from '@/components/app/product-thumb';
 import { PosTerminal, type PosProduct } from './pos-terminal';
 
 export const metadata: Metadata = { title: 'Caisse' };
@@ -18,7 +19,7 @@ export default async function PosPage() {
       .eq('is_archived', false)
       .eq('is_available', true)
       .order('name'),
-    supabase.from('categories').select('id, name').eq('is_active', true).order('sort_order').order('name'),
+    supabase.from('categories').select('id, name, is_active').order('sort_order').order('name'),
     supabase.from('payment_methods').select('code, label').eq('is_active', true).order('sort_order'),
   ]);
 
@@ -38,7 +39,9 @@ export default async function PosPage() {
   return (
     <PosTerminal
       products={posProducts}
-      categories={categories.data ?? []}
+      categories={(categories.data ?? []).flatMap((c, index) =>
+        c.is_active ? [{ id: c.id, name: c.name, tone: toneForIndex(index) }] : [],
+      )}
       paymentMethods={methods.data ?? []}
       currency={settings?.currency ?? 'GNF'}
       showImages={settings?.pos_show_images ?? true}

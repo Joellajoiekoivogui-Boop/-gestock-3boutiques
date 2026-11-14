@@ -39,9 +39,9 @@ export function LoginForm({ next, initialError }: { next: string | null; initial
   });
 
   return (
-    <form onSubmit={onSubmit} noValidate className="grid gap-4">
+    <form onSubmit={onSubmit} noValidate className="grid gap-5">
       {error && (
-        <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+        <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-destructive-strong">
           {error}
         </p>
       )}
@@ -52,6 +52,7 @@ export function LoginForm({ next, initialError }: { next: string | null; initial
           autoComplete="username"
           inputMode="email"
           autoFocus
+          className="h-12 text-lg"
           aria-invalid={!!errors.email}
           aria-describedby={errors.email ? 'email-error' : undefined}
           {...form.register('email')}
@@ -63,7 +64,7 @@ export function LoginForm({ next, initialError }: { next: string | null; initial
             id="password"
             type={showPassword ? 'text' : 'password'}
             autoComplete="current-password"
-            className="pr-11"
+            className="h-12 pr-12 text-lg"
             aria-invalid={!!errors.password}
             aria-describedby={errors.password ? 'password-error' : undefined}
             {...form.register('password')}
@@ -71,15 +72,15 @@ export function LoginForm({ next, initialError }: { next: string | null; initial
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-md text-muted-foreground hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+            className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-md text-muted-foreground hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
             aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
             aria-pressed={showPassword}
           >
-            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
           </button>
         </div>
       </Field>
-      <Button type="submit" size="lg" disabled={pending} className="w-full">
+      <Button type="submit" size="xl" disabled={pending} className="mt-2 w-full">
         {pending && <Loader2 className="animate-spin" aria-hidden />}
         {pending ? 'Connexion…' : 'Se connecter'}
       </Button>

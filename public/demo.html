@@ -4,199 +4,252 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#0ABF65">
+<meta name="theme-color" content="#111111">
 <link rel="icon" href="/icon.svg">
-<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Démo caisse MassaGui</title>
-
 <style>
-/* Mise en page : barre latérale noire + zone de travail ; à la caisse, le panier occupe une colonne fixe à droite
-   (tiroir en bas d'écran sur téléphone). Charte du projet : vert #0ABF65, noir #111, gris clair. */
+/* Démonstration statique de la caisse MassaGui : même monde que l'application
+   (lisière noire en tête, coloris de catégorie, Barlow / Barlow Condensed).
+   Données d'exemple, rien n'est enregistré. */
+@font-face { font-family: 'Barlow'; font-weight: 400; font-display: swap; src: url(/demo-fonts/barlow-latin-400-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Barlow'; font-weight: 500; font-display: swap; src: url(/demo-fonts/barlow-latin-500-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Barlow'; font-weight: 600; font-display: swap; src: url(/demo-fonts/barlow-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Barlow'; font-weight: 700; font-display: swap; src: url(/demo-fonts/barlow-latin-700-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Barlow Condensed'; font-weight: 500; font-display: swap; src: url(/demo-fonts/barlow-condensed-latin-500-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Barlow Condensed'; font-weight: 600; font-display: swap; src: url(/demo-fonts/barlow-condensed-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Barlow Condensed'; font-weight: 700; font-display: swap; src: url(/demo-fonts/barlow-condensed-latin-700-normal.woff2) format('woff2'); }
+
 :root {
-  --bg: #f5f6f7; --card: #ffffff; --fg: #111111; --muted: #eef0f2; --muted-fg: #5b6168;
-  --border: #e2e5e9; --primary: #0abf65; --on-primary: #111111; --primary-strong: #067a40;
-  --accent: #e3f8ec; --accent-fg: #0b5c34; --warn: #fff4d6; --warn-fg: #7a5400; --danger: #b42318; --danger-bg: #fde8e6;
-  --side: #111111; --side-fg: #f2f3f4; --side-muted: #9aa1a8; --side-hover: #1f2422;
-  --t1: #0b8a4c; --t2: #a36f00; --t3: #2f55b0; --t4: #b23a26; --t5: #6d46a8; --t6: #5b6168;
-  --shadow: 0 1px 2px rgb(17 17 17 / 0.06);
-  --font: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-  --mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0e1110; --card: #171b19; --fg: #f2f3f4; --muted: #222825; --muted-fg: #a3aab0;
-    --border: #2b322f; --primary: #0abf65; --on-primary: #111111; --primary-strong: #4fd995;
-    --accent: #12331f; --accent-fg: #9be7bf; --warn: #3a2e0a; --warn-fg: #f2cf73; --danger: #ff8a7d; --danger-bg: #3b1714;
-    --side: #080a09; --side-fg: #f2f3f4; --side-muted: #9aa1a8; --side-hover: #1a1f1d;
-    --t1: #4fd995; --t2: #f2cf73; --t3: #8fb0ff; --t4: #ff9c8a; --t5: #c3a3f5; --t6: #a3aab0;
-    --shadow: none; color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0e1110; --card: #171b19; --fg: #f2f3f4; --muted: #222825; --muted-fg: #a3aab0;
-  --border: #2b322f; --primary: #0abf65; --on-primary: #111111; --primary-strong: #4fd995;
-  --accent: #12331f; --accent-fg: #9be7bf; --warn: #3a2e0a; --warn-fg: #f2cf73; --danger: #ff8a7d; --danger-bg: #3b1714;
-  --side: #080a09; --side-fg: #f2f3f4; --side-muted: #9aa1a8; --side-hover: #1a1f1d;
-  --t1: #4fd995; --t2: #f2cf73; --t3: #8fb0ff; --t4: #ff9c8a; --t5: #c3a3f5; --t6: #a3aab0;
-  --shadow: none; color-scheme: dark;
+  --bg: #edf0ed; --card: #ffffff; --ink: #111111; --muted: #e3e8e4; --muted-ink: #4a524d;
+  --border: #d5dcd7; --input: #bcc6bf; --primary: #0abf65; --primary-hover: #09ad5b; --primary-strong: #067a40;
+  --accent: #dcf5e7; --accent-ink: #0b5c34; --warn: #fdf0cc; --warn-ink: #6e4b00; --danger: #a8281a; --danger-bg: #fbe5e1;
+  --cat-1: #2b3c92; --cat-1-fg: #fff; --cat-2: #b3432a; --cat-2-fg: #fff; --cat-3: #087a43; --cat-3-fg: #fff;
+  --cat-4: #73306e; --cat-4-fg: #fff; --cat-5: #e2a62a; --cat-5-fg: #111; --cat-6: #1d201e; --cat-6-fg: #fff;
+  --sans: 'Barlow', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --display: 'Barlow Condensed', 'Barlow', 'Arial Narrow', ui-sans-serif, sans-serif;
+  --header: 100px;
+  color-scheme: light;
 }
 * { box-sizing: border-box; }
-html, body { height: 100%; }
-body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 14px; line-height: 1.45; font-variant-numeric: tabular-nums; }
-button { font: inherit; color: inherit; cursor: pointer; }
-button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary) 55%, transparent); outline-offset: 1px; }
-h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
-h2 { font-size: 15px; font-weight: 600; margin: 0; }
+html, body { margin: 0; }
+body { min-height: 100dvh; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.5 var(--sans); font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary-strong) 70%, transparent); outline-offset: 2px; }
+::selection { background: var(--accent); color: var(--accent-ink); }
+svg { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+h1, h2 { margin: 0; text-wrap: balance; }
 p { margin: 0; }
+.display { font-family: var(--display); font-weight: 700; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-.app { display: grid; grid-template-columns: 240px minmax(0, 1fr); height: 100%; }
-.side { background: var(--side); color: var(--side-fg); display: flex; flex-direction: column; min-height: 0; }
-.brand { display: flex; align-items: center; gap: 12px; padding: 20px 16px; }
-.logo { width: 40px; height: 40px; border-radius: 8px; background: #fff; color: #111; display: grid; place-items: center; font-weight: 700; flex: none; }
-.brand b { display: block; font-size: 14px; font-weight: 600; }
-.brand small { color: var(--side-muted); font-size: 12px; }
-.nav { display: flex; flex-direction: column; gap: 2px; padding: 0 12px; flex: 1; }
-.nav-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--side-muted); padding: 14px 8px 6px; }
-.nav button { display: flex; align-items: center; gap: 12px; border: 0; background: none; color: color-mix(in srgb, var(--side-fg) 85%, transparent); padding: 10px; border-radius: 6px; text-align: left; }
-.nav button:hover { background: var(--side-hover); }
-.nav button[aria-current="page"] { background: var(--primary); color: var(--on-primary); font-weight: 600; }
-.nav svg, .btn svg, .chip svg { width: 16px; height: 16px; flex: none; }
-.side-foot { border-top: 1px solid rgb(255 255 255 / 0.1); padding: 14px 20px; font-size: 12px; color: var(--side-muted); }
-.side-foot b { display: block; color: var(--side-fg); font-size: 14px; font-weight: 500; }
+/* Lisière et barre de navigation */
+.top { position: sticky; top: 0; z-index: 30; }
+.selvedge { height: 32px; background: var(--ink); color: #fff; display: flex; align-items: center; gap: 16px; padding: 0 max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px));
+  font: 600 13px/1 var(--display); letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap; overflow: hidden; }
+.selvedge .soft { color: rgb(255 255 255 / 0.75); }
+.selvedge .push { margin-left: auto; }
+.stripe { display: flex; height: 4px; }
+.stripe span { flex: 1; }
+.bar { height: 64px; background: var(--card); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; padding: 0 max(12px, env(safe-area-inset-right, 0px)) 0 max(12px, env(safe-area-inset-left, 0px)); }
+.logo { width: 40px; height: 40px; border-radius: 6px; background: var(--primary); color: var(--ink); display: grid; place-items: center; font: 700 16px var(--display); flex: none; }
+.brand { font: 700 20px var(--display); margin: 0 8px 0 10px; }
+.tabs { display: flex; height: 100%; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.tab { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 100%; padding: 0 16px; border: 0; background: none; color: var(--muted-ink); font-weight: 600; font-size: 16px; white-space: nowrap; }
+.tab:hover { color: var(--ink); }
+.tab[aria-current="page"] { color: var(--ink); }
+.tab[aria-current="page"]::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: 0; height: 4px; border-radius: 3px 3px 0 0; background: var(--primary); }
+.who { margin-left: auto; text-align: right; line-height: 1.2; }
+.who b { display: block; font-size: 14px; }
+.who small { color: var(--muted-ink); font-size: 12px; }
+.note { background: var(--warn); color: var(--warn-ink); font-size: 14px; padding: 8px max(16px, env(safe-area-inset-left, 0px)); border-bottom: 1px solid #efd99a; }
 
-.main { min-width: 0; min-height: 0; overflow-y: auto; }
-.view { padding-block: 24px; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 16px; max-width: 1400px; }
-.demo-note { background: var(--warn); color: var(--warn-fg); border-radius: 8px; padding: 8px 12px; font-size: 13px; }
-.head { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; justify-content: space-between; }
-.head p { color: var(--muted-fg); margin-top: 4px; }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--border); background: var(--card); border-radius: 8px; padding: 8px 14px; font-weight: 500; min-height: 40px; }
-.btn:hover { background: var(--muted); }
-.btn.primary { background: var(--primary); border-color: var(--primary); color: var(--on-primary); font-weight: 600; }
-.btn.primary:hover { filter: brightness(0.96); }
-.btn.big { min-height: 52px; font-size: 17px; width: 100%; }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); min-width: 0; }
-.pad { padding: 18px 20px; }
-.card h2 + p { color: var(--muted-fg); margin-top: 2px; }
+/* Boutons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 18px; border-radius: 6px; border: 1px solid var(--input); background: var(--card); font-weight: 600; font-size: 15px; white-space: nowrap; transition: background-color .15s, border-color .15s, transform .15s; }
+.btn:hover { border-color: rgb(17 17 17 / 0.4); background: var(--muted); }
+.btn:active:not(:disabled) { transform: scale(0.97); }
+.btn.primary { background: var(--primary); border-color: var(--primary); color: var(--ink); }
+.btn.primary:hover { background: var(--primary-hover); }
+.btn.primary:disabled { opacity: 0.45; }
+.btn.ghost { border-color: transparent; background: none; color: var(--muted-ink); }
+.btn.ghost:hover { background: var(--muted); color: var(--ink); }
 
 /* Caisse */
-.pos { display: grid; grid-template-columns: minmax(0, 1fr) 380px; height: 100%; }
-.pos-left { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
-.pos-top { padding-top: 24px; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: 24px; display: flex; flex-direction: column; gap: 12px; }
-.search { position: relative; }
-.search input { width: 100%; height: 44px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--fg); padding: 0 44px 0 38px; font: inherit; font-size: 16px; }
-.search svg { position: absolute; left: 12px; top: 14px; width: 16px; height: 16px; color: var(--muted-fg); }
-.search button { position: absolute; right: 4px; top: 4px; width: 36px; height: 36px; border: 0; background: none; border-radius: 6px; color: var(--muted-fg); font-size: 18px; }
-.chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
-.chip { flex: none; height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--border); background: var(--card); font-weight: 500; white-space: nowrap; }
-.chip small { margin-left: 6px; font-size: 12px; color: var(--muted-fg); }
-.chip[aria-selected="true"] { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
-.chip[aria-selected="true"] small { color: inherit; opacity: 0.8; }
-.grid-wrap { flex: 1; min-height: 0; overflow-y: auto; padding-block: 12px 24px; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: 24px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; list-style: none; margin: 0; padding: 0; }
-.prod { position: relative; display: flex; flex-direction: column; width: 100%; height: 100%; text-align: left; padding: 0; background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); transition: transform 0.15s ease; }
-.prod:hover:not(:disabled) { border-color: var(--primary); transform: translateY(-2px); }
+.pos { display: grid; grid-template-columns: 13rem minmax(0, 1fr) 26rem; height: calc(100dvh - var(--header) - var(--note, 0px)); }
+.rail { background: var(--card); border-right: 1px solid var(--border); padding: 12px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+.cat { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 0 12px; border: 1px solid transparent; border-radius: 6px; background: none; font-weight: 600; text-align: left; }
+.cat:hover { background: var(--muted); }
+.cat[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.cat .name { flex: 1; line-height: 1.2; }
+.cat .n { font: 600 16px var(--display); color: var(--muted-ink); }
+.cat[aria-pressed="true"] .n { color: rgb(255 255 255 / 0.7); }
+.sw { width: 16px; height: 16px; border-radius: 3px; flex: none; }
+.chips { display: none; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.chips .cat { min-height: 48px; border-color: var(--border); background: var(--card); white-space: nowrap; flex: none; padding: 0 16px; font-size: 15px; }
+.chips .cat[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); }
+.products { min-width: 0; display: flex; flex-direction: column; min-height: 0; }
+.ptop { padding: 20px 24px 12px; display: flex; flex-direction: column; gap: 12px; }
+.prow { display: flex; align-items: center; gap: 12px; }
+.prow h1 { font: 700 32px/1 var(--display); }
+.search { position: relative; flex: 1; max-width: 28rem; margin-left: auto; min-width: 0; }
+.search svg { position: absolute; left: 14px; top: 14px; color: var(--muted-ink); pointer-events: none; }
+.search input { width: 100%; height: 48px; border: 1px solid var(--input); border-radius: 6px; background: var(--card); padding: 0 46px 0 44px; font-size: 18px; }
+.search input::placeholder { color: var(--muted-ink); }
+.search .clear { position: absolute; right: 4px; top: 4px; width: 40px; height: 40px; border: 0; border-radius: 6px; background: none; color: var(--muted-ink); display: grid; place-items: center; }
+.pgrid-wrap { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 24px 24px; }
+.pgrid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 12px; }
+.prod { position: relative; display: flex; flex-direction: column; width: 100%; height: 100%; padding: 0; text-align: left; background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: transform .15s, border-color .15s, box-shadow .15s; }
+.prod:hover:not(:disabled) { border-color: rgb(17 17 17 / 0.4); }
 .prod:active:not(:disabled) { transform: scale(0.97); }
-.prod.in { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
-.prod:disabled { opacity: 0.55; cursor: not-allowed; }
-.thumb { aspect-ratio: 2 / 1; display: grid; place-items: center; font-weight: 700; font-size: 20px; letter-spacing: 0.03em; background: color-mix(in srgb, var(--tone) 15%, var(--card)); color: color-mix(in srgb, var(--tone) 80%, var(--fg)); }
-.prod-body { display: flex; flex-direction: column; gap: 4px; padding: 12px; flex: 1; }
-.prod-name { font-weight: 500; line-height: 1.3; }
-.prod-price { margin-top: auto; font-size: 16px; font-weight: 700; }
-.badge { display: inline-block; width: fit-content; font-size: 12px; font-weight: 500; border-radius: 999px; padding: 1px 8px; }
-.badge.ok { background: var(--accent); color: var(--accent-fg); }
-.badge.warn { background: var(--warn); color: var(--warn-fg); }
-.badge.bad { background: var(--danger-bg); color: var(--danger); }
-.qty { position: absolute; top: 8px; right: 8px; background: var(--fg); color: var(--card); border-radius: 999px; padding: 1px 8px; font-size: 12px; font-weight: 700; }
-.empty { text-align: center; color: var(--muted-fg); padding: 48px 16px; }
-.empty b { display: block; color: var(--fg); font-weight: 500; margin-bottom: 4px; }
+.prod.in { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+.prod:disabled .pbody { color: var(--muted-ink); }
+.band { position: relative; height: 28px; display: block; }
+.band .badge { position: absolute; left: 8px; bottom: 4px; }
+.pbody { display: flex; flex-direction: column; gap: 8px; padding: 14px; flex: 1; }
+.pname { font-weight: 600; font-size: 18px; line-height: 1.3; }
+.price { margin-top: auto; font: 700 28px/1 var(--display); }
+.price small { font: 600 16px var(--sans); color: var(--muted-ink); margin-left: 4px; }
+.badge { display: inline-block; width: fit-content; border-radius: 999px; padding: 1px 10px; font-size: 13px; font-weight: 600; }
+.badge.warn { background: var(--warn); color: var(--warn-ink); }
+.badge.bad { background: var(--danger); color: #fff; }
+.badge.ok { background: var(--accent); color: var(--accent-ink); }
+.qty { position: absolute; top: 8px; right: 8px; height: 32px; min-width: 32px; padding: 0 8px; border-radius: 999px; background: var(--ink); color: #fff; display: grid; place-items: center; font: 700 18px var(--display); }
+.empty { text-align: center; color: var(--muted-ink); padding: 48px 16px; }
+.empty b { display: block; color: var(--ink); font: 700 20px var(--display); margin-bottom: 4px; }
 
-.cart { background: var(--card); border-left: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; }
-.cart-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); min-height: 53px; }
-.cart-head small { color: var(--muted-fg); font-weight: 400; font-size: 13px; }
-.link { border: 0; background: none; color: var(--muted-fg); padding: 6px 8px; border-radius: 6px; }
-.link:hover { background: var(--muted); color: var(--fg); }
+.ticket { background: var(--card); border-left: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; }
+.thead { height: 64px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-bottom: 1px solid var(--border); }
+.thead h2 { font: 700 24px var(--display); display: flex; align-items: baseline; gap: 8px; }
+.thead h2 small { font: 500 16px var(--sans); color: var(--muted-ink); }
 .lines { flex: 1; min-height: 0; overflow-y: auto; list-style: none; margin: 0; padding: 0; }
-.line { padding: 12px 16px; border-bottom: 1px solid var(--border); display: grid; gap: 8px; }
+.line { padding: 10px 20px; border-bottom: 1px solid var(--border); display: grid; gap: 8px; }
 .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.line small { color: var(--muted-fg); }
+.line .lname { font-weight: 600; font-size: 17px; line-height: 1.3; }
+.line .ltotal { font: 700 20px var(--display); white-space: nowrap; }
+.line small { color: var(--muted-ink); font-size: 15px; }
 .step { display: flex; align-items: center; gap: 4px; }
-.step button { width: 36px; height: 36px; border: 1px solid var(--border); background: var(--card); border-radius: 8px; font-size: 18px; line-height: 1; }
-.step button.rm { border-color: transparent; color: var(--muted-fg); font-size: 15px; }
-.step span { min-width: 32px; text-align: center; font-weight: 600; }
-.cart-foot { border-top: 1px solid var(--border); padding-top: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); padding-inline: 16px; display: grid; gap: 12px; }
-.total { font-size: 24px; font-weight: 700; }
-.muted { color: var(--muted-fg); }
-.pay { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.pay button { min-height: 44px; border: 1px solid var(--border); background: var(--card); border-radius: 8px; font-weight: 500; padding: 6px; }
-.pay button[aria-pressed="true"] { border-color: var(--primary); background: var(--accent); color: var(--accent-fg); box-shadow: 0 0 0 1px var(--primary); }
+.step button { width: 44px; height: 44px; border: 1px solid var(--input); background: var(--card); border-radius: 6px; display: grid; place-items: center; }
+.step button:hover:not(:disabled) { background: var(--muted); }
+.step button:disabled { opacity: 0.4; }
+.step span { width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid var(--input); border-radius: 6px; font: 700 20px var(--display); }
+.tfoot { flex: none; border-top: 1px solid var(--border); padding: 12px 20px calc(16px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 12px; }
+.total { display: flex; align-items: baseline; justify-content: space-between; }
+.total span:first-child { font: 700 20px var(--display); letter-spacing: 0.04em; text-transform: uppercase; }
+.total b { font: 700 44px/1 var(--display); }
+.pay { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.pay button { min-height: 52px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 6px; font-size: 14px; font-weight: 600; line-height: 1.15; text-align: center; }
+.pay button:hover { border-color: rgb(17 17 17 / 0.4); }
+.pay button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+.pay button[aria-pressed="true"] svg { color: var(--primary); }
+.cash { background: var(--muted); border-radius: 6px; padding: 8px; display: grid; gap: 6px; }
+.cash .amounts { display: flex; gap: 6px; }
+.cash .amounts button { flex: 1; min-width: 0; height: 44px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); font: 600 18px var(--display); }
+.cash .amounts button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+.cash .change { display: flex; align-items: baseline; justify-content: space-between; min-height: 32px; }
+.cash .change b { font: 700 26px var(--display); }
+.cash .change.minus b { color: var(--danger); }
+.go { min-height: 64px; width: 100%; justify-content: space-between; padding: 0 20px; font-size: 20px; }
+.go b { font: 700 24px var(--display); }
 .cartbar { display: none; }
 
-/* Chiffres, listes, tableaux */
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
-.stat { padding: 16px 20px; display: grid; gap: 6px; }
-.stat span { color: var(--muted-fg); }
-.stat b { font-size: 24px; font-weight: 700; letter-spacing: -0.01em; }
-.stat small { color: var(--muted-fg); font-size: 12px; }
-.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
-.bars { display: grid; gap: 14px; margin-top: 14px; }
-.bar-track { height: 8px; border-radius: 999px; background: var(--muted); overflow: hidden; margin: 4px 0; }
-.bar-fill { height: 100%; border-radius: 999px; background: var(--primary-strong); }
-.table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; }
-th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted-fg); background: color-mix(in srgb, var(--muted) 60%, transparent); padding: 10px 12px; white-space: nowrap; }
-td { padding: 10px 12px; border-top: 1px solid var(--border); vertical-align: middle; }
-td.num, th.num { text-align: right; white-space: nowrap; }
-td small { display: none; color: var(--muted-fg); font-size: 12px; }
+/* Pages Ventes et Tableau de bord */
+.page { padding: 24px max(24px, env(safe-area-inset-right, 0px)) 32px max(24px, env(safe-area-inset-left, 0px)); max-width: 1400px; display: grid; gap: 16px; }
+.phead { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.phead h1 { font: 700 32px/1 var(--display); }
+.phead p { color: var(--muted-ink); margin-top: 8px; }
+.panel { background: var(--card); border: 1px solid var(--border); border-radius: 8px; min-width: 0; }
+.dayline { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 32px; padding: 16px 20px; }
+.dayline .big { font: 700 44px/1 var(--display); margin-top: 4px; }
+.dayline dl { display: flex; flex-wrap: wrap; gap: 12px 32px; margin: 0; padding-bottom: 4px; }
+.dayline dt { color: var(--muted-ink); font-size: 14px; }
+.dayline dd { margin: 0; font: 700 24px/1.2 var(--display); }
+.label { font: 600 14px var(--display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-ink); }
+.cols { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.panel.pad { padding: 20px; }
+.panel h2 { font-size: 18px; font-weight: 600; }
+.panel h2 + p { color: var(--muted-ink); font-size: 14px; margin-top: 2px; }
+.bars { display: grid; gap: 14px; margin-top: 16px; }
+.track { height: 10px; border-radius: 999px; background: var(--muted); overflow: hidden; margin: 6px 0 4px; }
+.fill { height: 100%; border-radius: 999px; }
+.bars small { color: var(--muted-ink); font-size: 13px; }
+.low { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--warn); color: var(--warn-ink); border-radius: 6px; padding: 10px 12px; font-weight: 600; }
+.twrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+th { text-align: left; font: 600 14px var(--display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-ink); background: rgb(227 232 228 / 0.6); padding: 12px; white-space: nowrap; }
+td { padding: 12px; border-top: 1px solid var(--border); }
+.num { text-align: right; white-space: nowrap; }
+td .sub { display: none; color: var(--muted-ink); font-size: 13px; }
 
-/* Fenêtre du reçu */
-.overlay { position: fixed; inset: 0; background: rgb(0 0 0 / 0.5); display: grid; place-items: center; padding: 16px; z-index: 30; }
-.dialog { background: var(--card); border-radius: 14px; padding: 24px; width: min(380px, 100%); display: grid; gap: 14px; text-align: center; }
-.check { width: 56px; height: 56px; border-radius: 999px; background: var(--accent); color: var(--accent-fg); display: grid; place-items: center; margin: 0 auto; font-size: 28px; }
-.ticket { font-family: var(--mono); font-size: 12px; text-align: left; border: 1px dashed var(--border); border-radius: 8px; padding: 12px; display: grid; gap: 4px; }
-.ticket hr { border: 0; border-top: 1px dashed var(--border); width: 100%; margin: 4px 0; }
+/* Vente enregistrée */
+.overlay { position: fixed; inset: 0; z-index: 50; background: rgb(17 17 17 / 0.55); display: grid; place-items: center; padding: 16px; }
+.dialog { background: var(--card); border-radius: 10px; padding: 24px; width: min(420px, 100%); display: grid; gap: 16px; text-align: center; max-height: 100%; overflow-y: auto; }
+.okmark { width: 64px; height: 64px; border-radius: 50%; background: var(--primary); color: var(--ink); display: grid; place-items: center; margin: 0 auto; }
+.okmark svg { width: 34px; height: 34px; stroke-width: 3; }
+.dialog h2 { font: 700 30px var(--display); }
+.dialog .big { font: 700 48px/1 var(--display); }
+.receipt { font: 12px/1.5 ui-monospace, Menlo, Consolas, monospace; text-align: left; border: 1px dashed var(--input); border-radius: 6px; padding: 12px; }
+.receipt hr { border: 0; border-top: 1px dashed var(--input); margin: 6px 0; }
+.dactions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.dactions .btn.primary { grid-column: 1 / -1; min-height: 60px; font-size: 18px; }
 
-@media (max-width: 900px) {
-  .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
-  .side { flex-direction: row; align-items: center; overflow-x: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); gap: 8px; }
-  .brand { padding: 10px 0; } .brand div, .nav-title, .side-foot { display: none; } .logo { width: 32px; height: 32px; font-size: 12px; }
-  .nav { flex-direction: row; padding: 0; } .nav button { white-space: nowrap; padding: 8px 10px; }
-  .view { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px; }
-  .pos { grid-template-columns: minmax(0, 1fr); }
-  .pos-top { padding-top: 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-  .grid-wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-bottom: 96px; }
-  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .cart { position: fixed; inset: auto 0 0 0; max-height: 88%; border-left: 0; border-top: 1px solid var(--border); border-radius: 16px 16px 0 0; z-index: 25; box-shadow: 0 -8px 24px rgb(0 0 0 / 0.18); }
-  .cart:not(.open) { display: none; }
-  .cartbar { display: block; position: fixed; inset: auto 0 0 0; z-index: 20; background: var(--card); border-top: 1px solid var(--border); padding-top: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px)); }
-  .cartbar .btn { justify-content: space-between; padding: 0 18px; }
-  .hide-sm { display: none; } td small { display: block; }
+@media (max-width: 1023px) {
+  .pos { grid-template-columns: minmax(0, 1fr); height: auto; }
+  .rail, .ticket:not(.open) { display: none; }
+  .chips { display: flex; }
+  .ptop { position: sticky; top: var(--header); z-index: 10; background: var(--bg); border-bottom: 1px solid var(--border); padding: 16px 16px 12px; }
+  .pgrid-wrap { padding: 16px 16px 112px; overflow: visible; }
+  .ticket.open { position: fixed; inset: auto 0 0 0; height: 92dvh; z-index: 40; border: 0; border-radius: 14px 14px 0 0; box-shadow: 0 -12px 32px rgb(0 0 0 / 0.25); }
+  .cartbar { display: block; position: fixed; inset: auto 0 0 0; z-index: 20; background: var(--card); border-top: 1px solid var(--border); padding: 12px max(12px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+  .cartbar .btn { width: 100%; min-height: 64px; justify-content: space-between; font-size: 18px; }
+  .scrim { position: fixed; inset: 0; z-index: 35; background: rgb(17 17 17 / 0.5); }
+  .cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .cols > :first-child { grid-column: 1 / -1; }
 }
-@media (prefers-reduced-motion: reduce) { .prod { transition: none; } }
+@media (max-width: 767px) {
+  .selvedge .hide-sm, .who, .brand { display: none; }
+  .tab { padding: 0 12px; font-size: 15px; }
+  .tab svg { display: none; }
+  .prow .btn { display: none; }
+  .pgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cols { grid-template-columns: minmax(0, 1fr); }
+  .page { padding: 16px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px)); }
+  .hide-sm { display: none; }
+  td .sub { display: block; }
+}
+@media (prefers-reduced-motion: reduce) { .prod, .btn { transition: none; } }
 </style>
-
 </head>
 <body>
-<div class="app">
-  <aside class="side">
-    <div class="brand"><span class="logo">MG</span><div><b>MassaGui Fils SARL.U</b><small>Gestion restaurant</small></div></div>
-    <nav class="nav" aria-label="Navigation principale">
-      <span class="nav-title">Vente</span>
-      <button type="button" data-view="caisse"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 2h3l3 13h11l2-9H6"/></svg>Caisse</button>
-      <button type="button" data-view="ventes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Mes ventes</button>
-      <span class="nav-title">Pilotage</span>
-      <button type="button" data-view="bord"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Tableau de bord</button>
+<div class="top">
+  <div class="selvedge">
+    <span>MassaGui Fils SARL.U</span>
+    <span class="soft hide-sm">·</span>
+    <span class="soft hide-sm">Hôtellerie — Restaurant</span>
+    <span class="push soft hide-sm" id="today"></span>
+    <span class="hide-sm">Awa Camara · Gérant / Caissier</span>
+  </div>
+  <div class="stripe" aria-hidden="true"><span style="background:var(--cat-1)"></span><span style="background:var(--cat-2)"></span><span style="background:var(--cat-3)"></span><span style="background:var(--cat-4)"></span><span style="background:var(--cat-5)"></span><span style="background:var(--cat-6)"></span></div>
+  <div class="bar">
+    <span class="logo" role="img" aria-label="Logo MassaGui Fils SARL.U">MG</span>
+    <span class="brand">MassaGui</span>
+    <nav class="tabs" aria-label="Navigation principale">
+      <button type="button" class="tab" data-view="caisse"><svg viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>Caisse</button>
+      <button type="button" class="tab" data-view="ventes"><svg viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg>Mes ventes</button>
+      <button type="button" class="tab" data-view="bord"><svg viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>Tableau de bord</button>
     </nav>
-    <div class="side-foot"><b>Démonstration</b>Données d’exemple</div>
-  </aside>
-  <main class="main" id="main"></main>
+    <div class="who"><b>Awa Camara</b><small>Démonstration</small></div>
+  </div>
 </div>
+<p class="note" id="note">Démonstration avec des données d’exemple : rien n’est enregistré, tout repart de zéro au rechargement.</p>
+<main id="main"></main>
 <div id="modal"></div>
 
 <script>
 const CATS = [
-  { id: 'af', name: 'Plats africains', tone: 3 }, { id: 'eu', name: 'Plats européens', tone: 6 },
-  { id: 'bo', name: 'Boissons', tone: 1 }, { id: 'de', name: 'Desserts', tone: 5 }, { id: 'pd', name: 'Petit-déjeuner', tone: 2 },
+  { id: 'af', name: 'Plats africains', tone: 1 }, { id: 'eu', name: 'Plats européens', tone: 2 },
+  { id: 'bo', name: 'Boissons', tone: 3 }, { id: 'de', name: 'Desserts', tone: 4 }, { id: 'pd', name: 'Petit-déjeuner', tone: 5 },
 ];
 const PRODUCTS = [
   ['Attiéké poisson braisé', 'af', 60000], ['Fouti au poisson', 'af', 40000], ['Poulet yassa', 'af', 55000],
@@ -207,22 +260,47 @@ const PRODUCTS = [
   ['Crêpe au chocolat', 'de', 25000], ['Salade de fruits', 'de', 20000],
   ['Croissant', 'pd', 8000, 0], ['Omelette complète', 'pd', 30000],
 ].map(([name, cat, price, stock], i) => ({ id: 'p' + i, name, cat, price, stock: stock === undefined ? null : stock }));
-const PAYMENTS = ['Espèces', 'Orange Money', 'MTN Mobile Money', 'Virement bancaire'];
+const PAYMENTS = [['cash', 'Espèces'], ['om', 'Orange Money'], ['mtn', 'MTN Mobile Money'], ['bank', 'Virement bancaire'], ['other', 'Autre']];
+const ICONS = {
+  grid: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
+  search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  minus: '<path d="M5 12h14"/>', plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  trash: '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>', ok: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  cash: '<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>',
+  phone: '<rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/>',
+  bank: '<path d="M3 22h18"/><path d="M6 18v-7"/><path d="M10 18v-7"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="m12 2 8 5H4z"/>',
+  wallet: '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+  receipt: '<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M13 16H8"/>',
+  printer: '<path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/>',
+  cart: '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>',
+};
+const icon = (name) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`;
+const PAY_ICON = { cash: 'cash', om: 'phone', mtn: 'phone', bank: 'bank', other: 'wallet' };
 
-const state = { view: 'caisse', cat: 'all', search: '', cart: [], pay: PAYMENTS[0], cartOpen: false, sales: [], nextNo: 22 };
-const money = (v) => new Intl.NumberFormat('fr-FR').format(v) + ' GNF';
+const state = { view: 'caisse', cat: 'all', search: '', cart: [], pay: 'cash', received: '', cartOpen: false, sales: [], nextNo: 22 };
+
+const fmt = (v) => new Intl.NumberFormat('fr-FR').format(v).replace(/ /g, ' ');
+const money = (v) => fmt(v) + ' GNF';
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const norm = (s) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 const prod = (id) => PRODUCTS.find((p) => p.id === id);
-const initials = (name) => { const w = name.trim().split(/\s+/); return ((w[1] ? w[0][0] + w[1][0] : w[0].slice(0, 2))).toUpperCase(); };
+const toneOf = (catId) => (CATS.find((c) => c.id === catId) || { tone: 6 }).tone;
 const inCart = (id) => (state.cart.find((l) => l.id === id) || { q: 0 }).q;
 const cartTotal = () => state.cart.reduce((s, l) => s + prod(l.id).price * l.q, 0);
 const cartCount = () => state.cart.reduce((s, l) => s + l.q, 0);
+const payLabel = (code) => PAYMENTS.find((p) => p[0] === code)[1];
+const cashSuggestions = (total) => {
+  if (total <= 0) return [];
+  const values = new Set([total]);
+  for (const step of [5000, 10000, 20000, 50000, 100000]) values.add(Math.ceil(total / step) * step);
+  return [...values].sort((a, b) => a - b).slice(0, 4);
+};
 
 function recordSale(lines, pay, no, time) {
   const total = lines.reduce((s, l) => s + prod(l.id).price * l.q, 0);
-  const now = new Date();
-  const sale = { no: 'MG-2026-' + String(no).padStart(6, '0'), time: time || now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }), lines, pay, total };
+  const sale = { no: 'MG-2026-' + String(no).padStart(6, '0'), time: time || new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }), lines, pay, total };
   state.sales.unshift(sale);
   return sale;
 }
@@ -240,155 +318,175 @@ function setQty(id, q) {
   else state.cart.find((l) => l.id === id).q = p.stock === null ? q : Math.min(q, p.stock);
   render();
 }
-function validate() {
+function checkout() {
   if (!state.cart.length) return;
   const lines = state.cart.map((l) => ({ ...l }));
   lines.forEach((l) => { const p = prod(l.id); if (p.stock !== null) p.stock -= l.q; });
   const sale = recordSale(lines, state.pay, state.nextNo++);
-  state.cart = []; state.cartOpen = false; state.pay = PAYMENTS[0];
+  state.cart = []; state.cartOpen = false; state.pay = 'cash'; state.received = '';
   render(); showReceipt(sale);
 }
 
 function showReceipt(sale) {
-  document.getElementById('modal').innerHTML = `<div class="overlay" role="dialog" aria-modal="true" aria-label="Vente enregistrée"><div class="dialog">
-    <div class="check" aria-hidden="true">✓</div>
-    <div><h2>Vente enregistrée</h2><p class="muted">Reçu n° <b>${sale.no}</b></p></div>
-    <div class="ticket">
-      <b style="text-align:center">MASSAGUI FILS SARL.U</b><hr>
-      ${sale.lines.map((l) => `<div>${esc(prod(l.id).name)}</div><div class="row"><span>${l.q} x ${new Intl.NumberFormat('fr-FR').format(prod(l.id).price)}</span><span>${new Intl.NumberFormat('fr-FR').format(prod(l.id).price * l.q)}</span></div>`).join('')}
-      <hr><div class="row"><b>TOTAL</b><b>${money(sale.total)}</b></div><div class="row"><span>Paiement</span><span>${esc(sale.pay)}</span></div>
+  document.getElementById('modal').innerHTML = `<div class="overlay" role="dialog" aria-modal="true" aria-labelledby="ok-title"><div class="dialog">
+    <div class="okmark">${icon('check')}</div>
+    <div><h2 id="ok-title">Vente enregistrée</h2><p style="color:var(--muted-ink)">Reçu n° <b style="color:var(--ink)">${sale.no}</b></p></div>
+    <p class="big">${money(sale.total)}</p>
+    <div class="receipt">
+      <b style="display:block;text-align:center">MASSAGUI FILS SARL.U</b><hr>
+      ${sale.lines.map((l) => `<div>${esc(prod(l.id).name)}</div><div class="row"><span>${l.q} x ${fmt(prod(l.id).price)}</span><span>${fmt(prod(l.id).price * l.q)}</span></div>`).join('')}
+      <hr><div class="row"><b>TOTAL</b><b>${money(sale.total)}</b></div><div class="row"><span>Paiement</span><span>${esc(payLabel(sale.pay))}</span></div>
     </div>
-    <div class="row"><button type="button" class="btn" data-go="ventes" style="flex:1">Mes ventes</button><button type="button" class="btn primary" data-close style="flex:1">Nouvelle vente</button></div>
+    <div class="dactions">
+      <button type="button" class="btn primary" data-close>${icon('printer')} Imprimer le reçu</button>
+      <button type="button" class="btn" data-go="ventes">${icon('receipt')} Mes ventes</button>
+      <button type="button" class="btn" data-close>${icon('plus')} Nouvelle vente</button>
+    </div>
   </div></div>`;
-  document.querySelector('[data-close]').focus();
+  document.querySelector('.dialog [data-close]').focus();
+}
+
+function catButton(c, n, chip) {
+  const sw = c.tone ? `<span class="sw" style="background:var(--cat-${c.tone})" aria-hidden="true"></span>` : icon('grid');
+  return `<button type="button" class="cat" data-cat="${c.id}" aria-pressed="${state.cat === c.id}">${sw}<span class="name">${esc(c.name)}</span><span class="n">${n}</span></button>`;
 }
 
 function viewCaisse() {
   const q = norm(state.search.trim());
   const list = PRODUCTS.filter((p) => (state.cat === 'all' || p.cat === state.cat) && (!q || norm(p.name).includes(q)));
-  const chips = [{ id: 'all', name: 'Tout', n: PRODUCTS.length }, ...CATS.map((c) => ({ ...c, n: PRODUCTS.filter((p) => p.cat === c.id).length }))];
+  const cats = [{ id: 'all', name: 'Tout', tone: 0, n: PRODUCTS.length }, ...CATS.map((c) => ({ ...c, n: PRODUCTS.filter((p) => p.cat === c.id).length }))];
   const cards = list.map((p) => {
-    const tone = CATS.find((c) => c.id === p.cat).tone, qty = inCart(p.id), left = p.stock === null ? null : p.stock - qty, out = p.stock === 0;
+    const tone = toneOf(p.cat), qty = inCart(p.id), left = p.stock === null ? null : p.stock - qty, out = p.stock === 0;
     return `<li><button type="button" class="prod${qty ? ' in' : ''}" data-add="${p.id}" ${out ? 'disabled' : ''} aria-label="Ajouter ${esc(p.name)}, ${money(p.price)}">
-      <span class="thumb" style="--tone: var(--t${tone})" aria-hidden="true">${initials(p.name)}</span>
-      <span class="prod-body"><span class="prod-name">${esc(p.name)}</span><span class="prod-price">${money(p.price)}</span>
-      ${out ? '<span class="badge bad">Rupture</span>' : left !== null && left <= 5 ? `<span class="badge warn">Reste ${left}</span>` : ''}</span>
+      <span class="band" style="background:${out ? 'var(--muted)' : `var(--cat-${tone})`}">${out ? '<span class="badge bad">Rupture</span>' : left !== null && left <= 5 ? `<span class="badge warn">Reste ${left}</span>` : ''}</span>
+      <span class="pbody"><span class="pname">${esc(p.name)}</span><span class="price">${fmt(p.price)}<small>GNF</small></span></span>
       ${qty ? `<span class="qty">×${qty}</span>` : ''}</button></li>`;
   }).join('');
+  const total = cartTotal(), received = Number(state.received || 0), change = received - total;
   const lines = state.cart.map((l) => { const p = prod(l.id); return `<li class="line">
-      <div class="row"><span style="font-weight:500">${esc(p.name)}</span><b>${money(p.price * l.q)}</b></div>
-      <div class="row"><small>${money(p.price)} / unité</small><div class="step">
-        <button type="button" data-qty="${p.id}" data-d="-1" aria-label="Diminuer la quantité de ${esc(p.name)}">−</button><span>${l.q}</span>
-        <button type="button" data-qty="${p.id}" data-d="1" aria-label="Augmenter la quantité de ${esc(p.name)}" ${p.stock !== null && l.q >= p.stock ? 'disabled' : ''}>+</button>
-        <button type="button" class="rm" data-qty="${p.id}" data-d="-999" aria-label="Retirer ${esc(p.name)}">✕</button></div></div></li>`; }).join('');
+      <div class="row"><span class="lname">${esc(p.name)}</span><span class="ltotal">${money(p.price * l.q)}</span></div>
+      <div class="row"><small>${money(p.price)} l’unité</small><div class="step">
+        <button type="button" data-qty="${p.id}" data-d="-1" aria-label="${l.q > 1 ? 'Diminuer la quantité de' : 'Retirer'} ${esc(p.name)}">${icon(l.q > 1 ? 'minus' : 'trash')}</button><span>${l.q}</span>
+        <button type="button" data-qty="${p.id}" data-d="1" aria-label="Augmenter la quantité de ${esc(p.name)}" ${p.stock !== null && l.q >= p.stock ? 'disabled' : ''}>${icon('plus')}</button></div></div></li>`; }).join('');
+  const cash = state.pay === 'cash' && total > 0 ? `<div class="cash">
+      <div class="amounts" role="group" aria-label="Montant reçu du client">${cashSuggestions(total).map((v) => `<button type="button" data-recv="${v}" aria-pressed="${received === v}">${fmt(v)}</button>`).join('')}</div>
+      <p class="change${change < 0 ? ' minus' : ''}" aria-live="polite">${state.received ? `<span>${change >= 0 ? 'À rendre' : 'Il manque'}</span><b>${money(Math.abs(change))}</b>` : '<span style="color:var(--muted-ink)">Touchez le montant reçu pour calculer la monnaie.</span>'}</p></div>` : '';
   return `<div class="pos">
-    <section class="pos-left" aria-label="Produits">
-      <div class="pos-top">
-        <div class="demo-note">Démonstration avec des données d’exemple : rien n’est enregistré, tout repart de zéro au rechargement.</div>
-        <div class="row"><h1>Caisse</h1><button type="button" class="btn" data-go="ventes">Ventes récentes</button></div>
-        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          <input id="search" type="text" placeholder="Rechercher un produit…" aria-label="Rechercher un produit" value="${esc(state.search)}" autocomplete="off">
-          ${state.search ? '<button type="button" data-clear aria-label="Effacer la recherche">✕</button>' : ''}</div>
-        <div class="chips" role="tablist" aria-label="Catégories">${chips.map((c) => `<button type="button" role="tab" class="chip" data-cat="${c.id}" aria-selected="${state.cat === c.id}">${esc(c.name)}<small>${c.n}</small></button>`).join('')}</div>
+    <nav class="rail" aria-label="Catégories">${cats.map((c) => catButton(c, c.n)).join('')}</nav>
+    <section class="products" aria-label="Produits">
+      <div class="ptop">
+        <div class="prow"><h1>Caisse</h1>
+          <div class="search">${icon('search')}<input id="search" type="search" placeholder="Rechercher un plat…" aria-label="Rechercher un produit" value="${esc(state.search)}" autocomplete="off">
+          ${state.search ? `<button type="button" class="clear" data-clear aria-label="Effacer la recherche">${icon('x')}</button>` : ''}</div>
+          <button type="button" class="btn" data-go="ventes">${icon('receipt')} Ventes du jour</button></div>
+        <div class="chips" role="group" aria-label="Catégories">${cats.map((c) => catButton(c, c.n)).join('')}</div>
       </div>
-      <div class="grid-wrap">${list.length ? `<ul class="grid">${cards}</ul>` : '<div class="empty"><b>Aucun résultat</b>Modifiez la recherche ou la catégorie.</div>'}</div>
+      <div class="pgrid-wrap">${list.length ? `<ul class="pgrid">${cards}</ul>` : '<div class="empty"><b>Aucun résultat</b>Modifiez la recherche ou choisissez « Tout ».</div>'}</div>
     </section>
-    <aside class="cart${state.cartOpen ? ' open' : ''}" aria-label="Panier">
-      <div class="cart-head"><h2>Panier <small>(${cartCount()} article${cartCount() > 1 ? 's' : ''})</small></h2>
-        <span>${state.cart.length ? '<button type="button" class="link" data-empty>Vider</button>' : ''}<button type="button" class="link cart-close" data-cart-toggle>Fermer</button></span></div>
-      ${state.cart.length ? `<ul class="lines">${lines}</ul>` : '<div class="lines empty"><b>Panier vide</b>Touchez un produit pour l’ajouter.</div>'}
-      <div class="cart-foot">
-        <div class="row"><b style="font-size:16px">Total</b><span class="total">${money(cartTotal())}</span></div>
-        <div><p style="font-weight:500;margin-bottom:8px">Mode de paiement</p><div class="pay">${PAYMENTS.map((m) => `<button type="button" data-pay="${m}" aria-pressed="${state.pay === m}">${state.pay === m ? '✓ ' : ''}${m}</button>`).join('')}</div></div>
-        <button type="button" class="btn primary big" data-validate ${state.cart.length ? '' : 'disabled'}>Valider la vente</button>
+    ${state.cartOpen ? '<div class="scrim" data-cart-toggle></div>' : ''}
+    <aside class="ticket${state.cartOpen ? ' open' : ''}" aria-label="Panier">
+      <div class="thead"><h2>Ticket <small>${cartCount()} article${cartCount() > 1 ? 's' : ''}</small></h2>
+        <span style="display:flex;gap:4px">${state.cart.length ? `<button type="button" class="btn ghost" data-empty>${icon('trash')} Vider</button>` : ''}${state.cartOpen ? `<button type="button" class="btn ghost" data-cart-toggle aria-label="Fermer le ticket">${icon('x')}</button>` : ''}</span></div>
+      ${state.cart.length ? `<ul class="lines">${lines}</ul>` : '<div class="lines empty"><b>Ticket vide</b>Touchez un plat pour l’ajouter au ticket.</div>'}
+      <div class="tfoot">
+        <div class="total"><span>Total</span><b>${money(total)}</b></div>
+        <fieldset style="border:0;margin:0;padding:0"><legend class="sr-only">Mode de paiement</legend><div class="pay">${PAYMENTS.map(([code, label]) => `<button type="button" data-pay="${code}" aria-pressed="${state.pay === code}">${icon(state.pay === code ? 'check' : PAY_ICON[code])}<span>${label}</span></button>`).join('')}</div></fieldset>
+        ${cash}
+        <button type="button" class="btn primary go" data-checkout ${state.cart.length ? '' : 'disabled'}><span style="display:flex;align-items:center;gap:8px">${icon('ok')} Encaisser</span>${state.cart.length ? `<b>${money(total)}</b>` : ''}</button>
       </div>
     </aside>
-    <div class="cartbar"><button type="button" class="btn primary big" data-cart-toggle><span>Panier (${cartCount()})</span><span>${money(cartTotal())}</span></button></div>
+    <div class="cartbar"><button type="button" class="btn primary" data-cart-toggle><span style="display:flex;align-items:center;gap:8px">${icon('cart')} Panier (${cartCount()})</span><b class="display" style="font-size:24px">${money(total)}</b></button></div>
   </div>`;
 }
 
-function salesRows(limit) {
-  return state.sales.slice(0, limit).map((s) => `<tr><td><b style="font-weight:500">${s.no}</b><small>Aujourd’hui ${s.time} · ${esc(s.pay)}</small></td>
+function salesTable(limit) {
+  const rows = state.sales.slice(0, limit).map((s) => `<tr><td><b style="font-weight:600">${s.no}</b><span class="sub">Aujourd’hui ${s.time} · ${esc(payLabel(s.pay))}</span></td>
     <td class="hide-sm">Aujourd’hui ${s.time}</td><td class="num hide-sm">${s.lines.reduce((n, l) => n + l.q, 0)}</td>
-    <td class="num"><b style="font-weight:500">${money(s.total)}</b></td><td class="hide-sm">${esc(s.pay)}</td><td><span class="badge ok">Payée</span></td></tr>`).join('');
+    <td class="num"><b style="font-weight:600">${money(s.total)}</b></td><td class="hide-sm">${esc(payLabel(s.pay))}</td><td><span class="badge ok">Payée</span></td></tr>`).join('');
+  return `<div class="panel"><div class="twrap"><table><thead><tr><th>Reçu</th><th class="hide-sm">Date</th><th class="num hide-sm">Articles</th><th class="num">Montant</th><th class="hide-sm">Paiement</th><th>Statut</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
 }
-const salesTable = (limit) => `<div class="card"><div class="table-wrap"><table><thead><tr><th>Reçu</th><th class="hide-sm">Date</th><th class="num hide-sm">Articles</th><th class="num">Montant</th><th class="hide-sm">Paiement</th><th>Statut</th></tr></thead><tbody>${salesRows(limit)}</tbody></table></div></div>`;
 const sum = (rows) => rows.reduce((s, r) => s + r.total, 0);
 
 function viewVentes() {
-  const total = sum(state.sales), cash = sum(state.sales.filter((s) => s.pay === 'Espèces')), n = state.sales.length;
-  return `<div class="view">
-    <div class="head"><div><h1>Mes ventes</h1><p>Vos ventes et leurs reçus.</p></div><button type="button" class="btn primary" data-go="caisse">+ Nouvelle vente</button></div>
-    <div class="stats">
-      <div class="card stat"><span>Encaissé aujourd’hui</span><b>${money(total)}</b><small>Hors ventes annulées</small></div>
-      <div class="card stat"><span>Ventes aujourd’hui</span><b>${n}</b><small>Panier moyen ${money(Math.round(total / n))}</small></div>
-      <div class="card stat"><span>Dont espèces</span><b>${money(cash)}</b><small>Ventes payées en espèces</small></div>
-    </div>${salesTable(50)}</div>`;
+  const total = sum(state.sales), cash = sum(state.sales.filter((s) => s.pay === 'cash')), n = state.sales.length;
+  return `<div class="page">
+    <div class="phead"><div><h1>Mes ventes</h1><p>Vos ventes et leurs reçus, à réimprimer si besoin.</p></div><button type="button" class="btn primary" data-go="caisse">${icon('plus')} Nouvelle vente</button></div>
+    ${dayLine('Encaissé aujourd’hui', money(total), [['Ventes', n], ['Panier moyen', money(Math.round(total / n))], ['Dont espèces', money(cash)]])}${salesTable(50)}</div>`;
 }
 
-function barList(items, fmt) {
+function dayLine(label, value, facts) {
+  return `<div class="panel dayline"><div><span class="label">${label}</span><p class="big">${value}</p></div>
+    <dl>${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl></div>`;
+}
+function barList(items, fmtValue) {
   const max = Math.max(...items.map((i) => i.value), 1);
-  return `<div class="bars">${items.map((i) => `<div><div class="row"><span>${esc(i.label)}</span><b style="font-weight:600">${fmt(i)}</b></div>
-    <div class="bar-track"><div class="bar-fill" style="width:${(i.value / max) * 100}%"></div></div><small class="muted">${esc(i.detail)}</small></div>`).join('')}</div>`;
+  return `<div class="bars">${items.map((i) => `<div><div class="row"><span>${esc(i.label)}</span><b style="font-weight:600">${fmtValue(i)}</b></div>
+    <div class="track"><div class="fill" style="width:${(i.value / max) * 100}%;background:${i.color || 'var(--primary-strong)'}"></div></div><small>${esc(i.detail)}</small></div>`).join('')}</div>`;
 }
 function viewBord() {
   const total = sum(state.sales), n = state.sales.length;
-  const byPay = PAYMENTS.map((m) => { const r = state.sales.filter((s) => s.pay === m); return { label: m, value: sum(r), detail: `${r.length} vente(s) · ${total ? Math.round((sum(r) / total) * 100) : 0} %` }; }).filter((i) => i.value).sort((a, b) => b.value - a.value);
+  const byPay = PAYMENTS.map(([code, label]) => { const r = state.sales.filter((s) => s.pay === code); return { label, value: sum(r), detail: `${r.length} vente(s) · ${total ? Math.round((sum(r) / total) * 100) : 0} %` }; }).filter((i) => i.value).sort((a, b) => b.value - a.value);
   const sold = {};
   state.sales.forEach((s) => s.lines.forEach((l) => { sold[l.id] = (sold[l.id] || 0) + l.q; }));
-  const top = Object.entries(sold).map(([id, q]) => ({ label: prod(id).name, value: q, detail: money(q * prod(id).price) })).sort((a, b) => b.value - a.value).slice(0, 5);
+  const top = Object.entries(sold).map(([id, q]) => ({ label: prod(id).name, value: q, detail: money(q * prod(id).price), color: `var(--cat-${toneOf(prod(id).cat)})` })).sort((a, b) => b.value - a.value).slice(0, 5);
   const low = PRODUCTS.filter((p) => p.stock !== null && p.stock <= 6);
-  const date = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-  return `<div class="view">
-    <div class="head"><div><h1>Tableau de bord</h1><p>${date.charAt(0).toUpperCase() + date.slice(1)} · chiffres de la démonstration</p></div><button type="button" class="btn primary" data-go="caisse">Ouvrir la caisse</button></div>
-    <div class="stats">
-      <div class="card stat"><span>CA net du jour</span><b>${money(total)}</b><small>${n} vente(s) aujourd’hui</small></div>
-      <div class="card stat"><span>Panier moyen</span><b>${money(Math.round(total / n))}</b><small>${state.sales.reduce((s, r) => s + r.lines.reduce((a, l) => a + l.q, 0), 0)} article(s) vendus</small></div>
-      <div class="card stat"><span>Produits actifs</span><b>${PRODUCTS.length}</b><small>${low.length} en stock faible</small></div>
-    </div>
+  return `<div class="page">
+    <div class="phead"><div><h1>Tableau de bord</h1><p>${document.getElementById('today').textContent} · chiffres de la démonstration</p></div><button type="button" class="btn primary" data-go="caisse">${icon('cart')} Ouvrir la caisse</button></div>
+    ${dayLine('CA net du jour', money(total), [['Ventes aujourd’hui', n], ['Panier moyen', money(Math.round(total / n))], ['Articles vendus', state.sales.reduce((s, r) => s + r.lines.reduce((a, l) => a + l.q, 0), 0)], ['Stock faible', low.length + ' produit(s)']])}
     <div class="cols">
-      <div class="card pad"><h2>Répartition des paiements</h2><p>Ventes par mode de paiement</p>${barList(byPay, (i) => money(i.value))}</div>
-      <div class="card pad"><h2>Produits les plus vendus</h2><p>Par quantité, aujourd’hui</p>${barList(top, (i) => i.value + ' vendu(s)')}</div>
-      <div class="card pad"><h2>Stock faible</h2><p>Produits à réapprovisionner</p><div class="bars">${low.map((p) => `<div class="row badge warn" style="width:100%;border-radius:8px;padding:8px 12px;font-size:14px"><b style="font-weight:500">${esc(p.name)}</b><span>${p.stock} restant(s)</span></div>`).join('')}</div></div>
+      <div class="panel pad"><h2>Produits les plus vendus</h2><p>Par quantité, aujourd’hui</p>${barList(top, (i) => i.value + ' vendu(s)')}</div>
+      <div class="panel pad"><h2>Répartition des paiements</h2><p>Ventes par mode de paiement</p>${barList(byPay, (i) => money(i.value))}</div>
+      <div class="panel pad"><h2>Stock faible</h2><p>À réapprovisionner</p><div class="bars">${low.map((p) => `<div class="low"><span>${esc(p.name)}</span><span>${p.stock} restant(s)</span></div>`).join('')}</div></div>
     </div>
-    <h2>Dernières transactions</h2>${salesTable(6)}</div>`;
+    <h2 style="font-size:18px;font-weight:600">Dernières transactions</h2>${salesTable(6)}</div>`;
 }
 
 function render() {
   const active = document.activeElement && document.activeElement.id === 'search';
   const pos = active ? document.activeElement.selectionStart : null;
   document.querySelectorAll('[data-view]').forEach((b) => b.toggleAttribute('aria-current', false));
-  const cur = document.querySelector(`[data-view="${state.view}"]`); cur.setAttribute('aria-current', 'page');
+  document.querySelector(`[data-view="${state.view}"]`).setAttribute('aria-current', 'page');
+  document.documentElement.style.setProperty('--note', document.getElementById('note').offsetHeight + 'px');
   const main = document.getElementById('main');
   main.innerHTML = state.view === 'caisse' ? viewCaisse() : state.view === 'ventes' ? viewVentes() : viewBord();
-  main.style.overflowY = state.view === 'caisse' ? 'hidden' : 'auto';
   if (active) { const input = document.getElementById('search'); input.focus(); input.setSelectionRange(pos, pos); }
 }
-function go(view) { state.view = view; state.cartOpen = false; document.getElementById('modal').innerHTML = ''; render(); document.getElementById('main').scrollTop = 0; }
+function go(view) { state.view = view; state.cartOpen = false; document.getElementById('modal').innerHTML = ''; render(); window.scrollTo(0, 0); }
 
 document.addEventListener('click', (e) => {
-  const t = e.target.closest('button'); if (!t) return;
+  const t = e.target.closest('button, [data-cart-toggle]'); if (!t) return;
   const d = t.dataset;
   if (d.view) go(d.view);
   else if (d.go) go(d.go);
   else if (d.add) add(d.add);
   else if (d.cat) { state.cat = d.cat; render(); }
   else if (d.qty) setQty(d.qty, inCart(d.qty) + Number(d.d));
-  else if (d.pay) { state.pay = d.pay; render(); }
-  else if ('empty' in d) { state.cart = []; render(); }
+  else if (d.pay) { state.pay = d.pay; state.received = ''; render(); }
+  else if (d.recv) { state.received = state.received === d.recv ? '' : d.recv; render(); }
+  else if ('empty' in d) { state.cart = []; state.received = ''; render(); }
   else if ('clear' in d) { state.search = ''; render(); document.getElementById('search').focus(); }
   else if ('cartToggle' in d) { state.cartOpen = !state.cartOpen; render(); }
-  else if ('validate' in d) validate();
+  else if ('checkout' in d) checkout();
   else if ('close' in d) document.getElementById('modal').innerHTML = '';
 });
 document.addEventListener('input', (e) => { if (e.target.id === 'search') { state.search = e.target.value; render(); } });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.getElementById('modal').innerHTML = ''; });
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('modal').innerHTML) document.getElementById('modal').innerHTML = '';
+  else if (state.cartOpen) { state.cartOpen = false; render(); }
+});
+window.addEventListener('resize', () => document.documentElement.style.setProperty('--note', document.getElementById('note').offsetHeight + 'px'));
+
+const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Africa/Conakry' });
+document.getElementById('today').textContent = today.charAt(0).toUpperCase() + today.slice(1);
 // Ventes d'exemple déjà enregistrées aujourd'hui.
 [[['p2', 2], ['p13', 1]], [['p8', 2], ['p6', 2]], [['p17', 3], ['p9', 3]], [['p3', 1], ['p11', 2]], [['p5', 1], ['p14', 2]]]
-  .forEach((items, i) => recordSale(items.map(([id, q]) => ({ id, q })), PAYMENTS[[0, 1, 0, 2, 0][i]], 17 + i, `1${i}:${10 + i * 7}`));
+  .forEach((items, i) => {
+    // Heures d'exemple : les cinq dernières ventes, toutes les 40 minutes environ.
+    const at = new Date(Date.now() - (5 - i) * 41 * 60000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    recordSale(items.map(([id, q]) => ({ id, q })), ['cash', 'om', 'cash', 'mtn', 'cash'][i], 17 + i, at);
+  });
 render();
 </script>
-<style>@media (min-width: 901px) { .cart-close { display: none; } }</style>
-
 </body>
 </html>
