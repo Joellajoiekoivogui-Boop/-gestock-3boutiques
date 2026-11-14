@@ -32,10 +32,7 @@ export default async function LoginPage({ searchParams }: PageProps<'/login'>) {
     <main className="grid min-h-dvh bg-background lg:grid-cols-[minmax(0,1fr)_minmax(0,32rem)]">
       {/* Bandeau de marque : lisière noire, nom de l'établissement, coloris. */}
       <section className="flex flex-col justify-between gap-8 bg-foreground px-6 py-8 text-background sm:px-10 lg:py-12">
-        <div className="flex items-center gap-4">
-          <Logo logoUrl={branding.logo_url} name={branding.name} size={56} className="mg-pop-in" />
-          <p className="font-display text-sm font-semibold tracking-[0.18em] text-background/70 uppercase">Caisse et gestion</p>
-        </div>
+        <Logo logoUrl={branding.logo_url} name={branding.name} size={56} className="mg-pop-in" />
         <div className="mg-rise">
           <h1 className="font-display text-5xl leading-[0.95] font-bold tracking-tight sm:text-6xl lg:text-7xl">{branding.name}</h1>
           {branding.tagline && (
