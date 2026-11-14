@@ -92,8 +92,8 @@ cp .env.example .env.local   # puis renseignez les 3 variables
    *Allow new users to sign up*. (Même si elles restaient ouvertes, un compte créé ainsi est inactif et n'accède à rien.)
 4. Récupérez l'URL et les clés dans *Project Settings → API* et remplissez `.env.local`.
 
-Tant que ces variables ne sont pas définies, le site affiche une page publique « Bientôt disponible »
-(sans détail technique) au lieu de l’application.
+Tant que ces variables ne sont pas définies, le site redirige vers la démonstration `/demo.html`
+(fichier statique dans `public/`, données d’exemple, rien n’est enregistré). Elle reste accessible ensuite.
 
 ### 2. Créer le premier administrateur
 

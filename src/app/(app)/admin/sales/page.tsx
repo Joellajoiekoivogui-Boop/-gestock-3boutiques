@@ -1,5 +1,6 @@
 import { Download } from 'lucide-react';
 import type { Metadata } from 'next';
+import { CollapsibleFilters } from '@/components/app/collapsible-filters';
 import { PageHeader } from '@/components/app/page-header';
 import { Pagination, parsePage } from '@/components/app/pagination';
 import { SalesFiltersForm } from '@/components/sales/sales-filters';
@@ -50,12 +51,14 @@ export default async function SalesPage({ searchParams }: PageProps<'/admin/sale
       />
       <Card className="mb-4">
         <CardContent>
-          <SalesFiltersForm
+          <CollapsibleFilters activeCount={Object.values(filters).filter(Boolean).length}>
+            <SalesFiltersForm
             action="/admin/sales"
             filters={filters}
             methods={methods.data ?? []}
             cashiers={cashiers.data ?? undefined}
           />
+          </CollapsibleFilters>
         </CardContent>
       </Card>
       <Card className="py-0">

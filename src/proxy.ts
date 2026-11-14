@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { getSupabaseEnv } from '@/lib/supabase/env';
 
+const DEMO_PATH = '/demo.html';
 const PROTECTED_PREFIXES = ['/admin', '/pos', '/receipts'];
 
 // Rafraîchit la session Supabase à chaque requête et renvoie vers /login les
@@ -11,10 +12,14 @@ export async function proxy(request: NextRequest) {
   const env = getSupabaseEnv();
   const { pathname } = request.nextUrl;
 
-  // Base pas encore branchée : toutes les pages mènent à « Bientôt disponible ».
+  // La démonstration (fichier statique, données d'exemple) reste accessible
+  // en permanence, base branchée ou non.
+  if (pathname === DEMO_PATH) return NextResponse.next();
+
+  // Base pas encore branchée : toutes les pages mènent à la démonstration.
   if (!env) {
     if (pathname === '/bientot-disponible') return NextResponse.next();
-    return NextResponse.redirect(new URL('/bientot-disponible', request.url));
+    return NextResponse.redirect(new URL(DEMO_PATH, request.url));
   }
 
   let response = NextResponse.next({ request });

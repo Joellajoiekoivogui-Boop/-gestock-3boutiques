@@ -60,8 +60,8 @@ export function SaleDetail({
               <TableHeader>
                 <TableRow>
                   <TableHead>Désignation</TableHead>
-                  <TableHead className="text-right">Qté</TableHead>
-                  <TableHead className="text-right">Prix unitaire</TableHead>
+                  <TableHead className="hidden text-right sm:table-cell">Qté</TableHead>
+                  <TableHead className="hidden text-right sm:table-cell">Prix unitaire</TableHead>
                   <TableHead className="text-right">Total</TableHead>
                 </TableRow>
               </TableHeader>
@@ -70,11 +70,14 @@ export function SaleDetail({
                   <TableRow key={item.id}>
                     <TableCell>
                       <p className="font-medium">{item.product_name}</p>
-                      {item.category_name && <p className="text-xs text-muted-foreground">{item.category_name}</p>}
+                      {item.category_name && <p className="hidden text-xs text-muted-foreground sm:block">{item.category_name}</p>}
+                      <p className="text-xs text-muted-foreground tabular-nums sm:hidden">
+                        {item.quantity} × {formatAmount(item.unit_price)}
+                      </p>
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">{item.quantity}</TableCell>
-                    <TableCell className="text-right tabular-nums">{formatAmount(item.unit_price)}</TableCell>
-                    <TableCell className="text-right font-medium tabular-nums">{money(item.line_total)}</TableCell>
+                    <TableCell className="hidden text-right tabular-nums sm:table-cell">{item.quantity}</TableCell>
+                    <TableCell className="hidden text-right tabular-nums sm:table-cell">{formatAmount(item.unit_price)}</TableCell>
+                    <TableCell className="text-right font-medium whitespace-nowrap tabular-nums">{money(item.line_total)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
