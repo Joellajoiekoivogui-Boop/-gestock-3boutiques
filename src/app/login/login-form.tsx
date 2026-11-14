@@ -52,7 +52,7 @@ export function LoginForm({ next, initialError }: { next: string | null; initial
           autoComplete="username"
           inputMode="email"
           autoFocus
-          className="h-12 text-lg"
+          className="h-12 rounded-full px-5 text-base"
           aria-invalid={!!errors.email}
           aria-describedby={errors.email ? 'email-error' : undefined}
           {...form.register('email')}
@@ -64,7 +64,7 @@ export function LoginForm({ next, initialError }: { next: string | null; initial
             id="password"
             type={showPassword ? 'text' : 'password'}
             autoComplete="current-password"
-            className="h-12 pr-12 text-lg"
+            className="h-12 rounded-full px-5 pr-12 text-base"
             aria-invalid={!!errors.password}
             aria-describedby={errors.password ? 'password-error' : undefined}
             {...form.register('password')}
@@ -72,7 +72,7 @@ export function LoginForm({ next, initialError }: { next: string | null; initial
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-md text-muted-foreground hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+            className="absolute inset-y-0 right-1 flex w-12 items-center justify-center rounded-full text-muted-foreground hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
             aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
             aria-pressed={showPassword}
           >

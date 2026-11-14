@@ -25,7 +25,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { EmptyState } from '@/components/app/empty-state';
-import { ProductThumb, toneStyle } from '@/components/app/product-thumb';
+import { CART_COUNT_EVENT, CART_OPEN_EVENT } from '@/components/app/app-shell';
+import { DishIcon, ProductThumb, toneColor } from '@/components/app/product-thumb';
 import { AnimatedMoney } from '@/components/motion/animated-number';
 import { SuccessBurst } from '@/components/motion/success-burst';
 import { Badge } from '@/components/ui/badge';
@@ -43,6 +44,7 @@ import { createSaleAction } from './actions';
 export type PosProduct = {
   id: string;
   name: string;
+  description: string | null;
   price: number;
   imageUrl: string | null;
   categoryId: string | null;
@@ -101,6 +103,19 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
   const totals = cartTotals(lines, discount);
   const discountInvalid = canDiscount && (!Number.isInteger(discount) || discount < 0 || discount > totals.subtotal);
   const toneOf = useMemo(() => new Map(categories.map((c) => [c.id, c.tone])), [categories]);
+
+  // Barre du bas (téléphone) : nombre d'articles et ouverture du ticket.
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent(CART_COUNT_EVENT, { detail: totals.itemCount }));
+  }, [totals.itemCount]);
+  useEffect(() => {
+    const open = () => setCartOpen(true);
+    window.addEventListener(CART_OPEN_EVENT, open);
+    return () => {
+      window.removeEventListener(CART_OPEN_EVENT, open);
+      window.dispatchEvent(new CustomEvent(CART_COUNT_EVENT, { detail: 0 }));
+    };
+  }, []);
 
   // Toute modification du panier invalide la clé précédente.
   useEffect(() => {
@@ -229,32 +244,19 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
     />
   );
 
-  const categoryButtons = [{ id: 'all', name: 'Tout', tone: -1 }, ...shownCategories];
+  const categoryButtons = [{ id: 'all', name: 'Tout le menu', tone: -1 }, ...shownCategories];
+  const sectionTitle = category === 'all' ? 'Tout le menu' : (categories.find((c) => c.id === category)?.name ?? 'Menu');
 
   return (
-    <div className="-m-4 sm:-m-6 lg:grid lg:h-[calc(100dvh-6.25rem)] lg:grid-cols-[13rem_minmax(0,1fr)_26rem]">
-      {/* Catégories : rail vertical sur grand écran */}
-      <nav aria-label="Catégories" className="hidden min-h-0 flex-col gap-1 overflow-y-auto border-r bg-card p-3 lg:flex">
-        {categoryButtons.map((c) => (
-          <CategoryButton
-            key={c.id}
-            category={c}
-            count={c.id === 'all' ? products.length : (countByCategory.get(c.id) ?? 0)}
-            active={category === c.id}
-            onSelect={() => setCategory(c.id)}
-            layout="rail"
-          />
-        ))}
-      </nav>
-
+    <div className="-m-4 sm:-m-6 lg:grid lg:h-[calc(100dvh-4.5rem-1px)] lg:grid-cols-[minmax(0,1fr)_26rem]">
       {/* Plats */}
-      <section aria-label="Produits" className="flex min-h-0 flex-col">
-        <div className="sticky top-[6.25rem] z-10 flex flex-col gap-3 border-b bg-background px-4 pt-4 pb-3 sm:px-6 lg:static lg:border-b-0 lg:pt-5">
+      <section aria-label="Produits" className="flex min-h-0 flex-col lg:overflow-y-auto">
+        <div className="flex shrink-0 flex-col gap-5 px-4 pt-5 sm:px-6 lg:pt-6">
           <div className="flex items-center gap-3">
-            <h1 className="sr-only font-display text-[2rem] leading-none font-bold sm:not-sr-only">Caisse</h1>
-            <div className="relative ml-auto min-w-0 flex-1 sm:max-w-md">
+            <h1 className="sr-only">Caisse</h1>
+            <div className="relative min-w-0 flex-1">
               <Search
-                className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-muted-foreground"
+                className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground"
                 aria-hidden
               />
               <Input
@@ -262,9 +264,9 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Rechercher un plat…"
+                placeholder="Rechercher un plat, une boisson…"
                 aria-label="Rechercher un produit"
-                className="h-12 pr-12 pl-11 text-lg [&::-webkit-search-cancel-button]:hidden"
+                className="h-13 rounded-full border-transparent bg-card pr-12 pl-12 text-base shadow-card [&::-webkit-search-cancel-button]:hidden"
               />
               {search ? (
                 <button
@@ -274,26 +276,27 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
                     searchRef.current?.focus();
                   }}
                   aria-label="Effacer la recherche"
-                  className="absolute top-1/2 right-1 inline-flex size-10 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                  className="absolute top-1/2 right-1.5 inline-flex size-10 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
                 >
                   <X className="size-5" aria-hidden />
                 </button>
               ) : (
                 <kbd
                   aria-hidden
-                  className="pointer-events-none absolute top-1/2 right-3 hidden -translate-y-1/2 rounded border bg-muted px-1.5 py-0.5 font-sans text-xs text-muted-foreground pointer-fine:block"
+                  className="pointer-events-none absolute top-1/2 right-4 hidden -translate-y-1/2 rounded-md border bg-muted px-1.5 py-0.5 font-sans text-xs text-muted-foreground pointer-fine:block"
                 >
                   /
                 </kbd>
               )}
             </div>
-            <Button asChild variant="outline" size="lg" className="no-print hidden px-4 sm:inline-flex">
+            <Button asChild variant="dark" size="lg" className="no-print hidden shrink-0 sm:inline-flex">
               <Link href="/pos/sales">
                 <Receipt aria-hidden /> Ventes du jour
               </Link>
             </Button>
           </div>
-          <div role="group" aria-label="Catégories" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6 lg:hidden">
+
+          <div role="group" aria-label="Catégories" className="-mx-4 flex shrink-0 gap-4 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:gap-5 sm:px-6">
             {categoryButtons.map((c) => (
               <CategoryButton
                 key={c.id}
@@ -301,13 +304,19 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
                 count={c.id === 'all' ? products.length : (countByCategory.get(c.id) ?? 0)}
                 active={category === c.id}
                 onSelect={() => setCategory(c.id)}
-                layout="chip"
               />
             ))}
           </div>
+
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="font-serif text-2xl font-bold">{sectionTitle}</h2>
+            <p className="text-sm text-muted-foreground">
+              {visibleProducts.length} plat{visibleProducts.length > 1 ? 's' : ''}
+            </p>
+          </div>
         </div>
 
-        <div className="min-h-0 flex-1 px-4 pt-4 pb-28 sm:px-6 lg:overflow-y-auto lg:pt-1 lg:pb-6">
+        <div className="flex-1 px-4 pt-3 pb-8 sm:px-6">
           {products.length === 0 ? (
             <EmptyState
               icon={PackageX}
@@ -315,9 +324,9 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
               description="L’administrateur doit d’abord créer des produits et les rendre disponibles."
             />
           ) : visibleProducts.length === 0 ? (
-            <EmptyState icon={Search} title="Aucun résultat" description="Modifiez la recherche ou choisissez « Tout »." />
+            <EmptyState icon={Search} title="Aucun résultat" description="Modifiez la recherche ou choisissez « Tout le menu »." />
           ) : (
-            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(11rem,1fr))]">
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(12.5rem,1fr))] sm:gap-4">
               {visibleProducts.map((p) => {
                 const qty = inCart(p.id);
                 const remaining = p.maxQuantity === null ? null : p.maxQuantity - qty;
@@ -331,52 +340,62 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
                       disabled={soldOut}
                       aria-label={`Ajouter ${p.name}, ${money(p.price)}`}
                       className={cn(
-                        'group relative flex h-full w-full flex-col overflow-hidden rounded-lg border bg-card text-left transition-[transform,box-shadow,border-color] duration-150 hover:border-foreground/40 focus-visible:ring-[3px] focus-visible:ring-ring/60 focus-visible:outline-none active:scale-[0.97] disabled:cursor-not-allowed',
-                        qty > 0 && 'border-primary shadow-[0_0_0_2px_var(--primary)]',
+                        'group relative flex h-full w-full flex-col overflow-hidden rounded-xl border border-transparent bg-card text-left shadow-card transition-[transform,box-shadow,border-color] duration-150 hover:-translate-y-0.5 focus-visible:ring-[3px] focus-visible:ring-ring/40 focus-visible:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:hover:translate-y-0',
+                        qty > 0 && 'border-forest shadow-[0_0_0_2px_var(--forest)]',
                       )}
                     >
-                      {/* Bande de la catégorie : porte l'état du stock, pour que les prix restent alignés. */}
-                      <span className="relative block">
-                        {showImages && p.imageUrl ? (
-                          <ProductThumb
-                            name={p.name}
-                            imageUrl={p.imageUrl}
-                            tone={tone}
-                            sizes="(max-width: 640px) 50vw, 220px"
-                            className={cn('aspect-[16/9] w-full', soldOut && 'opacity-50 grayscale')}
-                            imageClassName="transition-transform duration-500 group-hover:scale-105"
-                          />
-                        ) : (
-                          <span aria-hidden className="block h-7 w-full" style={toneStyle(soldOut ? 0 : tone)} />
-                        )}
+                      <span className="relative block p-2 pb-0">
+                        <ProductThumb
+                          name={p.name}
+                          imageUrl={showImages ? p.imageUrl : null}
+                          tone={tone}
+                          sizes="(max-width: 640px) 50vw, 240px"
+                          className={cn('aspect-[16/10] w-full rounded-lg', soldOut && 'opacity-60 grayscale')}
+                          imageClassName="transition-transform duration-500 group-hover:scale-105"
+                          iconClassName="size-10 sm:size-12"
+                        />
                         {soldOut ? (
-                          <Badge className="absolute bottom-1 left-2 border-transparent bg-destructive-strong text-destructive-foreground">
+                          <Badge className="absolute top-4 left-4 border-transparent bg-destructive-strong text-destructive-foreground">
                             Rupture
                           </Badge>
                         ) : remaining !== null && remaining <= 5 ? (
-                          <Badge variant="warning" className="absolute bottom-1 left-2 border-warning-foreground/20">
+                          <Badge className="absolute top-4 left-4 border-transparent bg-forest text-forest-foreground">
                             Reste {remaining}
                           </Badge>
                         ) : null}
+                        {qty > 0 && (
+                          <motion.span
+                            key={qty}
+                            initial={{ scale: 1.4 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: 'spring', stiffness: 600, damping: 22 }}
+                            className="absolute top-4 right-4 inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-primary px-2 text-sm font-bold text-primary-foreground shadow-md"
+                          >
+                            ×{qty}
+                          </motion.span>
+                        )}
                       </span>
-                      <span className={cn('flex flex-1 flex-col gap-2 p-3.5', soldOut && 'text-muted-foreground')}>
-                        <span className="line-clamp-2 text-lg leading-snug font-semibold">{p.name}</span>
-                        <span className="mt-auto font-display text-[1.75rem] leading-none font-bold tabular-nums">
-                          {formatAmount(p.price)}
-                          <span className="ml-1 text-base font-semibold text-muted-foreground">{currency}</span>
+                      <span className={cn('flex flex-1 flex-col gap-1 p-3 sm:p-3.5', soldOut && 'text-muted-foreground')}>
+                        <span className="line-clamp-2 text-base leading-snug font-bold">{p.name}</span>
+                        {p.description && (
+                          <span className="line-clamp-2 hidden text-sm leading-snug text-muted-foreground sm:block">{p.description}</span>
+                        )}
+                        <span className="mt-auto flex items-end justify-between gap-2 pt-2">
+                          <span className="text-lg leading-none font-bold tracking-tight whitespace-nowrap tabular-nums sm:text-xl">
+                            {formatAmount(p.price)}
+                            <span className="ml-1 text-xs font-semibold text-muted-foreground">{currency}</span>
+                          </span>
+                          <span
+                            aria-hidden
+                            className={cn(
+                              'inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-colors',
+                              soldOut ? 'bg-muted text-muted-foreground' : 'bg-forest text-forest-foreground group-hover:bg-primary group-hover:text-primary-foreground',
+                            )}
+                          >
+                            <Plus className="size-5" />
+                          </span>
                         </span>
                       </span>
-                      {qty > 0 && (
-                        <motion.span
-                          key={qty}
-                          initial={{ scale: 1.5 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: 'spring', stiffness: 600, damping: 20 }}
-                          className="absolute top-2 right-2.5 inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-foreground px-2 font-display text-lg font-bold text-background"
-                        >
-                          ×{qty}
-                        </motion.span>
-                      )}
                     </button>
                   </li>
                 );
@@ -391,18 +410,16 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
         {ticket}
       </aside>
 
-      {/* Ticket : barre + tiroir sur tablette en portrait et téléphone */}
-      <div className="no-print fixed inset-x-0 bottom-0 z-20 border-t bg-card p-3 lg:hidden">
-        <div>
-          <Button size="xl" className="w-full justify-between" onClick={() => setCartOpen(true)}>
-            <span className="flex items-center gap-2">
-              <ShoppingCart aria-hidden className="size-6" /> Panier ({totals.itemCount})
-            </span>
-            <span className="font-display text-2xl font-bold">
-              <AnimatedMoney value={totals.total} currency={currency} duration={0.4} />
-            </span>
-          </Button>
-        </div>
+      {/* Ticket sur tablette en portrait : barre en bas (sur téléphone, le bouton rond de la barre d'onglets). */}
+      <div className="no-print fixed inset-x-0 bottom-0 z-20 hidden border-t bg-card p-3 md:block lg:hidden">
+        <Button size="xl" className="w-full justify-between" onClick={() => setCartOpen(true)}>
+          <span className="flex items-center gap-2">
+            <ShoppingCart aria-hidden className="size-6" /> Panier ({totals.itemCount})
+          </span>
+          <span className="text-xl font-bold">
+            <AnimatedMoney value={totals.total} currency={currency} duration={0.4} />
+          </span>
+        </Button>
       </div>
       <Sheet open={cartOpen} onOpenChange={setCartOpen}>
         <SheetContent side="bottom" className="h-[92dvh] gap-0 p-0">
@@ -416,12 +433,12 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
         <DialogContent className="sm:max-w-md">
           <DialogHeader className="items-center text-center">
             <SuccessBurst />
-            <DialogTitle className="font-display text-3xl">Vente enregistrée</DialogTitle>
+            <DialogTitle className="font-serif text-3xl">Vente enregistrée</DialogTitle>
             <DialogDescription className="text-base">
               Reçu n° <strong className="text-foreground">{success?.receipt_number}</strong>
             </DialogDescription>
           </DialogHeader>
-          <p className="text-center font-display text-5xl font-bold">
+          <p className="text-center text-5xl font-bold tracking-tight">
             {success ? <AnimatedMoney value={Number(success.total_amount)} currency={currency} duration={0.6} /> : ''}
           </p>
           <DialogFooter className="grid grid-cols-2 gap-2 sm:grid-cols-2">
@@ -450,39 +467,35 @@ function CategoryButton({
   count,
   active,
   onSelect,
-  layout,
 }: {
   category: { id: string; name: string; tone: number };
   count: number;
   active: boolean;
   onSelect: () => void;
-  layout: 'rail' | 'chip';
 }) {
-  const swatch =
-    category.tone < 0 ? (
-      <LayoutGrid className="size-5 shrink-0" aria-hidden />
-    ) : (
-      <span aria-hidden className="size-4 shrink-0 rounded-sm" style={toneStyle(category.tone)} />
-    );
   return (
     <button
       type="button"
       onClick={onSelect}
       aria-pressed={active}
-      className={cn(
-        'flex shrink-0 items-center gap-3 rounded-md text-left font-semibold transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/60 focus-visible:outline-none',
-        layout === 'rail' ? 'min-h-14 w-full px-3 text-base' : 'h-12 border px-4 text-[15px] whitespace-nowrap',
-        active
-          ? 'border-foreground bg-foreground text-background'
-          : layout === 'rail'
-            ? 'hover:bg-muted'
-            : 'bg-card hover:border-foreground/40',
-      )}
+      className="group flex w-[5.5rem] shrink-0 flex-col items-center gap-2 rounded-xl text-center focus-visible:ring-[3px] focus-visible:ring-ring/40 focus-visible:outline-none"
     >
-      {swatch}
-      <span className={cn('leading-tight', layout === 'rail' && 'flex-1')}>{category.name}</span>
-      <span className={cn('font-display text-base tabular-nums', active ? 'text-background/70' : 'text-muted-foreground')}>
-        {count}
+      <span
+        className={cn(
+          'flex size-16 items-center justify-center rounded-full border transition-colors',
+          active ? 'border-forest bg-forest text-forest-foreground shadow-md' : 'border-border bg-card shadow-card group-hover:border-forest/50',
+        )}
+        style={active || category.tone < 0 ? undefined : { color: toneColor(category.tone) }}
+      >
+        {category.tone < 0 ? (
+          <LayoutGrid className="size-7" strokeWidth={1.75} aria-hidden />
+        ) : (
+          <DishIcon name={category.name} className="size-7" strokeWidth={1.75} />
+        )}
+      </span>
+      <span className={cn('text-[13px] leading-tight font-semibold', active ? 'text-forest' : 'text-foreground')}>
+        {category.name}
+        <span className="block text-xs font-medium text-muted-foreground">{count}</span>
       </span>
     </button>
   );
@@ -545,8 +558,8 @@ function TicketPanel({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex h-16 shrink-0 items-center justify-between border-b px-5">
-        <h2 className="flex items-baseline gap-2 font-display text-2xl font-bold">
-          Ticket
+        <h2 className="flex items-baseline gap-2 font-serif text-2xl font-bold whitespace-nowrap">
+          Commande
           <span className="font-sans text-base font-medium text-muted-foreground">
             {totals.itemCount} article{totals.itemCount > 1 ? 's' : ''}
           </span>
@@ -560,7 +573,7 @@ function TicketPanel({
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {lines.length === 0 ? (
-          <EmptyState icon={ShoppingCart} title="Ticket vide" description="Touchez un plat pour l’ajouter au ticket." />
+          <EmptyState icon={ShoppingCart} title="Commande vide" description="Touchez un plat pour l’ajouter." />
         ) : (
           <ul className="divide-y">
             <AnimatePresence initial={false} mode="popLayout">
@@ -576,7 +589,7 @@ function TicketPanel({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <p className="text-[17px] leading-snug font-semibold">{line.name}</p>
-                    <p className="shrink-0 font-display text-xl font-bold tabular-nums">{money(line.unitPrice * line.quantity)}</p>
+                    <p className="shrink-0 text-lg font-bold tracking-tight tabular-nums">{money(line.unitPrice * line.quantity)}</p>
                   </div>
                   <div className="mt-1.5 flex items-center justify-between gap-3">
                     <p className="text-[15px] text-muted-foreground tabular-nums">{money(line.unitPrice)} l’unité</p>
@@ -597,7 +610,7 @@ function TicketPanel({
                         value={line.quantity}
                         onChange={(e) => onQuantity(line.productId, Number(e.target.value || 0))}
                         aria-label={`Quantité de ${line.name}`}
-                        className="h-11 w-12 px-1 text-center font-display text-xl font-bold tabular-nums"
+                        className="h-11 w-12 rounded-full px-1 text-center text-lg font-bold tabular-nums"
                       />
                       <Button
                         variant="outline"
@@ -652,7 +665,7 @@ function TicketPanel({
           )}
           <div className="flex items-baseline justify-between">
             <dt className="flex items-baseline gap-3">
-              <span className="font-display text-xl font-bold tracking-wide uppercase">Total</span>
+              <span className="font-serif text-2xl font-bold">Total</span>
               {canDiscount && !discountShown && lines.length > 0 && (
                 <button
                   type="button"
@@ -663,7 +676,7 @@ function TicketPanel({
                 </button>
               )}
             </dt>
-            <dd className="font-display text-[2.75rem] leading-none font-bold">
+            <dd className="text-3xl leading-none font-bold tracking-tight sm:text-[2.25rem]">
               <AnimatedMoney value={totals.total} currency={currency} duration={0.4} />
             </dd>
           </div>
@@ -684,11 +697,11 @@ function TicketPanel({
                     onClick={() => onPaymentMethodChange(m.code)}
                     aria-pressed={selected}
                     className={cn(
-                      'flex min-h-13 flex-col items-center justify-center gap-0.5 rounded-md border px-1.5 py-1 text-center text-sm leading-tight font-semibold transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/60 focus-visible:outline-none',
-                      selected ? 'border-foreground bg-foreground text-background' : 'bg-card hover:border-foreground/40',
+                      'flex min-h-13 flex-col items-center justify-center gap-0.5 rounded-xl border px-1.5 py-1 text-center text-sm leading-tight font-semibold transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/60 focus-visible:outline-none',
+                      selected ? 'border-forest bg-forest text-forest-foreground' : 'bg-card hover:border-forest/50',
                     )}
                   >
-                    {selected ? <Check className="size-5 shrink-0 text-primary" aria-hidden /> : <PaymentIcon code={m.code} />}
+                    {selected ? <Check className="size-5 shrink-0 text-gold" aria-hidden /> : <PaymentIcon code={m.code} />}
                     <span>{m.label}</span>
                   </button>
                 );
@@ -698,7 +711,7 @@ function TicketPanel({
         </fieldset>
 
         {isCash && totals.total > 0 && (
-          <div className="space-y-1.5 rounded-md bg-muted p-2">
+          <div className="space-y-1.5 rounded-xl bg-muted p-2">
             <div className="flex gap-1.5" role="group" aria-label="Montant reçu du client">
               {cashSuggestions(totals.total)
                 .slice(0, 3)
@@ -709,8 +722,8 @@ function TicketPanel({
                     onClick={() => onReceivedChange(receivedAmount === value ? '' : String(value))}
                     aria-pressed={receivedAmount === value}
                     className={cn(
-                      'h-11 min-w-0 flex-1 rounded-md border bg-card px-1 font-display text-lg font-semibold tabular-nums transition-colors hover:border-foreground/40',
-                      receivedAmount === value && 'border-foreground bg-foreground text-background',
+                      'h-11 min-w-0 flex-1 rounded-full border bg-card px-1 text-[15px] font-bold tabular-nums transition-colors hover:border-forest/50',
+                      receivedAmount === value && 'border-forest bg-forest text-forest-foreground',
                     )}
                   >
                     {formatAmount(value)}
@@ -728,13 +741,13 @@ function TicketPanel({
                 value={received}
                 onChange={(e) => onReceivedChange(e.target.value)}
                 placeholder="Autre"
-                className="h-11 w-24 shrink-0 bg-card text-right tabular-nums"
+                className="h-11 w-24 shrink-0 rounded-full bg-card text-right tabular-nums"
               />
             </div>
             {received !== '' && (
               <p aria-live="polite" className="flex items-baseline justify-between px-1">
                 <span className="font-semibold">{change >= 0 ? 'À rendre' : 'Il manque'}</span>
-                <span className={cn('font-display text-2xl font-bold tabular-nums', change < 0 && 'text-destructive-strong')}>
+                <span className={cn('text-2xl font-bold tracking-tight tabular-nums', change < 0 && 'text-destructive-strong')}>
                   {money(Math.abs(change))}
                 </span>
               </p>
@@ -752,7 +765,7 @@ function TicketPanel({
             {pending ? <Loader2 className="size-6 animate-spin" aria-hidden /> : <CheckCircle2 className="size-6" aria-hidden />}
             {pending ? 'Enregistrement…' : 'Encaisser'}
           </span>
-          {!pending && lines.length > 0 && <span className="font-display text-2xl font-bold">{money(totals.total)}</span>}
+          {!pending && lines.length > 0 && <span className="text-xl font-bold tracking-tight">{money(totals.total)}</span>}
         </Button>
       </div>
     </div>

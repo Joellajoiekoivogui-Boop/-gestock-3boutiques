@@ -15,7 +15,7 @@ export default async function PosPage() {
   const [products, categories, methods] = await Promise.all([
     supabase
       .from('products')
-      .select('id, name, price, image_url, category_id, track_stock, stock_quantity, is_available')
+      .select('id, name, description, price, image_url, category_id, track_stock, stock_quantity, is_available')
       .eq('is_archived', false)
       .eq('is_available', true)
       .order('name'),
@@ -30,6 +30,7 @@ export default async function PosPage() {
   const posProducts: PosProduct[] = (products.data ?? []).map((p) => ({
     id: p.id,
     name: p.name,
+    description: p.description,
     price: Number(p.price),
     imageUrl: p.image_url,
     categoryId: p.category_id,
