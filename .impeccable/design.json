@@ -1,53 +1,53 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-14T13:53:41+00:00",
+  "generatedAt": "2026-11-14T15:35:44+00:00",
   "title": "Design System: MassaGui Fils SARL.U",
   "extensions": {
     "colorMeta": {
-      "ground": {
+      "menu-ground": {
         "role": "neutral",
-        "displayName": "Fond de comptoir",
-        "canonical": "#edf0ed",
+        "displayName": "Fond de carte",
+        "canonical": "#f3f5f2",
         "tonalRamp": [
-          "#242824",
-          "#3e473e",
-          "#576657",
-          "#708570",
-          "#8e9f8e",
-          "#adb8ad",
-          "#ced4ce",
-          "#f2f3f2"
+          "#252923",
+          "#414a3d",
+          "#5d6b56",
+          "#788e6d",
+          "#97a68f",
+          "#b6bfb1",
+          "#d4d9d2",
+          "#f2f3f1"
         ],
         "cssVar": "--background"
       },
       "ink": {
         "role": "neutral",
         "displayName": "Encre",
-        "canonical": "#111111",
+        "canonical": "#16201b",
         "tonalRamp": [
-          "#262626",
-          "#424242",
-          "#5e5e5e",
-          "#7a7a7a",
-          "#969696",
-          "#b2b2b2",
-          "#d1d1d1",
-          "#f2f2f2"
+          "#222b26",
+          "#3a4d43",
+          "#517061",
+          "#67957e",
+          "#8aab9b",
+          "#aec2b8",
+          "#d0dad5",
+          "#f1f3f2"
         ],
         "cssVar": "--foreground"
       },
-      "panel": {
+      "plate-white": {
         "role": "neutral",
-        "displayName": "Papier",
+        "displayName": "Blanc d'assiette",
         "canonical": "#ffffff",
         "tonalRamp": [
           "#262626",
-          "#424242",
-          "#5e5e5e",
-          "#7a7a7a",
-          "#969696",
-          "#b2b2b2",
-          "#d1d1d1",
+          "#434343",
+          "#616161",
+          "#7e7e7e",
+          "#9b9b9b",
+          "#b8b8b8",
+          "#d5d5d5",
           "#f2f2f2"
         ],
         "cssVar": "--card"
@@ -58,172 +58,252 @@
         "canonical": "#0abf65",
         "tonalRamp": [
           "#113b26",
-          "#166e43",
-          "#16a75f",
-          "#0fe67b",
-          "#42eb97",
-          "#7de8b3",
-          "#b6ecd1",
+          "#167044",
+          "#15ac61",
+          "#0dee7e",
+          "#4bea9b",
+          "#88e8b8",
+          "#bdedd5",
           "#ecf8f2"
         ],
         "cssVar": "--primary"
       },
-      "massagui-green-hover": {
+      "massagui-green-ink": {
         "role": "primary",
-        "displayName": "Vert MassaGui appuyé",
-        "canonical": "#09ad5b",
+        "displayName": "Encre sur vert",
+        "canonical": "#0b1a12",
         "tonalRamp": [
-          "#113b26",
-          "#166e42",
-          "#15a75e",
-          "#0fe67a",
-          "#42eb96",
-          "#7de8b3",
-          "#b6ecd1",
-          "#ecf8f2"
+          "#1d3026",
+          "#2f5842",
+          "#3f825e",
+          "#4bb07a",
+          "#77bf98",
+          "#a2ceb7",
+          "#cae0d4",
+          "#f0f5f2"
         ],
-        "note": "Valeur littérale dans src/components/ui/button.tsx (hover:bg-[#09ad5b]) et --primary-hover dans public/demo.html ; pas de variable dans globals.css."
+        "cssVar": "--primary-foreground"
       },
-      "forest-ink": {
+      "massagui-green-strong": {
         "role": "primary",
-        "displayName": "Vert forêt",
+        "displayName": "Vert MassaGui foncé",
         "canonical": "#067a40",
         "tonalRamp": [
           "#113c26",
-          "#166f42",
-          "#15a85e",
-          "#0ee77a",
-          "#41ec96",
-          "#7ce9b3",
-          "#b6ecd1",
+          "#167143",
+          "#15ac61",
+          "#0def7e",
+          "#4beb9b",
+          "#87e9b8",
+          "#bdedd5",
           "#ecf8f2"
         ],
         "cssVar": "--primary-strong"
       },
+      "forest": {
+        "role": "secondary",
+        "displayName": "Vert sapin",
+        "canonical": "#0f3d2c",
+        "tonalRamp": [
+          "#18342a",
+          "#25624b",
+          "#2e936e",
+          "#32c991",
+          "#65d0a9",
+          "#97d8c0",
+          "#c5e5d9",
+          "#eef6f3"
+        ],
+        "cssVar": "--forest"
+      },
+      "forest-soft": {
+        "role": "secondary",
+        "displayName": "Sapin pâle",
+        "canonical": "#e7efe9",
+        "tonalRamp": [
+          "#222b24",
+          "#394d3e",
+          "#507158",
+          "#659771",
+          "#89ac92",
+          "#adc3b3",
+          "#d0dad2",
+          "#f1f4f2"
+        ],
+        "cssVar": "--forest-soft"
+      },
+      "gold": {
+        "role": "tertiary",
+        "displayName": "Or",
+        "canonical": "#b8914a",
+        "tonalRamp": [
+          "#31291c",
+          "#594a2e",
+          "#856b3c",
+          "#b48e47",
+          "#c1a674",
+          "#cfbfa1",
+          "#e1d8ca",
+          "#f5f3ef"
+        ],
+        "cssVar": "--gold"
+      },
+      "gold-strong": {
+        "role": "tertiary",
+        "displayName": "Or foncé",
+        "canonical": "#82621f",
+        "tonalRamp": [
+          "#352b18",
+          "#624e25",
+          "#94732d",
+          "#ca9931",
+          "#d1ae64",
+          "#d9c497",
+          "#e5dbc5",
+          "#f6f4ee"
+        ],
+        "cssVar": "--gold-strong"
+      },
+      "gold-light": {
+        "role": "tertiary",
+        "displayName": "Or clair",
+        "canonical": "#e3c88f",
+        "tonalRamp": [
+          "#342b18",
+          "#614e25",
+          "#93722e",
+          "#c89833",
+          "#d0ae66",
+          "#d8c398",
+          "#e5dbc5",
+          "#f6f4ee"
+        ],
+        "note": "Pas encore de jeton CSS : écrit en dur dans day-line.tsx et demo.html."
+      },
       "mist": {
         "role": "neutral",
         "displayName": "Brume",
-        "canonical": "#e3e8e4",
+        "canonical": "#eaede8",
         "tonalRamp": [
-          "#242925",
-          "#3e473f",
-          "#56665a",
-          "#6f8673",
-          "#8da091",
-          "#adb8af",
-          "#ced4cf",
-          "#f2f3f2"
+          "#262923",
+          "#42493d",
+          "#5e6b56",
+          "#7b8d6e",
+          "#99a690",
+          "#b7bfb1",
+          "#d4d8d2",
+          "#f2f3f1"
         ],
         "cssVar": "--muted"
       },
       "slate-ink": {
         "role": "neutral",
         "displayName": "Ardoise",
-        "canonical": "#4a524d",
+        "canonical": "#5b605b",
         "tonalRamp": [
-          "#252726",
-          "#404542",
-          "#5a625d",
-          "#748179",
-          "#929b95",
-          "#afb6b2",
-          "#d0d3d1",
-          "#f2f3f2"
+          "#262726",
+          "#424542",
+          "#5e635e",
+          "#7a817a",
+          "#989d98",
+          "#b7b9b7",
+          "#d4d6d4",
+          "#f2f2f2"
         ],
         "cssVar": "--muted-foreground"
       },
       "mint-wash": {
         "role": "tertiary",
-        "displayName": "Lavis menthe",
-        "canonical": "#dcf5e7",
+        "displayName": "Menthe (succès)",
+        "canonical": "#e3f4ea",
         "tonalRamp": [
-          "#193325",
-          "#275d3f",
-          "#318b59",
-          "#38bd72",
-          "#62cb90",
-          "#91d4af",
-          "#c1e2cf",
-          "#eff6f2"
+          "#1c3124",
+          "#2e5940",
+          "#3c855a",
+          "#47b474",
+          "#74c194",
+          "#a1cfb4",
+          "#cae1d3",
+          "#eff5f2"
         ],
-        "cssVar": "--accent"
+        "cssVar": "--success"
       },
       "deep-leaf": {
         "role": "tertiary",
-        "displayName": "Feuille profonde",
+        "displayName": "Vert profond (succès)",
         "canonical": "#0b5c34",
         "tonalRamp": [
           "#143926",
-          "#1c6943",
-          "#1f9e5f",
-          "#1cd97c",
-          "#4ce197",
-          "#84e1b3",
-          "#bae8d1",
+          "#1c6b44",
+          "#1fa261",
+          "#1ce07f",
+          "#55e09c",
+          "#8ee2b8",
+          "#c0ead5",
           "#edf7f2"
         ],
-        "cssVar": "--accent-foreground"
+        "cssVar": "--success-foreground"
       },
       "butter-wash": {
         "role": "tertiary",
-        "displayName": "Lavis beurre",
-        "canonical": "#fdf0cc",
+        "displayName": "Beurre (avertissement)",
+        "canonical": "#fbefd2",
         "tonalRamp": [
-          "#3c3011",
-          "#6f5715",
-          "#a98114",
-          "#e9ae0c",
-          "#eebf3f",
-          "#eacc7b",
-          "#eddeb6",
-          "#f8f5ec"
+          "#3a2e13",
+          "#6d551a",
+          "#a77e1b",
+          "#e6a915",
+          "#e5b951",
+          "#e5cb8b",
+          "#ebdebf",
+          "#f8f4ed"
         ],
         "cssVar": "--warning"
       },
       "umber-ink": {
         "role": "tertiary",
-        "displayName": "Encre terre d'ombre",
-        "canonical": "#6e4b00",
+        "displayName": "Terre d'ombre (avertissement)",
+        "canonical": "#6b4a00",
         "tonalRamp": [
           "#3e2f0f",
-          "#735412",
-          "#af7c0d",
-          "#f2a603",
-          "#f5b938",
-          "#eec877",
-          "#efdcb3",
+          "#755711",
+          "#b4810d",
+          "#faad01",
+          "#f3bd42",
+          "#eecd82",
+          "#f0dfbb",
           "#f9f5ec"
         ],
         "cssVar": "--warning-foreground"
       },
       "brick-alarm": {
         "role": "tertiary",
-        "displayName": "Brique d'alarme",
+        "displayName": "Brique",
         "canonical": "#c8321f",
         "tonalRamp": [
           "#371915",
-          "#66271f",
-          "#9a3023",
-          "#d23723",
-          "#db6152",
-          "#de9187",
-          "#e7c0bb",
+          "#68271f",
+          "#9e3123",
+          "#d93722",
+          "#db695a",
+          "#df9991",
+          "#e8c6c2",
           "#f7efee"
         ],
         "cssVar": "--destructive"
       },
       "brick-alarm-strong": {
         "role": "tertiary",
-        "displayName": "Brique d'alarme appuyée",
+        "displayName": "Brique foncée",
         "canonical": "#a8281a",
         "tonalRamp": [
           "#371815",
-          "#66261f",
-          "#9a2f23",
-          "#d23423",
-          "#db5f51",
-          "#de8f87",
-          "#e7c0bb",
+          "#68261f",
+          "#9e2f23",
+          "#d93422",
+          "#dc675a",
+          "#df9891",
+          "#e8c6c2",
           "#f7eeee"
         ],
         "cssVar": "--destructive-strong"
@@ -231,15 +311,15 @@
       "hairline": {
         "role": "neutral",
         "displayName": "Filet",
-        "canonical": "#d5dcd7",
+        "canonical": "#e0e4dd",
         "tonalRamp": [
-          "#242825",
-          "#3e4740",
-          "#57665b",
-          "#708576",
-          "#8e9f93",
-          "#adb8b0",
-          "#ced4d0",
+          "#262924",
+          "#43493e",
+          "#5f6a57",
+          "#7c8c6f",
+          "#99a591",
+          "#b7beb2",
+          "#d5d8d2",
           "#f2f3f2"
         ],
         "cssVar": "--border"
@@ -247,111 +327,111 @@
       "field-edge": {
         "role": "neutral",
         "displayName": "Bord de champ",
-        "canonical": "#bcc6bf",
+        "canonical": "#cdd3cb",
         "tonalRamp": [
-          "#242825",
-          "#3e4641",
-          "#58655c",
-          "#718477",
-          "#8f9e93",
-          "#aeb7b1",
-          "#cfd3d0",
+          "#252824",
+          "#41483f",
+          "#5d685a",
+          "#788873",
+          "#97a293",
+          "#b6bcb3",
+          "#d4d7d3",
           "#f2f3f2"
         ],
         "cssVar": "--input"
       },
-      "cat-indigo": {
-        "role": "secondary",
-        "displayName": "Indigo (catégorie 1)",
-        "canonical": "#2b3c92",
+      "cat-forest": {
+        "role": "category",
+        "displayName": "Rayon sapin",
+        "canonical": "#0f3d2c",
         "tonalRamp": [
-          "#191e33",
-          "#28305d",
-          "#32418a",
-          "#394fbc",
-          "#6374ca",
-          "#929dd3",
-          "#c1c6e1",
-          "#eff0f6"
+          "#18342a",
+          "#25624b",
+          "#2e936e",
+          "#32c991",
+          "#65d0a9",
+          "#97d8c0",
+          "#c5e5d9",
+          "#eef6f3"
         ],
         "cssVar": "--cat-1"
       },
       "cat-brick": {
-        "role": "secondary",
-        "displayName": "Brique (catégorie 2)",
+        "role": "category",
+        "displayName": "Rayon brique",
         "canonical": "#b3432a",
         "tonalRamp": [
           "#351d18",
-          "#612f24",
-          "#903f2c",
-          "#c54b30",
-          "#d1715c",
-          "#d79b8e",
-          "#e4c5bf",
+          "#623024",
+          "#94402d",
+          "#cb4d30",
+          "#d27864",
+          "#d9a397",
+          "#e5cbc5",
           "#f6f0ee"
         ],
         "cssVar": "--cat-2"
       },
-      "cat-green": {
-        "role": "secondary",
-        "displayName": "Vert de cuisine (catégorie 3)",
-        "canonical": "#087a43",
+      "cat-lagoon": {
+        "role": "category",
+        "displayName": "Rayon lagune",
+        "canonical": "#1f6f8b",
         "tonalRamp": [
-          "#123b27",
-          "#186d44",
-          "#17a561",
-          "#11e37e",
-          "#44e999",
-          "#7ee7b4",
-          "#b7ebd2",
-          "#edf8f2"
+          "#172d35",
+          "#245363",
+          "#2b7a96",
+          "#2ea4cd",
+          "#63b6d3",
+          "#96c8da",
+          "#c4dde6",
+          "#eef4f6"
         ],
         "cssVar": "--cat-3"
       },
       "cat-plum": {
-        "role": "secondary",
-        "displayName": "Prune (catégorie 4)",
-        "canonical": "#73306e",
+        "role": "category",
+        "displayName": "Rayon prune",
+        "canonical": "#7a3d6e",
         "tonalRamp": [
-          "#301d2e",
-          "#562e53",
-          "#803d7b",
-          "#ac49a4",
-          "#bd70b7",
-          "#cb9ac7",
-          "#ddc5dc",
-          "#f5f0f5"
+          "#2e1e2b",
+          "#54334d",
+          "#7c4571",
+          "#a75497",
+          "#b87dad",
+          "#caa6c3",
+          "#deccda",
+          "#f4f0f4"
         ],
         "cssVar": "--cat-4"
       },
       "cat-ochre": {
-        "role": "secondary",
-        "displayName": "Ocre (catégorie 5)",
-        "canonical": "#e2a62a",
+        "role": "category",
+        "displayName": "Rayon ocre",
+        "canonical": "#a8781c",
         "tonalRamp": [
-          "#382c14",
-          "#674f1d",
-          "#9c7421",
-          "#d59a1f",
-          "#deaf4f",
-          "#e0c285",
-          "#e8d9ba",
-          "#f7f4ed"
+          "#372c15",
+          "#674f20",
+          "#9c7325",
+          "#d79a25",
+          "#daaf5c",
+          "#dec492",
+          "#e8dbc2",
+          "#f7f4ee"
         ],
         "cssVar": "--cat-5"
       },
-      "cat-black": {
-        "role": "secondary",
-        "displayName": "Noir de cuisine (catégorie 6)",
-        "canonical": "#1d201e",
+      "cat-charcoal": {
+        "role": "category",
+        "displayName": "Rayon charbon",
+        "canonical": "#3c4540",
         "tonalRamp": [
-          "#252726",
-          "#404542",
-          "#5a625d",
-          "#758078",
-          "#929b95",
-          "#b0b5b2",
-          "#d0d3d1",
+          "#252826",
+          "#404743",
+          "#5b6660",
+          "#75867d",
+          "#95a19a",
+          "#b4bcb8",
+          "#d3d7d5",
           "#f2f3f2"
         ],
         "cssVar": "--cat-6"
@@ -360,57 +440,75 @@
     "typographyMeta": {
       "display": {
         "displayName": "Display",
-        "purpose": "Total du ticket, chiffre du jour. Un seul par zone."
+        "purpose": "Nom de l'établissement sur le panneau sapin de la connexion."
       },
       "headline": {
-        "displayName": "Headline",
-        "purpose": "Titre de page (h1)."
-      },
-      "price": {
-        "displayName": "Price",
-        "purpose": "Prix sur les tuiles et chiffres secondaires."
+        "displayName": "Titre de page",
+        "purpose": "Titre h1 de chaque page (PageHeader), « Connexion »."
       },
       "title": {
-        "displayName": "Title",
-        "purpose": "Titres de cartes, noms de plats."
+        "displayName": "Titre de section",
+        "purpose": "Section de la caisse, « Commande » et « Total » du ticket, marque de l'en-tête."
+      },
+      "card-title": {
+        "displayName": "Titre de carte",
+        "purpose": "Titres de cartes et d'états vides."
+      },
+      "figure": {
+        "displayName": "Chiffre",
+        "purpose": "Chiffre principal du bandeau de journée, total du ticket, statistiques."
+      },
+      "price": {
+        "displayName": "Prix",
+        "purpose": "Prix d'une carte plat, suivi de « GNF » en petit."
+      },
+      "dish-name": {
+        "displayName": "Nom de plat",
+        "purpose": "Nom du plat sur sa carte, deux lignes au plus."
       },
       "body": {
-        "displayName": "Body",
+        "displayName": "Corps",
         "purpose": "Texte courant, chiffres à chasse fixe."
       },
       "button": {
-        "displayName": "Button",
-        "purpose": "Libellés de boutons (taille default)."
+        "displayName": "Bouton",
+        "purpose": "Boutons et onglets."
       },
       "label": {
-        "displayName": "Label",
-        "purpose": "En-têtes de tableau et intitulés de chiffres, en capitales."
+        "displayName": "Étiquette",
+        "purpose": "Badges, noms de catégories sous les pastilles."
       },
-      "selvedge": {
-        "displayName": "Selvedge",
-        "purpose": "Lisière noire uniquement, en capitales."
+      "tagline": {
+        "displayName": "Ligne de marque",
+        "purpose": "Uniquement « • Hôtellerie — Restaurant • » en or foncé capitales."
       }
     },
     "shadows": [
       {
-        "name": "selection-ring",
-        "value": "0 0 0 2px var(--primary)",
-        "purpose": "Tuile de plat déjà au ticket (avec bordure verte)."
+        "name": "card",
+        "value": "0 1px 2px rgb(22 32 27 / 0.05), 0 6px 18px -8px rgb(22 32 27 / 0.12)",
+        "purpose": "Ombre unique des surfaces blanches : cartes, cartes plats, pastilles de catégorie, recherche.",
+        "cssVar": "--card-shadow"
       },
       {
-        "name": "hover-lift",
-        "value": "0 10px 24px -12px rgb(17 17 17 / 0.25)",
-        "purpose": "Cartes interactives mg-lift au survol, avec translateY(-2px), souris uniquement."
-      },
-      {
-        "name": "focus-ring",
-        "value": "0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent)",
-        "purpose": "Focus clavier de tout élément interactif (50 à 60 %)."
+        "name": "raised",
+        "value": "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+        "purpose": "Pastille de catégorie active, pastille de quantité (shadow-md)."
       },
       {
         "name": "floating",
         "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
-        "purpose": "Menus, tiroirs et fenêtres (shadow-md / shadow-lg de Tailwind)."
+        "purpose": "Bouton rond central de la barre du bas, avec anneau blanc de 4 px (shadow-lg)."
+      },
+      {
+        "name": "selected-ring",
+        "value": "0 0 0 2px var(--forest)",
+        "purpose": "Carte plat déjà présente au ticket."
+      },
+      {
+        "name": "focus-ring",
+        "value": "0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent)",
+        "purpose": "Focus clavier, anneau sapin de 3 px."
       }
     ],
     "motion": [
@@ -447,7 +545,17 @@
       {
         "name": "press",
         "value": "scale(0.97), 150ms",
-        "purpose": "Appui sur bouton ou tuile."
+        "purpose": "Appui sur un bouton ; scale(0.98) sur une carte plat."
+      },
+      {
+        "name": "dish-hover",
+        "value": "translateY(-2px) 150ms ; photo scale(1.05) 500ms",
+        "purpose": "Survol d'une carte plat."
+      },
+      {
+        "name": "quantity-pop",
+        "value": "spring stiffness 600, damping 22, scale 1.4 → 1",
+        "purpose": "Pastille de quantité à chaque ajout (motion)."
       },
       {
         "name": "reduced-motion",
@@ -459,29 +567,29 @@
       {
         "name": "sm",
         "value": "640px",
-        "purpose": "Marges 24 px, lisière complète."
+        "purpose": "Marges 24 px, descriptions de plats visibles, grille de plats en remplissage automatique (200 px min)."
       },
       {
         "name": "md",
         "value": "768px",
-        "purpose": "Barre d'onglets à la place du menu tiroir."
+        "purpose": "Rail d'onglets en pilule dans l'en-tête ; la barre d'onglets du bas disparaît."
       },
       {
         "name": "lg",
         "value": "1024px",
-        "purpose": "Caisse en trois colonnes (rail 208 px, grille, ticket 416 px)."
+        "purpose": "Caisse en deux colonnes : menu et ticket fixe de 416 px."
       },
       {
         "name": "xl",
         "value": "1280px",
-        "purpose": "Nom « MassaGui » à côté du monogramme."
+        "purpose": "Nom et rôle de l'utilisateur dans l'en-tête."
       }
     ],
     "layout": {
-      "headerHeight": "100px (lisière 32 + bande 4 + onglets 64)",
-      "contentMaxWidth": "1600px",
-      "posColumns": "13rem minmax(0,1fr) 26rem",
-      "productGridMin": "11rem"
+      "header": "72 px, blanc à 95 % avec flou, collant",
+      "container": "1600 px max, marges 16 / 24 px",
+      "posGrid": "minmax(0,1fr) 26rem à partir de 1024 px",
+      "bottomBar": "80 px, bouton central 72 px qui dépasse de 28 px (téléphone)"
     }
   },
   "components": [
@@ -489,140 +597,159 @@
       "name": "Bouton principal",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Action qui fait avancer la vente ou la connexion ; un seul par écran.",
-      "html": "<button class=\"ds-btn-primary\">Se connecter</button>",
-      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:8px 16px;border:0;border-radius:4px;background:var(--primary,#0abf65);color:var(--foreground,#111111);font:600 15px 'Barlow',ui-sans-serif,system-ui,sans-serif;cursor:pointer;transition:background-color .15s,box-shadow .15s,transform .15s}.ds-btn-primary:hover{background:#09ad5b}.ds-btn-primary:focus-visible{outline:none;box-shadow:0 0 0 3px rgb(10 191 101 / .5)}.ds-btn-primary:active{transform:scale(.97)}"
+      "description": "Pilule vert MassaGui pour l'action qui valide.",
+      "html": "<button class=\"ds-btn-primary\">Ouvrir la caisse</button>",
+      "css": ".ds-btn-primary { font-family: var(--font-sans, Inter, ui-sans-serif, system-ui, sans-serif); display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 20px; border: 0; border-radius: 9999px; background: var(--primary, #0abf65); color: var(--primary-foreground, #0b1a12); font-size: 15px; font-weight: 600; cursor: pointer; transition: background-color .15s, color .15s, transform .15s, box-shadow .15s; } .ds-btn-primary:hover { background: var(--primary-strong, #067a40); color: #fff; } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(15 61 44 / .5); } .ds-btn-primary:active { transform: scale(.97); }"
     },
     {
-      "name": "Bouton Encaisser",
+      "name": "Bouton sombre",
       "kind": "button",
-      "refersTo": "button-checkout",
-      "description": "Bouton de 64 px en pied de ticket, total à droite.",
-      "html": "<button class=\"ds-btn-checkout\"><span class=\"ds-l\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m9 12 2 2 4-4\"/></svg>Encaisser</span><span class=\"ds-t\">125 000 GNF</span></button>",
-      "css": ".ds-btn-checkout{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:400px;height:64px;padding:0 20px;border:0;border-radius:4px;background:var(--primary,#0abf65);color:var(--foreground,#111111);font:600 20px 'Barlow',ui-sans-serif,system-ui,sans-serif;cursor:pointer;transition:background-color .15s,transform .15s}.ds-btn-checkout .ds-l{display:flex;align-items:center;gap:8px}.ds-btn-checkout .ds-t{font:700 24px 'Barlow Condensed','Barlow',sans-serif;font-variant-numeric:tabular-nums}.ds-btn-checkout:hover{background:#09ad5b}.ds-btn-checkout:focus-visible{outline:none;box-shadow:0 0 0 3px rgb(10 191 101 / .5)}.ds-btn-checkout:active{transform:scale(.97)}"
+      "refersTo": "button-dark",
+      "description": "Pilule vert sapin pour les actions secondaires fortes (« Ventes du jour »).",
+      "html": "<button class=\"ds-btn-dark\">Ventes du jour</button>",
+      "css": ".ds-btn-dark { font-family: var(--font-sans, Inter, ui-sans-serif, system-ui, sans-serif); height: 48px; padding: 0 24px; border: 0; border-radius: 9999px; background: var(--forest, #0f3d2c); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; transition: background-color .15s, transform .15s, box-shadow .15s; } .ds-btn-dark:hover { background: rgb(15 61 44 / .9); } .ds-btn-dark:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(15 61 44 / .5); } .ds-btn-dark:active { transform: scale(.97); }"
     },
     {
       "name": "Bouton contour",
       "kind": "button",
       "refersTo": "button-outline",
-      "description": "Action secondaire (« Ventes du jour »).",
-      "html": "<button class=\"ds-btn-outline\">Ventes du jour</button>",
-      "css": ".ds-btn-outline{display:inline-flex;align-items:center;justify-content:center;height:48px;padding:0 24px;border:1px solid var(--input,#bcc6bf);border-radius:4px;background:var(--card,#fff);color:var(--foreground,#111);font:600 16px 'Barlow',ui-sans-serif,sans-serif;cursor:pointer;transition:background-color .15s,border-color .15s,transform .15s}.ds-btn-outline:hover{background:var(--muted,#e3e8e4);border-color:rgb(17 17 17 / .4)}.ds-btn-outline:focus-visible{outline:none;box-shadow:0 0 0 3px rgb(10 191 101 / .5)}.ds-btn-outline:active{transform:scale(.97)}"
+      "description": "Pilule blanche à contour pour les actions neutres.",
+      "html": "<button class=\"ds-btn-outline\">Appliquer</button>",
+      "css": ".ds-btn-outline { font-family: var(--font-sans, Inter, ui-sans-serif, system-ui, sans-serif); height: 40px; padding: 0 20px; border: 1px solid var(--input, #cdd3cb); border-radius: 9999px; background: var(--card, #fff); color: var(--foreground, #16201b); font-size: 15px; font-weight: 600; cursor: pointer; transition: background-color .15s, border-color .15s, transform .15s, box-shadow .15s; } .ds-btn-outline:hover { border-color: rgb(22 32 27 / .4); background: var(--muted, #eaede8); } .ds-btn-outline:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(15 61 44 / .5); } .ds-btn-outline:active { transform: scale(.97); }"
+    },
+    {
+      "name": "Bouton Encaisser",
+      "kind": "button",
+      "refersTo": "button-encaisser",
+      "description": "Pilule de 64 px qui termine le ticket : libellé à gauche, montant à droite.",
+      "html": "<button class=\"ds-btn-pay\"><span class=\"ds-btn-pay-l\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21.8 10A10 10 0 1 1 17 3.3\"/><path d=\"m9 11 3 3L22 4\"/></svg>Encaisser</span><span class=\"ds-btn-pay-a\">55 000 GNF</span></button>",
+      "css": ".ds-btn-pay { font-family: var(--font-sans, Inter, ui-sans-serif, system-ui, sans-serif); display: flex; align-items: center; justify-content: space-between; width: 360px; height: 64px; padding: 0 20px; border: 0; border-radius: 9999px; background: var(--primary, #0abf65); color: var(--primary-foreground, #0b1a12); font-size: 20px; font-weight: 600; cursor: pointer; transition: background-color .15s, color .15s, transform .15s, box-shadow .15s; } .ds-btn-pay-l { display: flex; align-items: center; gap: 8px; } .ds-btn-pay-a { font-weight: 700; letter-spacing: -.025em; font-variant-numeric: tabular-nums; } .ds-btn-pay:hover { background: var(--primary-strong, #067a40); color: #fff; } .ds-btn-pay:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(15 61 44 / .5); } .ds-btn-pay:active { transform: scale(.97); }"
     },
     {
       "name": "Champ de recherche",
       "kind": "input",
       "refersTo": "input-search",
-      "description": "Recherche de plats en tête de la grille de caisse.",
-      "html": "<label class=\"ds-search\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg><input placeholder=\"Rechercher un plat…\"></label>",
-      "css": ".ds-search{position:relative;display:block;max-width:448px}.ds-search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted-foreground,#4a524d);pointer-events:none}.ds-search input{width:100%;height:48px;padding:0 48px 0 44px;border:1px solid var(--input,#bcc6bf);border-radius:4px;background:var(--card,#fff);color:var(--foreground,#111);font:400 18px 'Barlow',ui-sans-serif,sans-serif;outline:none;transition:box-shadow .15s,border-color .15s}.ds-search input::placeholder{color:var(--muted-foreground,#4a524d)}.ds-search input:focus-visible{border-color:var(--ring,#0abf65);box-shadow:0 0 0 3px rgb(10 191 101 / .4)}"
+      "description": "Pilule blanche à ombre douce, en tête du menu de la caisse.",
+      "html": "<label class=\"ds-search\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg><input type=\"search\" placeholder=\"Rechercher un plat, une boisson…\"></label>",
+      "css": ".ds-search { position: relative; display: flex; align-items: center; width: 420px; height: 52px; padding: 0 16px; gap: 12px; border-radius: 9999px; background: var(--card, #fff); color: var(--muted-foreground, #5b605b); box-shadow: 0 1px 2px rgb(22 32 27 / .05), 0 6px 18px -8px rgb(22 32 27 / .12); transition: box-shadow .15s; } .ds-search input { flex: 1; border: 0; outline: none; background: transparent; font: 400 16px var(--font-sans, Inter, ui-sans-serif, system-ui, sans-serif); color: var(--foreground, #16201b); } .ds-search:focus-within { box-shadow: 0 0 0 3px rgb(15 61 44 / .4); }"
     },
     {
-      "name": "Lisière et onglets",
+      "name": "En-tête et onglets",
       "kind": "nav",
-      "refersTo": "selvedge-band",
-      "description": "Lisière noire 32 px, bande de six coloris 4 px, barre d'onglets blanche 64 px.",
-      "html": "<header class=\"ds-head\"><div class=\"ds-selv\"><span>MassaGui Fils SARL.U</span><span class=\"ds-dim\">·</span><span class=\"ds-dim\">Hôtellerie — Restaurant</span><span class=\"ds-r ds-dim\">samedi 14 novembre</span><span>Awa · Gérant</span></div><div class=\"ds-stripe\"><i style=\"background:#2b3c92\"></i><i style=\"background:#b3432a\"></i><i style=\"background:#087a43\"></i><i style=\"background:#73306e\"></i><i style=\"background:#e2a62a\"></i><i style=\"background:#1d201e\"></i></div><nav class=\"ds-tabs\"><a aria-current=\"page\" href=\"#\">Caisse</a><a href=\"#\">Ventes</a><a href=\"#\">Tableau de bord</a><a href=\"#\">Gestion</a></nav></header>",
-      "css": ".ds-head{font-family:'Barlow',ui-sans-serif,sans-serif}.ds-selv{display:flex;align-items:center;gap:16px;height:32px;padding:0 16px;background:var(--foreground,#111);color:var(--background,#edf0ed);font:600 13px 'Barlow Condensed','Barlow',sans-serif;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;overflow:hidden}.ds-selv .ds-dim{opacity:.8}.ds-selv .ds-r{margin-left:auto}.ds-stripe{display:flex;height:4px}.ds-stripe i{flex:1}.ds-tabs{display:flex;height:64px;background:var(--card,#fff);border-bottom:1px solid var(--border,#d5dcd7);padding:0 8px}.ds-tabs a{position:relative;display:inline-flex;align-items:center;padding:0 16px;color:var(--muted-foreground,#4a524d);font-weight:600;font-size:16px;text-decoration:none;transition:color .15s}.ds-tabs a:hover{color:var(--foreground,#111)}.ds-tabs a:focus-visible{outline:none;box-shadow:inset 0 0 0 3px rgb(10 191 101 / .5)}.ds-tabs a[aria-current=page]{color:var(--foreground,#111)}.ds-tabs a[aria-current=page]::after{content:'';position:absolute;left:12px;right:12px;bottom:0;height:4px;border-radius:2px 2px 0 0;background:var(--primary,#0abf65)}"
+      "refersTo": "nav-tab",
+      "description": "En-tête blanc : marque en Playfair avec ligne d'or, rail d'onglets en pilule, onglet actif sapin.",
+      "html": "<header class=\"ds-head\"><span class=\"ds-brand\"><span class=\"ds-logo\">MG</span><span><b>MassaGui Fils</b><small>• Hôtellerie — Restaurant •</small></span></span><nav class=\"ds-tabs\"><a class=\"ds-tab is-active\" href=\"#\">Caisse</a><a class=\"ds-tab\" href=\"#\">Ventes</a><a class=\"ds-tab\" href=\"#\">Tableau de bord</a></nav></header>",
+      "css": ".ds-head { display: flex; align-items: center; gap: 24px; height: 72px; padding: 0 24px; background: var(--card, #fff); border-bottom: 1px solid var(--border, #e0e4dd); font-family: var(--font-sans, Inter, ui-sans-serif, system-ui, sans-serif); } .ds-brand { display: flex; align-items: center; gap: 12px; } .ds-logo { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 12px; background: var(--primary, #0abf65); color: #0b1a12; font-weight: 700; } .ds-brand b { display: block; font: 700 20px/1.2 'Playfair Display', Georgia, serif; color: var(--foreground, #16201b); } .ds-brand small { display: block; font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--gold-strong, #82621f); } .ds-tabs { display: flex; gap: 4px; margin: 0 auto; padding: 4px; border-radius: 9999px; background: var(--muted, #eaede8); } .ds-tab { display: inline-flex; align-items: center; height: 44px; padding: 0 16px; border-radius: 9999px; font-size: 15px; font-weight: 600; color: var(--muted-foreground, #5b605b); text-decoration: none; transition: color .15s, background-color .15s; } .ds-tab:hover { color: var(--foreground, #16201b); } .ds-tab:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(15 61 44 / .4); } .ds-tab.is-active { background: var(--forest, #0f3d2c); color: #fff; }"
     },
     {
-      "name": "Tuile de plat",
-      "kind": "custom",
-      "refersTo": "product-tile",
-      "description": "Tuile tactile de la grille de caisse : bande de coloris, nom, prix condensé ; contour vert et pastille ×N une fois au ticket.",
-      "html": "<div class=\"ds-tiles\"><button class=\"ds-tile\"><span class=\"ds-band\" style=\"background:#2b3c92\"></span><span class=\"ds-body\"><span class=\"ds-name\">Riz gras au poulet</span><span class=\"ds-price\">45 000<small>GNF</small></span></span></button><button class=\"ds-tile ds-in\"><span class=\"ds-band\" style=\"background:#087a43\"></span><span class=\"ds-qty\">×2</span><span class=\"ds-body\"><span class=\"ds-name\">Jus de gingembre</span><span class=\"ds-price\">15 000<small>GNF</small></span></span></button></div>",
-      "css": ".ds-tiles{display:grid;grid-template-columns:repeat(2,176px);gap:12px}.ds-tile{position:relative;display:flex;flex-direction:column;overflow:hidden;padding:0;text-align:left;background:var(--card,#fff);color:var(--foreground,#111);border:1px solid var(--border,#d5dcd7);border-radius:6px;cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s}.ds-tile:hover{border-color:rgb(17 17 17 / .4)}.ds-tile:focus-visible{outline:none;box-shadow:0 0 0 3px rgb(10 191 101 / .6)}.ds-tile:active{transform:scale(.97)}.ds-tile.ds-in{border-color:var(--primary,#0abf65);box-shadow:0 0 0 2px var(--primary,#0abf65)}.ds-band{display:block;height:28px}.ds-body{display:flex;flex-direction:column;gap:8px;padding:14px;min-height:96px}.ds-name{font:600 18px/1.35 'Barlow',sans-serif}.ds-price{margin-top:auto;font:700 28px/1 'Barlow Condensed','Barlow',sans-serif;font-variant-numeric:tabular-nums}.ds-price small{margin-left:4px;font:600 16px 'Barlow Condensed',sans-serif;color:var(--muted-foreground,#4a524d)}.ds-qty{position:absolute;top:8px;right:10px;display:inline-flex;align-items:center;justify-content:center;height:32px;min-width:32px;padding:0 8px;border-radius:9999px;background:var(--foreground,#111);color:var(--background,#edf0ed);font:700 18px 'Barlow Condensed',sans-serif}"
-    },
-    {
-      "name": "Rail des catégories",
+      "name": "Pastilles de catégorie",
       "kind": "chip",
-      "refersTo": "category-rail-item",
-      "description": "Entrées de 56 px avec pastille de coloris et compteur ; sélection en encre pleine.",
-      "html": "<div class=\"ds-rail\"><button class=\"ds-cat\" aria-pressed=\"true\"><i style=\"background:#2b3c92\"></i><span>Plats africains</span><b>5</b></button><button class=\"ds-cat\" aria-pressed=\"false\"><i style=\"background:#b3432a\"></i><span>Plats européens</span><b>4</b></button><button class=\"ds-cat\" aria-pressed=\"false\"><i style=\"background:#e2a62a\"></i><span>Petit-déjeuner</span><b>2</b></button></div>",
-      "css": ".ds-rail{display:flex;flex-direction:column;gap:4px;width:184px;padding:12px;background:var(--card,#fff)}.ds-cat{display:flex;align-items:center;gap:12px;min-height:56px;padding:0 12px;border:0;border-radius:4px;background:none;color:var(--foreground,#111);font:600 16px 'Barlow',sans-serif;text-align:left;cursor:pointer;transition:background-color .15s,color .15s}.ds-cat i{width:16px;height:16px;border-radius:2px;flex:none}.ds-cat span{flex:1;line-height:1.2}.ds-cat b{font:500 16px 'Barlow Condensed',sans-serif;color:var(--muted-foreground,#4a524d)}.ds-cat:hover{background:var(--muted,#e3e8e4)}.ds-cat:focus-visible{outline:none;box-shadow:0 0 0 3px rgb(10 191 101 / .6)}.ds-cat[aria-pressed=true]{background:var(--foreground,#111);color:var(--background,#edf0ed)}.ds-cat[aria-pressed=true] b{color:rgb(237 240 237 / .7)}"
+      "refersTo": "category-disc",
+      "description": "Disques de 64 px à pictogramme teinté ; actif en sapin plein.",
+      "html": "<div class=\"ds-cats\"><button class=\"ds-cat is-active\" aria-pressed=\"true\"><span class=\"ds-cat-disc\"><svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\"/><rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\"/><rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\"/><rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\"/></svg></span><span class=\"ds-cat-name\">Tout le menu<small>18</small></span></button><button class=\"ds-cat\" aria-pressed=\"false\"><span class=\"ds-cat-disc\" style=\"color:#0f3d2c\"><svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M2 12h20\"/><path d=\"M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8\"/><path d=\"m4 8 16-4\"/><path d=\"m8.86 6.78-.45-1.81a2 2 0 0 1 1.45-2.43l1.94-.48a2 2 0 0 1 2.43 1.46l.45 1.8\"/></svg></span><span class=\"ds-cat-name\">Plats africains<small>5</small></span></button><button class=\"ds-cat\" aria-pressed=\"false\"><span class=\"ds-cat-disc\" style=\"color:#1f6f8b\"><svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m6 8 1.75 12.28a2 2 0 0 0 2 1.72h4.54a2 2 0 0 0 2-1.72L18 8\"/><path d=\"M5 8h14\"/><path d=\"M7 15a6.47 6.47 0 0 1 5 0 6.47 6.47 0 0 0 5 0\"/><path d=\"m12 8 1-6h2\"/></svg></span><span class=\"ds-cat-name\">Boissons<small>5</small></span></button></div>",
+      "css": ".ds-cats { display: flex; gap: 20px; font-family: var(--font-sans, Inter, ui-sans-serif, system-ui, sans-serif); } .ds-cat { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 88px; padding: 0; border: 0; background: none; border-radius: 14px; cursor: pointer; } .ds-cat-disc { display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 9999px; border: 1px solid var(--border, #e0e4dd); background: var(--card, #fff); box-shadow: 0 1px 2px rgb(22 32 27 / .05), 0 6px 18px -8px rgb(22 32 27 / .12); transition: background-color .15s, border-color .15s; } .ds-cat:hover .ds-cat-disc { border-color: rgb(15 61 44 / .5); } .ds-cat:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(15 61 44 / .4); } .ds-cat-name { font-size: 13px; font-weight: 600; line-height: 1.25; color: var(--foreground, #16201b); } .ds-cat-name small { display: block; font-size: 12px; font-weight: 500; color: var(--muted-foreground, #5b605b); } .ds-cat.is-active .ds-cat-disc { background: var(--forest, #0f3d2c); border-color: var(--forest, #0f3d2c); color: #fff !important; box-shadow: 0 4px 6px -1px rgb(0 0 0 / .1); } .ds-cat.is-active .ds-cat-name { color: var(--forest, #0f3d2c); }"
+    },
+    {
+      "name": "Carte plat",
+      "kind": "card",
+      "refersTo": "dish-card",
+      "description": "Signature : carte blanche arrondie, emplacement photo teinté, nom, description, prix et bouton rond « + ».",
+      "html": "<button class=\"ds-dish\"><span class=\"ds-dish-photo\"><svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M2 12h20\"/><path d=\"M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8\"/><path d=\"m4 8 16-4\"/><path d=\"m8.86 6.78-.45-1.81a2 2 0 0 1 1.45-2.43l1.94-.48a2 2 0 0 1 2.43 1.46l.45 1.8\"/></svg><span class=\"ds-dish-qty\">×1</span></span><span class=\"ds-dish-body\"><span class=\"ds-dish-name\">Poulet yassa</span><span class=\"ds-dish-desc\">Poulet mariné aux oignons et citron</span><span class=\"ds-dish-foot\"><span class=\"ds-dish-price\">55 000<small>GNF</small></span><span class=\"ds-dish-add\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg></span></span></span></button>",
+      "css": ".ds-dish { display: flex; flex-direction: column; width: 240px; padding: 0; text-align: left; border: 1px solid transparent; border-radius: 14px; background: var(--card, #fff); color: var(--foreground, #16201b); font-family: var(--font-sans, Inter, ui-sans-serif, system-ui, sans-serif); box-shadow: 0 1px 2px rgb(22 32 27 / .05), 0 6px 18px -8px rgb(22 32 27 / .12); overflow: hidden; cursor: pointer; transition: transform .15s, box-shadow .15s, border-color .15s; } .ds-dish:hover { transform: translateY(-2px); } .ds-dish:active { transform: scale(.98); } .ds-dish:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(15 61 44 / .4); } .ds-dish-photo { position: relative; display: flex; align-items: center; justify-content: center; margin: 8px 8px 0; aspect-ratio: 3 / 1; border-radius: 8px; background: color-mix(in srgb, #0f3d2c 12%, white); color: #0f3d2c; } .ds-dish-qty { position: absolute; top: 8px; right: 8px; display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 32px; padding: 0 8px; border-radius: 9999px; background: var(--primary, #0abf65); color: #0b1a12; font-size: 14px; font-weight: 700; } .ds-dish-body { display: flex; flex-direction: column; gap: 4px; padding: 14px; } .ds-dish-name { font-size: 18px; font-weight: 700; line-height: 1.375; } .ds-dish-desc { font-size: 14px; line-height: 1.375; color: var(--muted-foreground, #5b605b); } .ds-dish-foot { display: flex; align-items: flex-end; justify-content: space-between; padding-top: 8px; } .ds-dish-price { font-size: 20px; font-weight: 700; line-height: 1; letter-spacing: -.025em; font-variant-numeric: tabular-nums; } .ds-dish-price small { margin-left: 4px; font-size: 12px; font-weight: 600; letter-spacing: 0; color: var(--muted-foreground, #5b605b); } .ds-dish-add { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 9999px; background: var(--forest, #0f3d2c); color: #fff; transition: background-color .15s, color .15s; } .ds-dish:hover .ds-dish-add { background: var(--primary, #0abf65); color: #0b1a12; }"
     },
     {
       "name": "Modes de paiement",
       "kind": "chip",
-      "refersTo": "payment-option",
-      "description": "Grille de 3 options de 52 px ; sélection en encre avec coche verte.",
-      "html": "<div class=\"ds-pay\"><button aria-pressed=\"true\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#0abf65\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M20 6 9 17l-5-5\"/></svg>Espèces</button><button aria-pressed=\"false\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"5\" y=\"2\" width=\"14\" height=\"20\" rx=\"2\"/><path d=\"M12 18h.01\"/></svg>Orange Money</button><button aria-pressed=\"false\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"5\" y=\"2\" width=\"14\" height=\"20\" rx=\"2\"/><path d=\"M12 18h.01\"/></svg>MTN Mobile Money</button></div>",
-      "css": ".ds-pay{display:grid;grid-template-columns:repeat(3,120px);gap:8px}.ds-pay button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:52px;padding:4px 6px;border:1px solid var(--border,#d5dcd7);border-radius:4px;background:var(--card,#fff);color:var(--foreground,#111);font:600 14px/1.2 'Barlow',sans-serif;cursor:pointer;transition:background-color .15s,border-color .15s}.ds-pay button:hover{border-color:rgb(17 17 17 / .4)}.ds-pay button:focus-visible{outline:none;box-shadow:0 0 0 3px rgb(10 191 101 / .6)}.ds-pay button[aria-pressed=true]{background:var(--foreground,#111);border-color:var(--foreground,#111);color:var(--background,#edf0ed)}"
+      "refersTo": "payment-tile",
+      "description": "Tuiles blanches en grille de 3 ; choisie en sapin avec coche or.",
+      "html": "<div class=\"ds-pay\"><button class=\"ds-pay-t is-on\" aria-pressed=\"true\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg>Espèces</button><button class=\"ds-pay-t\" aria-pressed=\"false\">Orange Money</button><button class=\"ds-pay-t\" aria-pressed=\"false\">Virement bancaire</button></div>",
+      "css": ".ds-pay { display: grid; grid-template-columns: repeat(3, 120px); gap: 8px; font-family: var(--font-sans, Inter, ui-sans-serif, system-ui, sans-serif); } .ds-pay-t { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 52px; padding: 4px 6px; border: 1px solid var(--border, #e0e4dd); border-radius: 14px; background: var(--card, #fff); color: var(--foreground, #16201b); font-size: 14px; font-weight: 600; line-height: 1.25; cursor: pointer; transition: background-color .15s, border-color .15s; } .ds-pay-t:hover { border-color: rgb(15 61 44 / .5); } .ds-pay-t:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(15 61 44 / .6); } .ds-pay-t.is-on { background: var(--forest, #0f3d2c); border-color: var(--forest, #0f3d2c); color: #fff; } .ds-pay-t.is-on svg { color: var(--gold, #b8914a); }"
     },
     {
-      "name": "Ligne de journée",
+      "name": "Bandeau de journée",
       "kind": "card",
-      "refersTo": "card",
-      "description": "Un chiffre en display, puis les faits qui l'expliquent côte à côte.",
-      "html": "<div class=\"ds-day\"><div><p class=\"ds-lbl\">Encaissé aujourd'hui</p><p class=\"ds-big\">1 245 000 GNF</p></div><dl><div><dt>Ventes</dt><dd>38</dd></div><div><dt>Panier moyen</dt><dd>32 763 GNF</dd></div></dl></div>",
-      "css": ".ds-day{display:flex;align-items:flex-end;gap:32px;padding:16px 20px;background:var(--card,#fff);border:1px solid var(--border,#d5dcd7);border-radius:6px;color:var(--foreground,#111);font-family:'Barlow',sans-serif}.ds-day p{margin:0}.ds-lbl{font:600 14px 'Barlow Condensed',sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--muted-foreground,#4a524d)}.ds-big{margin-top:4px!important;font:700 44px/1 'Barlow Condensed',sans-serif;font-variant-numeric:tabular-nums}.ds-day dl{display:flex;gap:32px;margin:0 0 4px}.ds-day dt{font-size:14px;color:var(--muted-foreground,#4a524d)}.ds-day dd{margin:0;font:700 24px/1.25 'Barlow Condensed',sans-serif;font-variant-numeric:tabular-nums}"
+      "refersTo": "day-line",
+      "description": "Carte sapin en tête du tableau de bord : le chiffre du jour en grand, puis les faits.",
+      "html": "<section class=\"ds-day\"><div><p class=\"ds-day-l\">CA net du jour</p><p class=\"ds-day-v\">1 715 000 GNF</p></div><dl class=\"ds-day-f\"><div><dt>Ventes aujourd’hui</dt><dd>7</dd></div><div><dt>Panier moyen</dt><dd>245 000 GNF</dd></div></dl></section>",
+      "css": ".ds-day { display: flex; align-items: flex-end; gap: 40px; padding: 20px 24px; border-radius: 14px; background: var(--forest, #0f3d2c); color: #fff; font-family: var(--font-sans, Inter, ui-sans-serif, system-ui, sans-serif); font-variant-numeric: tabular-nums; } .ds-day p, .ds-day dl, .ds-day dd { margin: 0; } .ds-day-l { font-size: 14px; font-weight: 600; color: #e3c88f; } .ds-day-v { margin-top: 6px !important; font-size: 40px; line-height: 1; font-weight: 700; letter-spacing: -.025em; } .ds-day-f { display: flex; gap: 40px; padding-bottom: 4px; } .ds-day-f dt { font-size: 14px; color: rgb(255 255 255 / .75); } .ds-day-f dd { font-size: 20px; line-height: 1.25; font-weight: 700; }"
+    },
+    {
+      "name": "Barre du bas (téléphone)",
+      "kind": "nav",
+      "refersTo": "bottom-bar-centre",
+      "description": "Barre d'onglets blanche avec bouton rond sapin qui dépasse au centre.",
+      "html": "<nav class=\"ds-bar\"><a class=\"ds-bar-t is-active\" href=\"#\">Ventes</a><button class=\"ds-bar-c\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z\"/><path d=\"M3 6h18\"/><path d=\"M16 10a4 4 0 0 1-8 0\"/></svg>Panier<span class=\"ds-bar-n\">2</span></button><a class=\"ds-bar-t\" href=\"#\">Plus</a></nav>",
+      "css": ".ds-bar { display: flex; align-items: stretch; width: 360px; height: 80px; margin-top: 32px; padding: 0 8px; border-top: 1px solid var(--border, #e0e4dd); background: var(--card, #fff); font-family: var(--font-sans, Inter, ui-sans-serif, system-ui, sans-serif); } .ds-bar-t { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--muted-foreground, #5b605b); text-decoration: none; } .ds-bar-t.is-active { color: var(--forest, #0f3d2c); } .ds-bar-c { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; width: 72px; height: 72px; margin: -28px auto 0; border: 0; border-radius: 9999px; background: var(--forest, #0f3d2c); color: #fff; font-size: 11px; font-weight: 600; box-shadow: 0 0 0 4px #fff, 0 10px 15px -3px rgb(0 0 0 / .1); cursor: pointer; } .ds-bar-c:focus-visible { outline: none; box-shadow: 0 0 0 4px #fff, 0 0 0 7px rgb(15 61 44 / .5); } .ds-bar-n { position: absolute; top: -2px; right: -2px; min-width: 24px; height: 24px; padding: 0 6px; border-radius: 9999px; background: var(--primary, #0abf65); color: #0b1a12; font-size: 12px; font-weight: 700; line-height: 24px; }"
     },
     {
       "name": "Badges d'état",
       "kind": "chip",
-      "refersTo": "badge-warning",
-      "description": "Pilules 13 px : stock bas, rupture, succès.",
-      "html": "<span class=\"ds-badge ds-warn\">Reste 3</span> <span class=\"ds-badge ds-bad\">Rupture</span> <span class=\"ds-badge ds-ok\">Payée</span>",
-      "css": ".ds-badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:9999px;font:600 13px 'Barlow',sans-serif;white-space:nowrap}.ds-warn{background:var(--warning,#fdf0cc);color:var(--warning-foreground,#6e4b00)}.ds-bad{background:var(--destructive-strong,#a8281a);color:#fff}.ds-ok{background:var(--success,#dcf5e7);color:var(--success-foreground,#0b5c34)}"
+      "refersTo": "badge",
+      "description": "Pilules 13 px : succès, avertissement, stock bas, rupture.",
+      "html": "<div class=\"ds-badges\"><span class=\"ds-badge ds-b-ok\">Payée</span><span class=\"ds-badge ds-b-warn\">Stock faible</span><span class=\"ds-badge ds-b-stock\">Reste 3</span><span class=\"ds-badge ds-b-out\">Rupture</span></div>",
+      "css": ".ds-badges { display: flex; gap: 8px; font-family: var(--font-sans, Inter, ui-sans-serif, system-ui, sans-serif); } .ds-badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 9999px; font-size: 13px; font-weight: 600; } .ds-b-ok { background: var(--success, #e3f4ea); color: var(--success-foreground, #0b5c34); } .ds-b-warn { background: var(--warning, #fbefd2); color: var(--warning-foreground, #6b4a00); } .ds-b-stock { background: var(--forest, #0f3d2c); color: #fff; } .ds-b-out { background: var(--destructive-strong, #a8281a); color: #fff; }"
     }
   ],
   "narrative": {
-    "northStar": "La lisière de pagne",
-    "overview": "**Creative North Star : « La lisière de pagne »**\n\nL'écran se lit comme un pagne wax déplié sur le comptoir. En tête court une lisière noire imprimée en capitales condensées : le nom de la maison, la date, la personne connectée. Elle se termine par une bande de six coloris pleins, comme les repères d'impression d'un tissu. Sous la lisière, tout est sobre : un fond gris très clair teinté de vert, des panneaux blancs, une encre noire. La couleur sert à deux choses seulement : le vert MassaGui pour l'action qui fait avancer la vente, et six coloris francs (indigo, brique, vert, prune, ocre, noir) pour distinguer les catégories de plats en un coup d'œil.\n\nLe système est dense mais lisible à bout de bras : grandes cibles tactiles (44 à 64 px), chiffres en Barlow Condensed gras et à chasse fixe, libellés courts en Barlow. Les montants en francs guinéens sont l'information la plus grosse de l'écran : le total du ticket et le chiffre du jour s'affichent en 44 px. Les surfaces sont plates et cerclées d'un filet de 1 px ; aucune ombre ne sert à décorer.\n\nCe monde rejette la barre latérale noire générique, la rangée de cartes grises identiques et les dégradés décoratifs. La navigation est une barre d'onglets blanche sous la lisière ; les chiffres de la journée tiennent sur une seule ligne plutôt que dans une grille de tuiles.",
+    "northStar": "La carte du restaurant",
+    "overview": "L'application se lit comme la carte d'un bon restaurant posée sur le comptoir : des plats présentés en cartes blanches arrondies sur un fond gris très clair à peine vert, des catégories en pastilles rondes à pictogramme, et une identité tenue par deux couleurs de maison, le vert sapin et l'or. Le vert MassaGui, vif, n'est pas l'identité : c'est le geste qui encaisse. Ce monde reprend la maquette de référence fournie par l'utilisateur et remplace l'ancienne « lisière de pagne » (bande noire, Barlow).\n\nLa densité est celle d'un outil de comptoir sur tablette : grandes cibles (44 px au doigt, 64 px pour Encaisser), chiffres en Inter gras à chasse fixe, titres en Playfair Display. La serif donne le ton « maison » ; elle ne porte jamais un prix ni un montant. Les surfaces sont plates à ombre douce, sans dégradé ni texture ; la profondeur vient du blanc posé sur le fond clair.\n\nL'application refuse le tableau de cases plates et la barre noire technique de l'ancien monde.",
     "keyCharacteristics": [
-      "Lisière noire de 32 px en capitales espacées, terminée par une bande de six coloris de 4 px.",
-      "Fond `ground` teinté vert, panneaux blancs, filets de 1 px, coins nets (4 à 6 px).",
-      "Vert MassaGui réservé à l'action principale et au contour de ce qui est déjà au ticket.",
-      "La sélection d'un choix (catégorie, mode de paiement, montant reçu) s'imprime en noir plein.",
-      "Barlow Condensed gras à chasse fixe pour tout ce qui est prix, total, compteur ou en-tête."
+      "Fond gris-vert clair, cartes blanches arrondies (14 px) à ombre douce.",
+      "Vert sapin pour tout ce qui est choisi : onglet actif, catégorie active, paiement sélectionné, bouton rond « + ».",
+      "Or pour la marque : sous-titre « • Hôtellerie — Restaurant • », coche du paiement choisi, libellé du bandeau de journée.",
+      "Vert MassaGui réservé aux actions qui valident (Encaisser, Ouvrir la caisse) et à la pastille de quantité.",
+      "Playfair Display pour la marque et les titres, Inter pour tout le reste.",
+      "Formes rondes partout où l'on touche : pilules, pastilles, boutons ronds."
     ],
     "rules": [
       {
-        "name": "La règle du vert qui encaisse",
-        "body": "Le vert plein ne remplit qu'un seul bouton par écran : celui qui fait avancer la vente ou la connexion. Ailleurs il n'apparaît qu'en trait (onglet actif, contour de tuile, focus).",
+        "name": "La règle du sapin choisi",
+        "body": "Tout ce qui est sélectionné passe en vert sapin plein avec texte blanc ; jamais en vert MassaGui. Le vert vif ne signale pas un état, il déclenche une action.",
         "section": "colors"
       },
       {
-        "name": "La règle de l'encre sélectionnée",
-        "body": "Un choix exclusif sélectionné (catégorie, mode de paiement, billet reçu) passe en noir plein avec texte clair. On ne sélectionne pas en vert.",
+        "name": "La règle de l'or rare",
+        "body": "L'or n'apparaît que sur la marque et sur un détail de sélection (coche, libellé). Jamais en fond, jamais sur un bouton. Sur blanc, toujours gold-strong.",
         "section": "colors"
       },
       {
-        "name": "La règle du coloris fixe",
-        "body": "Les six coloris appartiennent aux catégories et à la lisière. Ils ne servent jamais à signaler un état, ni à décorer un bouton.",
+        "name": "La règle des teintes de rayon",
+        "body": "Les six teintes de catégorie restent dans les pictogrammes et les emplacements photo ; elles ne colorent ni texte courant, ni bouton, ni graphique.",
         "section": "colors"
       },
       {
-        "name": "La règle de l'afficheur",
-        "body": "Tout montant, compteur ou quantité s'écrit en Barlow Condensed gras à chasse fixe. Un prix en Barlow normal est une erreur.",
+        "name": "La règle de la serif qui nomme",
+        "body": "Playfair nomme (marque, page, section, carte) ; elle ne porte jamais un prix, un total ni une quantité. Les chiffres sont toujours en Inter gras à chasse fixe.",
         "section": "typography"
       },
       {
-        "name": "La règle des capitales réservées",
-        "body": "Les capitales espacées sont réservées à la lisière, aux en-têtes de tableau, aux intitulés de chiffres et au mot « Total ». Pas de surtitre en capitales au-dessus des titres.",
+        "name": "La règle des capitales uniques",
+        "body": "Le seul texte en capitales interlettrées de l'interface est la ligne de marque et les en-têtes de colonnes de tableau. Aucun sur-titre au-dessus des titres.",
         "section": "typography"
       },
       {
-        "name": "La règle du plat au repos",
-        "body": "Au repos, aucune surface posée sur la page ne porte d'ombre. Une ombre signale un survol, une sélection ou un élément flottant.",
+        "name": "La règle de l'assiette posée",
+        "body": "Une surface est blanche sur fond clair avec l'ombre de carte, ou elle n'est pas une surface. On n'empile pas de carte dans une carte.",
         "section": "elevation"
       }
     ],
     "dos": [
-      "**Do** commencer chaque écran connecté par la lisière noire de 32 px et sa bande de six coloris de 4 px.",
-      "**Do** écrire chaque montant en Barlow Condensed 700 à chasse fixe, suivi de « GNF » en plus petit et en ardoise.",
-      "**Do** donner à chaque catégorie son coloris fixe (`cat-1` à `cat-6`, dans l'ordre d'affichage) et le répéter partout où la catégorie apparaît.",
-      "**Do** poser du texte noir sur le vert MassaGui (8,7:1) et utiliser le vert forêt pour tout texte vert sur fond clair.",
-      "**Do** garder des cibles tactiles de 44 px minimum, 56 à 64 px pour les gestes de caisse.",
-      "**Do** marquer un choix exclusif sélectionné en encre pleine."
+      "**Do** sélectionner en vert sapin plein (forest) avec texte blanc : onglets, catégories, paiements, montants rapides.",
+      "**Do** garder le vert MassaGui (massagui-green) pour l'action qui valide, avec texte massagui-green-ink.",
+      "**Do** poser chaque surface en blanc sur menu-ground avec l'ombre de carte et un rayon de 14 px.",
+      "**Do** rendre ronds tous les éléments de toucher : pilules pour boutons et onglets, disques pour catégories et « + ».",
+      "**Do** écrire les montants en Inter gras à chasse fixe, devise « GNF » à part en petit ardoise.",
+      "**Do** nommer en Playfair Display (marque, page, section, carte, « Total ») et tout le reste en Inter.",
+      "**Do** utiliser gold-strong pour tout or posé sur blanc."
     ],
     "donts": [
-      "**Don't** revenir à une barre latérale noire de navigation : la navigation est une barre d'onglets blanche sous la lisière.",
-      "**Don't** aligner des cartes de statistiques grises identiques : utiliser la ligne de journée.",
-      "**Don't** mettre de texte blanc sur le vert MassaGui.",
-      "**Don't** utiliser les coloris de catégorie pour un état, un bouton ou un fond décoratif.",
-      "**Don't** ajouter d'ombre à une surface au repos.",
-      "**Don't** demander de confirmation en fenêtre avant d'encaisser : la vente part au premier appui sur « Encaisser »."
+      "**Don't** revenir à la bande noire, à Barlow ou au noir #111111 de l'ancienne lisière de pagne.",
+      "**Don't** mettre un prix, un total ou une quantité en Playfair.",
+      "**Don't** utiliser l'or en fond ou sur un bouton.",
+      "**Don't** marquer une sélection en vert MassaGui.",
+      "**Don't** colorer du texte, des boutons ou des graphiques avec les teintes de catégorie.",
+      "**Don't** ajouter des sur-titres en capitales au-dessus des titres ; les capitales interlettrées sont réservées à la ligne de marque et aux en-têtes de tableau.",
+      "**Don't** imbriquer une carte dans une carte ni réduire une cible tactile sous 44 px."
     ]
   }
 }

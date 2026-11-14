@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
-/* Charte MassaGui Fils : vert #0ABF65 pour les actions, noir #111111.
+/* Charte MassaGui Fils : vert #0ABF65 pour les actions qui confirment.
    Monde « carte de restaurant » (maquette fournie par l'utilisateur) :
    blanc cassé chaud, cartes blanches arrondies, vert sapin pour ce qui est
    choisi, or pour les filets et le sous-titre. */
@@ -22,6 +22,7 @@
   --forest-soft: #e7efe9;
   --gold: #b8914a;
   --gold-strong: #82621f; /* or lisible sur blanc : 5,6:1 */
+  --gold-light: #e3c88f; /* or lisible sur vert sapin : 8:1 */
   --secondary: #eaede8;
   --secondary-foreground: #16201b;
   --muted: #eaede8;
@@ -104,6 +105,7 @@
   --color-forest-soft: var(--forest-soft);
   --color-gold: var(--gold);
   --color-gold-strong: var(--gold-strong);
+  --color-gold-light: var(--gold-light);
   --shadow-card: var(--card-shadow);
   --color-cat-1: var(--cat-1);
   --color-cat-2: var(--cat-2);
