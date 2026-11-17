@@ -1,6 +1,7 @@
 import { Search } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { AutoSubmitForm } from '@/components/app/auto-submit-form';
 import { CollapsibleFilters } from '@/components/app/collapsible-filters';
 import { PageHeader } from '@/components/app/page-header';
 import { Pagination, parsePage } from '@/components/app/pagination';
@@ -78,7 +79,7 @@ export default async function ProductsPage({ searchParams }: PageProps<'/admin/p
           })}
         </div>
         <CollapsibleFilters activeCount={[q, status !== 'active' ? status : ''].filter(Boolean).length}>
-          <form method="get" action="/admin/products" className="flex flex-wrap items-end gap-3">
+          <AutoSubmitForm method="get" action="/admin/products" className="flex flex-wrap items-end gap-3">
             {category && <input type="hidden" name="category" value={category} />}
             <div className="relative min-w-0 flex-[2_1_16rem]">
               <Label htmlFor="q" className="sr-only">
@@ -99,14 +100,14 @@ export default async function ProductsPage({ searchParams }: PageProps<'/admin/p
               </NativeSelect>
             </div>
             <div className="flex gap-2">
-              <Button type="submit" variant="dark" size="lg">
+              <Button type="submit" variant="dark" size="lg" className="sr-only">
                 Filtrer
               </Button>
               <Button asChild variant="ghost" size="lg">
-                <Link href="/admin/products">Effacer</Link>
+                <Link href="/admin/products">Effacer les filtres</Link>
               </Button>
             </div>
-          </form>
+          </AutoSubmitForm>
         </CollapsibleFilters>
         <p className="text-sm text-muted-foreground">
           {products.count ?? 0} produit{(products.count ?? 0) > 1 ? 's' : ''}

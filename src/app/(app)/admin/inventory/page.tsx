@@ -99,7 +99,7 @@ export default async function InventoryPage({ searchParams }: PageProps<'/admin/
         }
         facts={[
           { label: 'Produits suivis', value: tracked.length },
-          { label: 'Stock faible (rupture comprise)', value: lowCount },
+          { label: 'Sous le seuil', value: lowCount },
         ]}
       />
 
@@ -204,42 +204,53 @@ export default async function InventoryPage({ searchParams }: PageProps<'/admin/
           {(movements.data ?? []).length === 0 ? (
             <EmptyState title="Aucun mouvement" description="Les ventes, approvisionnements et ajustements apparaîtront ici." />
           ) : (
-            <Table>
+            <>
+            <Table className="hidden md:table">
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
                   <TableHead>Produit</TableHead>
-                  <TableHead className="hidden md:table-cell">Type</TableHead>
+                  <TableHead>Type</TableHead>
                   <TableHead className="text-right">Quantité</TableHead>
-                  <TableHead className="hidden text-right md:table-cell">Stock après</TableHead>
-                  <TableHead className="hidden lg:table-cell">Motif</TableHead>
-                  <TableHead className="hidden lg:table-cell">Par</TableHead>
+                  <TableHead className="text-right">Stock après</TableHead>
+                  <TableHead>Motif</TableHead>
+                  <TableHead>Par</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {(movements.data ?? []).map((m) => (
                   <TableRow key={m.id}>
                     <TableCell className="text-sm whitespace-nowrap">{formatDateTime(m.created_at, tz)}</TableCell>
-                    <TableCell>
-                      {(m.products as { name: string } | null)?.name ?? '—'}
-                      <span className="block text-sm text-muted-foreground lg:hidden">
-                        {MOVEMENT_TYPE_LABELS[m.movement_type]}
-                        {m.reason ? ` · ${m.reason}` : ''}
-                      </span>
-                    </TableCell>
-                    <TableCell className="hidden whitespace-nowrap md:table-cell">{MOVEMENT_TYPE_LABELS[m.movement_type]}</TableCell>
+                    <TableCell>{(m.products as { name: string } | null)?.name ?? '—'}</TableCell>
+                    <TableCell className="whitespace-nowrap">{MOVEMENT_TYPE_LABELS[m.movement_type]}</TableCell>
                     <TableCell
                       className={`text-right font-medium tabular-nums ${m.quantity > 0 ? 'text-accent-foreground' : 'text-destructive'}`}
                     >
                       {m.quantity > 0 ? `+${m.quantity}` : m.quantity}
                     </TableCell>
-                    <TableCell className="hidden text-right tabular-nums md:table-cell">{m.stock_after}</TableCell>
-                    <TableCell className="hidden max-w-xs truncate lg:table-cell">{m.reason ?? '—'}</TableCell>
-                    <TableCell className="hidden whitespace-nowrap lg:table-cell">{(m.profiles as { full_name: string } | null)?.full_name || '—'}</TableCell>
+                    <TableCell className="text-right tabular-nums">{m.stock_after}</TableCell>
+                    <TableCell className="max-w-xs truncate">{m.reason ?? '—'}</TableCell>
+                    <TableCell className="whitespace-nowrap">{(m.profiles as { full_name: string } | null)?.full_name || '—'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
+            <ul className="divide-y md:hidden">
+              {(movements.data ?? []).map((m) => (
+                <li key={m.id} className="px-5 py-3">
+                  <p className="flex items-baseline justify-between gap-3">
+                    <span className="font-semibold">{(m.products as { name: string } | null)?.name ?? '—'}</span>
+                    <span className={`font-bold tabular-nums ${m.quantity > 0 ? 'text-accent-foreground' : 'text-destructive'}`}>
+                      {m.quantity > 0 ? `+${m.quantity}` : m.quantity}
+                    </span>
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatDateTime(m.created_at, tz)} · {m.reason ?? MOVEMENT_TYPE_LABELS[m.movement_type]} · reste {m.stock_after}
+                  </p>
+                </li>
+              ))}
+            </ul>
+            </>
           )}
           <div className="px-4">
             <Pagination
