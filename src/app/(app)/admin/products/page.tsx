@@ -1,10 +1,11 @@
 import { Search } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { AutoSubmitForm } from '@/components/app/auto-submit-form';
+import { CollapsibleFilters } from '@/components/app/collapsible-filters';
 import { PageHeader } from '@/components/app/page-header';
 import { Pagination, parsePage } from '@/components/app/pagination';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
@@ -52,63 +53,79 @@ export default async function ProductsPage({ searchParams }: PageProps<'/admin/p
         description="Catalogue, prix, disponibilité et photos."
         actions={<NewProductButton categories={categories.data ?? []} currency={currency} />}
       />
-      <Card className="mb-4">
-        <CardContent>
-          <form method="get" action="/admin/products" className="grid gap-3 sm:grid-cols-[2fr_1fr_1fr_auto] sm:items-end">
-            <div className="grid gap-1.5">
-              <Label htmlFor="q">Recherche</Label>
-              <Input id="q" name="q" defaultValue={q} placeholder="Nom du produit" />
+      <div className="mb-5 flex flex-col gap-4">
+        <div role="group" aria-label="Filtrer par catégorie" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6">
+          {[{ id: '', name: 'Toutes' }, ...(categories.data ?? [])].map((c) => {
+            const active = category === c.id;
+            const params = new URLSearchParams();
+            if (q) params.set('q', q);
+            if (c.id) params.set('category', c.id);
+            if (status !== 'active') params.set('status', status);
+            const href = `/admin/products${params.size ? `?${params}` : ''}`;
+            return (
+              <Link
+                key={c.id || 'all'}
+                href={href}
+                aria-current={active ? 'true' : undefined}
+                className={
+                  active
+                    ? 'inline-flex h-10 shrink-0 items-center rounded-full bg-forest px-4 text-sm font-semibold text-forest-foreground'
+                    : 'inline-flex h-10 shrink-0 items-center rounded-full border bg-card px-4 text-sm font-semibold text-muted-foreground hover:text-foreground'
+                }
+              >
+                {c.name}
+              </Link>
+            );
+          })}
+        </div>
+        <CollapsibleFilters activeCount={[q, status !== 'active' ? status : ''].filter(Boolean).length}>
+          <AutoSubmitForm method="get" action="/admin/products" className="flex flex-wrap items-end gap-3">
+            {category && <input type="hidden" name="category" value={category} />}
+            <div className="relative min-w-0 flex-[2_1_16rem]">
+              <Label htmlFor="q" className="sr-only">
+                Recherche
+              </Label>
+              <Search className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden />
+              <Input id="q" name="q" defaultValue={q} placeholder="Rechercher un produit" className="h-12 rounded-full border-transparent bg-card pl-12 shadow-card" />
             </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor="category">Catégorie</Label>
-              <NativeSelect id="category" name="category" defaultValue={category}>
-                <option value="">Toutes</option>
-                {(categories.data ?? []).map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </NativeSelect>
-            </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor="status">Statut</Label>
-              <NativeSelect id="status" name="status" defaultValue={status}>
+            <div className="min-w-0 flex-[1_1_12rem]">
+              <Label htmlFor="status" className="sr-only">
+                Statut
+              </Label>
+              <NativeSelect id="status" name="status" defaultValue={status} className="h-12 rounded-full bg-card">
                 <option value="active">Actifs (non archivés)</option>
-                <option value="available">Disponibles</option>
-                <option value="unavailable">Indisponibles</option>
+                <option value="available">En caisse</option>
+                <option value="unavailable">Retirés de la caisse</option>
                 <option value="archived">Archivés</option>
               </NativeSelect>
             </div>
             <div className="flex gap-2">
-              <Button type="submit">
-                <Search /> Filtrer
+              <Button type="submit" variant="dark" size="lg" className="sr-only">
+                Filtrer
               </Button>
-              <Button asChild variant="ghost">
-                <Link href="/admin/products">Effacer</Link>
+              <Button asChild variant="ghost" size="lg">
+                <Link href="/admin/products">Effacer les filtres</Link>
               </Button>
             </div>
-          </form>
-        </CardContent>
-      </Card>
-      <Card className="py-0">
-        <CardContent className="px-0 pb-4">
-          <ProductsTable
-            products={products.data ?? []}
-            categories={categories.data ?? []}
-            currency={currency}
-            stockEnabled={settings?.stock_enabled ?? true}
-          />
-          <div className="px-4">
-            <Pagination
-              page={page}
-              pageSize={PAGE_SIZE}
-              total={products.count ?? 0}
-              basePath="/admin/products"
-              params={{ q: q || undefined, category: category || undefined, status: status === 'active' ? undefined : status }}
-            />
-          </div>
-        </CardContent>
-      </Card>
+          </AutoSubmitForm>
+        </CollapsibleFilters>
+        <p className="text-sm text-muted-foreground">
+          {products.count ?? 0} produit{(products.count ?? 0) > 1 ? 's' : ''}
+        </p>
+      </div>
+      <ProductsTable
+        products={products.data ?? []}
+        categories={categories.data ?? []}
+        currency={currency}
+        stockEnabled={settings?.stock_enabled ?? true}
+      />
+      <Pagination
+        page={page}
+        pageSize={PAGE_SIZE}
+        total={products.count ?? 0}
+        basePath="/admin/products"
+        params={{ q: q || undefined, category: category || undefined, status: status === 'active' ? undefined : status }}
+      />
     </div>
   );
 }

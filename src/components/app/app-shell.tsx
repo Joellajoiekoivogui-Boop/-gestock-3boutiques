@@ -93,6 +93,13 @@ export function AppShell({ profile, brand, children }: ShellProps) {
     return () => window.removeEventListener(CART_COUNT_EVENT, onCount);
   }, []);
 
+  // Sous-navigation « Gestion » : la page en cours toujours visible.
+  useEffect(() => {
+    document
+      .querySelector('nav[aria-label="Gestion"] [aria-current="page"]')
+      ?.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }, [pathname]);
+
   // Menu mobile : fermé automatiquement si l'écran s'élargit.
   useEffect(() => {
     const wide = window.matchMedia('(min-width: 768px)');
@@ -178,6 +185,33 @@ export function AppShell({ profile, brand, children }: ShellProps) {
 
         </div>
       </header>
+
+      {manageActive && (
+        <nav aria-label="Gestion" className="no-print border-b bg-card">
+          <div className="mx-auto flex max-w-[1600px] gap-2 overflow-x-auto px-4 py-2.5 sm:px-6">
+            {manage.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(pathname, item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? 'page' : undefined}
+                  className={cn(
+                    'inline-flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors',
+                    active
+                      ? 'border-forest bg-forest text-forest-foreground'
+                      : 'border-transparent text-muted-foreground hover:border-border hover:text-foreground',
+                  )}
+                >
+                  <Icon className="size-4" aria-hidden />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      )}
 
       <main className="mx-auto w-full max-w-[1600px] p-4 sm:p-6 print:max-w-none print:p-0">{children}</main>
 

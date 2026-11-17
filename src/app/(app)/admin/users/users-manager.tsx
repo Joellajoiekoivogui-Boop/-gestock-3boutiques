@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { Controller, useForm, useWatch, type Control } from 'react-hook-form';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -15,7 +16,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
 import { Switch } from '@/components/ui/switch';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { ProfileRow } from '@/lib/database.types';
 import { formatDate } from '@/lib/format';
 import { PERMISSIONS, ROLE_LABELS, type Permission } from '@/lib/permissions';
@@ -279,62 +279,83 @@ export function UsersManager({ users, currentUserId, canManageAuth }: { users: P
           <UserPlus /> Nouvel utilisateur
         </Button>
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Utilisateur</TableHead>
-            <TableHead>Rôle</TableHead>
-            <TableHead>Permissions</TableHead>
-            <TableHead>Statut</TableHead>
-            <TableHead>Créé le</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.map((u) => (
-            <TableRow key={u.id}>
-              <TableCell>
-                <p className="font-medium">
-                  {u.full_name || '—'} {u.id === currentUserId && <span className="text-xs text-muted-foreground">(vous)</span>}
-                </p>
-                <p className="text-xs text-muted-foreground">{u.email}</p>
-              </TableCell>
-              <TableCell className="whitespace-nowrap">{ROLE_LABELS[u.role]}</TableCell>
-              <TableCell>
-                {u.role === 'admin' ? (
-                  <span className="text-xs text-muted-foreground">Toutes</span>
-                ) : u.permissions.length === 0 ? (
-                  <span className="text-xs text-muted-foreground">Caisse et ses ventes</span>
-                ) : (
-                  <div className="flex max-w-xs flex-wrap gap-1">
-                    {u.permissions.map((p) => (
+      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {users.map((u) => {
+          const initials = (u.full_name || u.email || '')
+            .split(/\s+/)
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((w) => w.charAt(0).toUpperCase())
+            .join('');
+          return (
+            <li key={u.id}>
+              <article className={cn('flex h-full flex-col rounded-xl bg-card p-5 shadow-card', !u.is_active && 'opacity-70')}>
+                <div className="flex items-start gap-4">
+                  <span
+                    aria-hidden
+                    className={cn(
+                      'flex size-12 shrink-0 items-center justify-center rounded-full font-serif text-lg font-bold',
+                      u.role === 'admin' ? 'bg-forest text-forest-foreground' : 'bg-forest-soft text-forest',
+                    )}
+                  >
+                    {initials}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate text-lg leading-snug font-bold">{u.full_name || '—'}</h3>
+                    <p className="truncate text-sm text-muted-foreground">{u.email}</p>
+                    {u.id === currentUserId && (
+                      <Badge className="mt-1 border-transparent bg-forest-soft text-forest">Votre compte</Badge>
+                    )}
+                  </div>
+                  {u.is_active ? (
+                    <Badge className="border-transparent bg-forest-soft text-forest">Actif</Badge>
+                  ) : (
+                    <Badge variant="destructive">Désactivé</Badge>
+                  )}
+                </div>
+                <dl className="mt-4 grid gap-2 text-sm">
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-muted-foreground">Rôle</dt>
+                    <dd className="font-semibold">{ROLE_LABELS[u.role]}</dd>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-muted-foreground">Compte créé le</dt>
+                    <dd className="tabular-nums">{formatDate(u.created_at)}</dd>
+                  </div>
+                </dl>
+                <div className="mt-3 mb-4 flex flex-wrap gap-1.5">
+                  {u.role === 'admin' ? (
+                    <Badge variant="secondary">Tous les droits</Badge>
+                  ) : u.permissions.length === 0 ? (
+                    <Badge variant="secondary">Caisse et ses ventes</Badge>
+                  ) : (
+                    u.permissions.map((p) => (
                       <Badge key={p} variant="secondary">
                         {permissionLabel.get(p) ?? p}
                       </Badge>
-                    ))}
-                  </div>
-                )}
-              </TableCell>
-              <TableCell>{u.is_active ? <Badge variant="success">Actif</Badge> : <Badge variant="destructive">Désactivé</Badge>}</TableCell>
-              <TableCell className="whitespace-nowrap">{formatDate(u.created_at)}</TableCell>
-              <TableCell className="text-right whitespace-nowrap">
-                <Button variant="ghost" size="icon-sm" onClick={() => setEditing(u)} aria-label={`Modifier ${u.full_name}`}>
-                  <Pencil />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => setPassword(u)}
-                  disabled={!canManageAuth}
-                  aria-label={`Changer le mot de passe de ${u.full_name}`}
-                >
-                  <KeyRound />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                    ))
+                  )}
+                </div>
+                <div className="mt-auto flex gap-2 border-t pt-3">
+                  <Button variant="outline" size="sm" className="flex-1" onClick={() => setEditing(u)} aria-label={`Modifier ${u.full_name}`}>
+                    <Pencil /> Modifier
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => setPassword(u)}
+                    disabled={!canManageAuth}
+                    aria-label={`Changer le mot de passe de ${u.full_name}`}
+                  >
+                    <KeyRound /> Mot de passe
+                  </Button>
+                </div>
+              </article>
+            </li>
+          );
+        })}
+      </ul>
       {creating && <CreateUserDialog onClose={() => setCreating(false)} />}
       {editing && <EditUserDialog user={editing} isSelf={editing.id === currentUserId} onClose={() => setEditing(null)} />}
       {password && <PasswordDialog user={password} onClose={() => setPassword(null)} />}

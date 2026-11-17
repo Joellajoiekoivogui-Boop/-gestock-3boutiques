@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { DishIcon, toneColor, toneForIndex } from '@/components/app/product-thumb';
+import { cn } from '@/lib/utils';
 import { EmptyState } from '@/components/app/empty-state';
 import {
   AlertDialog,
@@ -24,7 +26,6 @@ import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import type { CategoryRow } from '@/lib/database.types';
 import { categorySchema, type CategoryFormOutput, type CategoryFormValues } from '@/lib/validation';
@@ -108,7 +109,8 @@ export function CategoriesManager({ categories }: { categories: Category[] }) {
 
   return (
     <>
-      <div className="mb-4 flex justify-end">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">L’ordre et les couleurs sont ceux de la caisse.</p>
         <Button onClick={() => setEditing('new')}>
           <Plus /> Nouvelle catégorie
         </Button>
@@ -116,44 +118,51 @@ export function CategoriesManager({ categories }: { categories: Category[] }) {
       {categories.length === 0 ? (
         <EmptyState title="Aucune catégorie" description="Créez une première catégorie." />
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nom</TableHead>
-              <TableHead className="text-right">Produits</TableHead>
-              <TableHead className="text-right">Ordre</TableHead>
-              <TableHead>Statut</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {categories.map((c) => (
-              <TableRow key={c.id}>
-                <TableCell>
-                  <p className="font-medium">{c.name}</p>
-                  {c.description && <p className="text-xs text-muted-foreground">{c.description}</p>}
-                </TableCell>
-                <TableCell className="text-right tabular-nums">{c.productCount}</TableCell>
-                <TableCell className="text-right tabular-nums">{c.sort_order}</TableCell>
-                <TableCell>{c.is_active ? <Badge variant="success">Active</Badge> : <Badge variant="outline">Inactive</Badge>}</TableCell>
-                <TableCell className="text-right whitespace-nowrap">
-                  <Button variant="ghost" size="icon-sm" onClick={() => setEditing(c)} aria-label={`Modifier ${c.name}`}>
-                    <Pencil />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => setDeleting(c)}
-                    aria-label={`Supprimer ${c.name}`}
-                    className="text-destructive"
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {categories.map((c, index) => {
+            const tone = toneForIndex(index);
+            return (
+              <li key={c.id}>
+                <article className={cn('flex h-full items-start gap-4 rounded-xl bg-card p-4 shadow-card', !c.is_active && 'opacity-70')}>
+                  <span
+                    className="flex size-14 shrink-0 items-center justify-center rounded-full border bg-card"
+                    style={{ color: toneColor(tone) }}
                   >
-                    <Trash2 />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                    <DishIcon name={c.name} className="size-7" strokeWidth={1.75} />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-lg leading-snug font-bold">{c.name}</h3>
+                      {c.is_active ? (
+                        <Badge className="border-transparent bg-forest-soft text-forest">À la caisse</Badge>
+                      ) : (
+                        <Badge variant="outline">Masquée</Badge>
+                      )}
+                    </div>
+                    {c.description && <p className="mt-0.5 text-sm text-muted-foreground">{c.description}</p>}
+                    <p className="mt-2 text-sm text-muted-foreground tabular-nums">
+                      {c.productCount} produit{c.productCount > 1 ? 's' : ''} · {index === 0 ? '1re' : `${index + 1}e`} à la caisse
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 flex-col gap-1">
+                    <Button variant="ghost" size="icon" className="size-11" onClick={() => setEditing(c)} aria-label={`Modifier ${c.name}`}>
+                      <Pencil />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-11 text-destructive-strong"
+                      onClick={() => setDeleting(c)}
+                      aria-label={`Supprimer ${c.name}`}
+                    >
+                      <Trash2 />
+                    </Button>
+                  </div>
+                </article>
+              </li>
+            );
+          })}
+        </ul>
       )}
 
       {editing && <CategoryDialog category={editing === 'new' ? null : editing} onClose={() => setEditing(null)} />}

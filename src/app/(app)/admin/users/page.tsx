@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { PageHeader } from '@/components/app/page-header';
-import { Card, CardContent } from '@/components/ui/card';
 import { requireAdmin } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { UsersManager } from './users-manager';
@@ -16,15 +15,11 @@ export default async function UsersPage() {
   return (
     <div>
       <PageHeader title="Utilisateurs" description="Comptes, rôles et permissions du personnel." />
-      <Card>
-        <CardContent>
-          <UsersManager
-            users={data ?? []}
-            currentUserId={session.userId}
-            canManageAuth={Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY)}
-          />
-        </CardContent>
-      </Card>
+      <UsersManager
+        users={data ?? []}
+        currentUserId={session.userId}
+        canManageAuth={Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY)}
+      />
     </div>
   );
 }

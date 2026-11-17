@@ -380,7 +380,16 @@ Bouton entier, carte blanche 14 px à ombre de carte. En haut, l'emplacement pho
 Panneau blanc à droite. En-tête de 64 px : « Commande » en Playfair 24 px et nombre d'articles. Lignes séparées par des filets : nom 17 px semi-gras, total de ligne en gras, prix unitaire ardoise, contrôles de quantité ronds de 44 px. Pied : sous-total, remise, « Total » en Playfair avec montant en Inter gras 30–36 px, tuiles de paiement en grille de 3 (blanches, 52 px, rayon 14 px ; choisie en sapin avec coche or), zone de monnaie rapide sur fond brume, puis la pilule Encaisser.
 
 ### Bandeau de journée
-Carte sapin pleine sans bordure, rayon 14 px : libellé en or clair, chiffre principal en Inter 700 40 px, puis faits côte à côte (libellé blanc à 75 %, valeur en gras 20 px). En tête du tableau de bord.
+Carte sapin pleine sans bordure, rayon 14 px : libellé en or clair, chiffre principal en Inter 700 40 px, puis faits côte à côte (libellé blanc à 75 %, valeur en gras 20 px). En tête du tableau de bord, de « Mes ventes », des stocks (le titre nomme le problème : « Croissant en rupture ») et des rapports. Un seul bandeau par page ; les autres chiffres vont dans une ligne de faits sur carte blanche, jamais dans une rangée de cartes identiques.
+
+### Pages de gestion
+- **Bande de gestion :** sous l'en-tête, sur toutes les pages de gestion, une rangée de pilules de 40 px (icône 16 px + libellé 14 px semi-gras) qui défile horizontalement ; la page en cours est en sapin plein texte blanc et toujours ramenée dans le champ.
+- **Carte produit (administration) :** même carte que la carte plat (emplacement photo 16:9, ou 4:1 teinté sans photo), avec en bas une barre d'actions séparée par un filet : « Modifier » (contour), « Retirer » / « Remettre » (fantôme), menu « ⋯ » (archiver, supprimer). Badges seulement pour les exceptions : « Retiré de la caisse », « Archivé », « Rupture », « Stock faible ». Catégorie et stock en petit à droite du prix, jamais au-dessus du nom.
+- **Carte catégorie :** disque de 56 px au pictogramme dans la teinte de la catégorie, nom en Inter 700 18 px, badge « À la caisse » / « Masquée », ligne « 5 produits · 1re à la caisse », boutons modifier / supprimer de 44 px.
+- **Carte utilisateur :** pastille d'initiales en Playfair (sapin plein pour un administrateur, sapin pâle sinon), nom, e-mail, badge « Votre compte », rôle et date, permissions en badges, barre d'actions « Modifier » / « Mot de passe ».
+- **Jauge de stock :** barre de 8 px arrondie sur fond brume ; sapin si suffisant, ocre foncé (encre d'alerte) si faible, brique si rupture. L'or n'est jamais un remplissage.
+- **Journal d'activité :** fil groupé par jour, chaque jour sous une bande brume au titre Playfair ; chaque entrée a un disque de 40 px coloré par nature (vente sapin pâle, annulation brique pâle, stock beurre, compte bleu pâle, réglage brume), le libellé en gras, l'heure et l'auteur en ardoise, puis une phrase en français (« MG-2026-000020 · 435 000 GNF · Orange Money »), jamais le détail technique brut.
+- **Filtres sur téléphone :** repliés derrière un bouton « Filtres » qui affiche le nombre de filtres actifs ; ouverts d'office si un filtre est actif.
 
 ### Connexion
 Écran en deux colonnes sur grand écran : panneau sapin plein à gauche (logo, nom en Playfair display, ligne de marque en or capitales), formulaire sur fond clair à droite.

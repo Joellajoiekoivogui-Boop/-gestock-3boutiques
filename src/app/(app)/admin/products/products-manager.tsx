@@ -19,9 +19,9 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { ProductRow } from '@/lib/database.types';
 import { formatMoney } from '@/lib/format';
+import { cn } from '@/lib/utils';
 import { deleteProductAction, setProductFlagAction } from './actions';
 import { ProductFormDialog } from './product-form-dialog';
 
@@ -74,77 +74,79 @@ export function ProductsTable({
 
   return (
     <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-14">Photo</TableHead>
-            <TableHead>Produit</TableHead>
-            <TableHead className="hidden sm:table-cell">Catégorie</TableHead>
-            <TableHead className="text-right">Prix</TableHead>
-            <TableHead className="hidden text-right md:table-cell">Stock</TableHead>
-            <TableHead>Statut</TableHead>
-            <TableHead className="w-12">
-              <span className="sr-only">Actions</span>
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {products.map((p) => {
-            const low = stockEnabled && p.track_stock && p.stock_quantity <= p.minimum_stock;
-            return (
-              <TableRow key={p.id} className={p.is_archived ? 'opacity-60' : undefined}>
-                <TableCell>
-                  <ProductThumb name={p.name} imageUrl={p.image_url} tone={p.category_id ? categoryTone.get(p.category_id) : 0} sizes="48px" className="size-12 rounded-lg" iconClassName="size-5" />
-                </TableCell>
-                <TableCell>
-                  <p className="font-medium">{p.name}</p>
-                  {p.description && <p className="line-clamp-1 hidden max-w-xs text-xs text-muted-foreground sm:block">{p.description}</p>}
-                  {p.category_id && <p className="text-xs text-muted-foreground sm:hidden">{categoryName.get(p.category_id)}</p>}
-                </TableCell>
-                <TableCell className="hidden sm:table-cell">{p.category_id ? categoryName.get(p.category_id) : <span className="text-muted-foreground">—</span>}</TableCell>
-                <TableCell className="text-right font-medium whitespace-nowrap tabular-nums">{formatMoney(p.price, currency)}</TableCell>
-                <TableCell className="hidden text-right tabular-nums md:table-cell">
-                  {p.track_stock ? (
-                    <span className={low ? 'font-semibold text-warning-foreground' : undefined}>{p.stock_quantity}</span>
-                  ) : (
-                    <span className="text-muted-foreground">Non suivi</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <div className="flex flex-wrap gap-1">
+      <ul className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+        {products.map((p) => {
+          const low = stockEnabled && p.track_stock && p.stock_quantity <= p.minimum_stock;
+          const tone = p.category_id ? (categoryTone.get(p.category_id) ?? 0) : 0;
+          return (
+            <li key={p.id}>
+              <article
+                className={cn(
+                  'flex h-full flex-col overflow-hidden rounded-xl bg-card shadow-card',
+                  p.is_archived && 'opacity-70',
+                )}
+              >
+                <div className="relative p-2 pb-0">
+                  <ProductThumb
+                    name={p.name}
+                    imageUrl={p.image_url}
+                    tone={tone}
+                    sizes="(max-width: 640px) 100vw, 320px"
+                    className={cn('w-full rounded-lg', p.image_url ? 'aspect-[16/9]' : 'aspect-[4/1]')}
+                    iconClassName="size-8"
+                  />
+                  <div className="absolute top-4 left-4 flex flex-wrap gap-1">
                     {p.is_archived ? (
-                      <Badge variant="secondary">Archivé</Badge>
-                    ) : p.is_available ? (
-                      <Badge variant="success">Disponible</Badge>
-                    ) : (
-                      <Badge variant="outline">Indisponible</Badge>
+                      <Badge className="border-transparent bg-foreground/80 text-background">Archivé</Badge>
+                    ) : !p.is_available ? (
+                      <Badge className="border-transparent bg-card text-foreground shadow-sm">Retiré de la caisse</Badge>
+                    ) : null}
+                    {stockEnabled && p.track_stock && p.stock_quantity === 0 && !p.is_archived && (
+                      <Badge className="border-transparent bg-destructive-strong text-destructive-foreground">Rupture</Badge>
                     )}
-                    {low && !p.is_archived && <Badge variant="warning">Stock faible</Badge>}
+                    {low && p.stock_quantity > 0 && !p.is_archived && <Badge variant="warning">Stock faible</Badge>}
                   </div>
-                </TableCell>
-                <TableCell>
+                </div>
+                <div className="flex flex-1 flex-col gap-1 p-4 pt-3">
+                  <h3 className="text-lg leading-snug font-bold">{p.name}</h3>
+                  {p.description && <p className="line-clamp-2 text-sm text-muted-foreground">{p.description}</p>}
+                  <div className="mt-auto flex items-end justify-between gap-3 pt-3">
+                    <p className="text-xl font-bold tracking-tight whitespace-nowrap tabular-nums">{formatMoney(p.price, currency)}</p>
+                    <p className="text-right text-sm text-muted-foreground tabular-nums">
+                      {p.category_id ? categoryName.get(p.category_id) : 'Sans catégorie'}
+                      {p.track_stock && (
+                        <span className={cn('block', low && 'font-semibold text-warning-foreground')}>Stock : {p.stock_quantity}</span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 border-t px-3 py-2.5">
+                  <Button variant="outline" size="sm" onClick={() => setEditing(p)} disabled={pending} className="flex-1">
+                    <Pencil /> Modifier
+                  </Button>
+                  {!p.is_archived && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      disabled={pending}
+                      className="flex-1"
+                      onClick={() =>
+                        run(
+                          () => setProductFlagAction(p.id, 'is_available', !p.is_available),
+                          p.is_available ? 'Produit retiré de la caisse.' : 'Produit disponible à la caisse.',
+                        )
+                      }
+                    >
+                      {p.is_available ? <EyeOff /> : <Eye />} {p.is_available ? 'Retirer' : 'Remettre'}
+                    </Button>
+                  )}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon-sm" aria-label={`Actions pour ${p.name}`} disabled={pending}>
                         <MoreHorizontal />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onSelect={() => setEditing(p)}>
-                        <Pencil /> Modifier
-                      </DropdownMenuItem>
-                      {!p.is_archived && (
-                        <DropdownMenuItem
-                          onSelect={() =>
-                            run(
-                              () => setProductFlagAction(p.id, 'is_available', !p.is_available),
-                              p.is_available ? 'Produit retiré de la caisse.' : 'Produit disponible à la caisse.',
-                            )
-                          }
-                        >
-                          {p.is_available ? <EyeOff /> : <Eye />} {p.is_available ? 'Rendre indisponible' : 'Rendre disponible'}
-                        </DropdownMenuItem>
-                      )}
+                    <DropdownMenuContent align="end" className="rounded-xl">
                       <DropdownMenuItem
                         onSelect={() =>
                           run(
@@ -161,12 +163,12 @@ export function ProductsTable({
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+                </div>
+              </article>
+            </li>
+          );
+        })}
+      </ul>
 
       {editing && (
         <ProductFormDialog
