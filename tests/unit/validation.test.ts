@@ -108,10 +108,11 @@ describe('droits et navigation', () => {
 
   it('la navigation suit le rôle', () => {
     const hrefs = (p: Parameters<typeof navFor>[0]) => navFor(p).flatMap((s) => s.items.map((i) => i.href));
-    expect(hrefs(cashier)).toEqual(['/pos', '/pos/sales']);
+    expect(hrefs(cashier)).toEqual(['/pos', '/pos/sales', '/credits']);
     expect(hrefs({ ...cashier, permissions: ['manage_stock', 'view_reports'] })).toEqual([
       '/pos',
       '/pos/sales',
+      '/credits',
       '/admin/inventory',
       '/admin/reports',
     ]);

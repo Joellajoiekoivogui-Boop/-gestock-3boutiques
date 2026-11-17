@@ -3,6 +3,7 @@ import {
   Boxes,
   FolderTree,
   LayoutDashboard,
+  NotebookPen,
   type LucideIcon,
   Receipt,
   ScrollText,
@@ -31,6 +32,7 @@ export function navFor(profile: ProfileLike): NavSection[] {
   } else {
     vente.push({ href: '/pos/sales', label: 'Mes ventes', icon: Receipt });
   }
+  vente.push({ href: '/credits', label: 'Crédits', icon: NotebookPen });
 
   if (admin) {
     sections.push({ title: 'Pilotage', items: [{ href: '/admin/dashboard', label: 'Tableau de bord', icon: LayoutDashboard }] });
@@ -58,7 +60,7 @@ export function navFor(profile: ProfileLike): NavSection[] {
 }
 
 // Barre du haut : les onglets du travail quotidien, le reste sous « Gestion ».
-const PRIMARY_HREFS = ['/pos', '/pos/sales', '/admin/sales', '/admin/dashboard'];
+const PRIMARY_HREFS = ['/pos', '/pos/sales', '/admin/sales', '/credits', '/admin/dashboard'];
 const SHORT_LABELS: Record<string, string> = {
   '/pos/sales': 'Mes ventes',
   '/admin/sales': 'Ventes',

@@ -58,7 +58,7 @@ export function SalesTable({
             </TableCell>
             <TableCell className={cn('hidden whitespace-nowrap', compact ? 'sm:table-cell' : 'md:table-cell')}>{sale.payment_method_label}</TableCell>
             <TableCell>
-              <SaleStatusBadge status={sale.sale_status} />
+              <SaleStatusBadge status={sale.sale_status} unpaid={sale.payment_status === 'pending'} />
             </TableCell>
             {!compact && (
               <TableCell className="hidden text-right whitespace-nowrap sm:table-cell">

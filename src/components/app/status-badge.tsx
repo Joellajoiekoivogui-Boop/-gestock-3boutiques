@@ -9,6 +9,7 @@ const VARIANTS: Record<SaleStatus, 'success' | 'warning' | 'destructive' | 'seco
   cancelled: 'destructive',
 };
 
-export function SaleStatusBadge({ status }: { status: SaleStatus }) {
+export function SaleStatusBadge({ status, unpaid = false }: { status: SaleStatus; unpaid?: boolean }) {
+  if (unpaid && status !== 'cancelled') return <Badge variant="warning">À crédit</Badge>;
   return <Badge variant={VARIANTS[status]}>{SALE_STATUS_LABELS[status]}</Badge>;
 }

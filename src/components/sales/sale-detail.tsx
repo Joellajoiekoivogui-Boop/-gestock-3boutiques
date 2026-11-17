@@ -94,12 +94,24 @@ export function SaleDetail({
               <dl className="grid grid-cols-2 gap-y-2 text-sm">
                 <dt className="text-muted-foreground">Statut</dt>
                 <dd className="text-right">
-                  <SaleStatusBadge status={sale.sale_status} />
+                  <SaleStatusBadge status={sale.sale_status} unpaid={sale.payment_status === 'pending'} />
                 </dd>
                 <dt className="text-muted-foreground">Caissier</dt>
                 <dd className="text-right">{sale.cashier_name}</dd>
                 <dt className="text-muted-foreground">Paiement</dt>
-                <dd className="text-right">{sale.payment_method_label}</dd>
+                <dd className="text-right">
+                  {sale.payment_method_label}
+                  {sale.settled_payment_label && <span className="block text-sm text-muted-foreground">réglé en {sale.settled_payment_label}</span>}
+                </dd>
+                {sale.customer_name && (
+                  <>
+                    <dt className="text-muted-foreground">Client</dt>
+                    <dd className="text-right">
+                      {sale.customer_name}
+                      {sale.customer_phone && <span className="block text-sm text-muted-foreground">{sale.customer_phone}</span>}
+                    </dd>
+                  </>
+                )}
                 <dt className="text-muted-foreground">Articles</dt>
                 <dd className="text-right tabular-nums">{sale.item_count}</dd>
                 <dt className="text-muted-foreground">Sous-total</dt>

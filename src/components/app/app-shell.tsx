@@ -110,7 +110,9 @@ export function AppShell({ profile, brand, children }: ShellProps) {
 
   // Barre du bas (téléphone) : autant d'emplacements de chaque côté du
   // bouton rond, « Plus » compris, pour qu'il reste au centre.
-  const bottomItems = primary.slice(0, 3);
+  // Un administrateur garde le tableau de bord ; « Crédits » reste dans « Plus ».
+  const hasDashboard = primary.some((item) => item.href === '/admin/dashboard');
+  const bottomItems = primary.filter((item) => !(hasDashboard && item.href === '/credits')).slice(0, 3);
   const slots = bottomItems.length + 1; // + « Plus »
   const half = Math.ceil(slots / 2);
   const left = bottomItems.slice(0, half);
