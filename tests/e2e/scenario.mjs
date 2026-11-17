@@ -60,7 +60,7 @@ try {
   await step('connexion administrateur → tableau de bord vide', async () => {
     await login(ADMIN.email, ADMIN.password);
     await page.waitForURL('**/admin/dashboard');
-    await page.getByText('CA net du jour').waitFor();
+    await page.getByText('Encaissé aujourd’hui').waitFor();
     await page.getByText('Aucune vente sur cette période.').waitFor();
     await shot('02-dashboard-vide');
   });
@@ -212,8 +212,7 @@ try {
   await step('admin : tableau de bord à jour avec la vente réelle', async () => {
     await login(ADMIN.email, ADMIN.password);
     await page.waitForURL('**/admin/dashboard');
-    const card = page.locator('[data-slot=card]').filter({ hasText: 'CA net du jour' }).first();
-    await card.getByText('60\u00a0000\u00a0GNF').waitFor();
+    await page.getByTestId('day-value').getByText('60\u00a0000\u00a0GNF').waitFor();
     await page.getByText('Orange Money').first().waitFor();
     await shot('13-dashboard-avec-vente');
   });
@@ -238,8 +237,7 @@ try {
 
   await step('CA recalculé : la vente annulée n’est plus un revenu', async () => {
     await page.goto(`${BASE}/admin/dashboard`);
-    const card = page.locator('[data-slot=card]').filter({ hasText: 'CA net du jour' }).first();
-    await card.getByText('0\u00a0GNF', { exact: true }).waitFor();
+    await page.getByTestId('day-value').getByText('0\u00a0GNF', { exact: true }).waitFor();
     await page.goto(`${BASE}/admin/reports?period=today`);
     await page.getByText('Ventes annulées (exclues du CA)').waitFor();
     await shot('15-rapports');
@@ -283,15 +281,27 @@ try {
     await save.click();
     await page.getByRole('dialog', { name: 'Vente enregistrée' }).waitFor();
     await page.keyboard.press('Escape');
+    // Le crédit compte dans les ventes du jour mais pas dans l'argent encaissé.
+    await page.goto(`${BASE}/admin/dashboard`);
+    await page.getByTestId('day-value').getByText('0\u00a0GNF', { exact: true }).waitFor();
+    await page.getByText('À crédit aujourd’hui').waitFor();
+    // Un dossier a été ouvert pour le client.
     await page.goto(`${BASE}/credits`);
-    await page.getByRole('heading', { name: 'Mamadou Bah' }).waitFor();
     await page.getByText('+224 622 00 00 00').waitFor();
     await shot('19-credits');
+    await page.getByRole('link', { name: /Mamadou Bah/ }).click();
+    await page.waitForURL(/\/credits\/[0-9a-f-]+$/);
+    await page.getByRole('heading', { name: 'Mamadou Bah' }).waitFor();
+    await page.getByText('Doit encore').waitFor();
+    await shot('20-dossier-client');
     await page.getByRole('button', { name: 'Encaisser' }).first().click();
     await page.getByRole('dialog').getByRole('button', { name: 'Espèces' }).click();
     await page.getByRole('button', { name: 'Confirmer le paiement' }).click();
     await toast('Crédit de Mamadou Bah encaissé.').waitFor();
-    await page.getByText('Aucun crédit en cours').waitFor();
+    await page.getByText('Tout est réglé').waitFor();
+    // Une fois réglé, le crédit devient de l'argent encaissé.
+    await page.goto(`${BASE}/admin/dashboard`);
+    await page.getByTestId('day-value').getByText('0\u00a0GNF', { exact: true }).waitFor({ state: 'detached' });
   });
 
   assert.deepEqual(consoleErrors, [], `Erreurs JavaScript : ${consoleErrors.join(' | ')}`);

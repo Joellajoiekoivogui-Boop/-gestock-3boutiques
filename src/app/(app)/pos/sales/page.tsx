@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { getSettings, requireUser } from '@/lib/auth';
 import { dayRangeUtc, todayIn } from '@/lib/dates';
+import { getDayCredit } from '@/lib/credit-day';
 import { formatMoney } from '@/lib/format';
 import { listSales, parseSalesFilters } from '@/lib/sales-query';
 import { createClient } from '@/lib/supabase/server';
@@ -31,7 +32,7 @@ export default async function MySalesPage({ searchParams }: PageProps<'/pos/sale
   const today = todayIn(tz);
   const todayRange = dayRangeUtc(today, today, tz);
 
-  const [{ rows, count }, methods, todaySales] = await Promise.all([
+  const [{ rows, count }, methods, todaySales, dayCredit] = await Promise.all([
     listSales(supabase, filters, tz, { offset: (page - 1) * PAGE_SIZE, limit: PAGE_SIZE, cashierId: session.userId }),
     supabase.from('payment_methods').select('code, label').order('sort_order'),
     // Ma journée : mes ventes d'aujourd'hui (hors ventes annulées), nettes des remboursements.
@@ -43,6 +44,7 @@ export default async function MySalesPage({ searchParams }: PageProps<'/pos/sale
       .lt('created_at', todayRange.end)
       .neq('sale_status', 'cancelled')
       .limit(2000),
+    getDayCredit(supabase, tz, session.userId),
   ]);
 
   const day = (todaySales.data ?? []).reduce(
@@ -76,16 +78,20 @@ export default async function MySalesPage({ searchParams }: PageProps<'/pos/sale
       <section aria-label="Ma journée" className="mb-4">
         <DayLine
           label="Encaissé aujourd’hui"
-          value={formatMoney(day.total, currency)}
+          value={formatMoney(day.total + dayCredit.settledToday, currency)}
           facts={[
-            { label: 'Ventes', value: day.count },
+            { label: 'Ventes du jour', value: formatMoney(day.total + day.credit, currency) },
+            { label: 'À crédit (non payé)', value: day.credit > 0 ? `− ${formatMoney(day.credit, currency)}` : formatMoney(0, currency) },
+            ...(dayCredit.settledToday > 0
+              ? [{ label: 'Crédits réglés aujourd’hui', value: `+ ${formatMoney(dayCredit.settledToday, currency)}` }]
+              : []),
+            { label: 'Nombre de ventes', value: day.count },
             { label: 'Panier moyen', value: day.count > 0 ? formatMoney(Math.round((day.total + day.credit) / day.count), currency) : '—' },
             { label: 'Dont espèces', value: formatMoney(day.cash, currency) },
-            ...(day.credit > 0 ? [{ label: 'À crédit (non payé)', value: formatMoney(day.credit, currency) }] : []),
           ]}
         />
         <p className="mt-2 text-sm text-muted-foreground">
-          Hors ventes annulées et ventes à crédit non payées, remboursements déduits.
+          Ventes du jour − crédits non payés + anciens crédits réglés aujourd’hui. Hors ventes annulées, remboursements déduits.
         </p>
       </section>
       <Card className="mb-4">

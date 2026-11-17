@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { getSettings, requireAdmin } from '@/lib/auth';
 import { formatDate, formatMoney } from '@/lib/format';
 import { PERIOD_LABELS, resolvePeriod } from '@/lib/dates';
+import { getDayCredit } from '@/lib/credit-day';
 import { getDashboardSummary, getSalesReport } from '@/lib/reports';
 import { createClient } from '@/lib/supabase/server';
 
@@ -56,6 +57,9 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
   ]);
 
   const creditTotal = (credits.data ?? []).reduce((sum, c) => sum + Number(c.total_amount) - Number(c.refunded_amount), 0);
+  const dayCredit = await getDayCredit(supabase, tz);
+  // Argent réellement entré aujourd'hui : ventes du jour − crédits non payés + crédits d'avant réglés.
+  const cashedToday = summary.periods.today.net - dayCredit.unpaidToday + dayCredit.settledToday;
   const lowStockItems = settings?.stock_enabled
     ? (lowStock.data ?? []).filter((p) => p.stock_quantity <= p.minimum_stock).slice(0, 6)
     : [];
@@ -79,15 +83,14 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
       />
 
       <DayLine
-        label="CA net du jour"
-        value={<AnimatedMoney value={summary.periods.today.net} currency={currency} />}
+        label="Encaissé aujourd’hui"
+        value={<AnimatedMoney value={cashedToday} currency={currency} />}
         facts={[
+          { label: 'CA net du jour', value: money(summary.periods.today.net) },
+          { label: 'À crédit aujourd’hui', value: dayCredit.unpaidToday > 0 ? `− ${money(dayCredit.unpaidToday)}` : money(0) },
+          ...(dayCredit.settledToday > 0 ? [{ label: 'Crédits réglés aujourd’hui', value: `+ ${money(dayCredit.settledToday)}` }] : []),
           { label: 'Ventes aujourd’hui', value: summary.periods.today.count },
-          {
-            label: 'Panier moyen',
-            value: summary.periods.today.count > 0 ? money(Math.round(summary.periods.today.net / summary.periods.today.count)) : '—',
-          },
-          ...(creditTotal > 0 ? [{ label: 'Crédits à encaisser', value: money(creditTotal) }] : []),
+          ...(creditTotal > 0 ? [{ label: 'Reste à encaisser (tous)', value: money(creditTotal) }] : []),
           {
             label: 'Stock faible',
             value: summary.low_stock_products > 0 ? `${summary.low_stock_products} produit(s)` : 'Aucun',

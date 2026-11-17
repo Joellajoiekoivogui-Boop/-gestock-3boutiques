@@ -108,6 +108,19 @@ export type SaleRow = {
   settled_by: string | null;
   settled_payment_method: string | null;
   settled_payment_label: string | null;
+  customer_id: string | null;
+};
+
+export type CustomerRow = {
+  id: string;
+  name: string;
+  phone: string | null;
+  phone_key: string | null;
+  note: string | null;
+  is_active: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type SaleItemRow = {
@@ -211,6 +224,7 @@ export type Database = {
         { label?: string; is_active?: boolean; sort_order?: number }
       >;
       sales: Table<SaleRow, never, never>;
+      customers: Table<CustomerRow, never, Partial<Pick<CustomerRow, 'name' | 'phone' | 'note' | 'is_active'>>>;
       sale_items: Table<
         SaleItemRow,
         never,
@@ -277,9 +291,11 @@ export type Database = {
           p_note?: string | null;
           p_customer_name?: string | null;
           p_customer_phone?: string | null;
+          p_customer_id?: string | null;
         };
         Returns: Json;
       };
+      create_customer: { Args: { p_name: string; p_phone?: string | null; p_note?: string | null }; Returns: string };
       settle_credit: { Args: { p_sale_id: string; p_payment_method: string }; Returns: Json };
       cancel_sale: { Args: { p_sale_id: string; p_reason: string }; Returns: undefined };
       refund_sale: { Args: { p_sale_id: string; p_amount: number; p_reason: string }; Returns: Json };

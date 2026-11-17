@@ -1,158 +1,185 @@
-import { NotebookPen, Phone } from 'lucide-react';
+import { ChevronRight, NotebookPen, Phone, Search } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { AutoSubmitForm } from '@/components/app/auto-submit-form';
 import { DayLine } from '@/components/app/day-line';
 import { EmptyState } from '@/components/app/empty-state';
 import { PageHeader } from '@/components/app/page-header';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { getSettings, requireUser } from '@/lib/auth';
-import { formatDateTime, formatMoney } from '@/lib/format';
+import { formatDate, formatMoney } from '@/lib/format';
 import { can } from '@/lib/permissions';
 import { createClient } from '@/lib/supabase/server';
-import { SettleCreditButton } from './settle-button';
+import { cn } from '@/lib/utils';
+import { CustomerFormButton } from './customer-form';
 
-export const metadata: Metadata = { title: 'Crédits à encaisser' };
+export const metadata: Metadata = { title: 'Clients à crédit' };
 
-type CreditSale = {
-  id: string;
-  receipt_number: string;
-  customer_name: string | null;
-  customer_phone: string | null;
-  total_amount: number;
-  refunded_amount: number;
-  created_at: string;
-  cashier_name: string;
-};
+function normalize(text: string) {
+  return text
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
+}
 
-// Crédits en cours, regroupés par client. Un caissier ne voit que ses propres
-// ventes (règles de la base) ; l'administrateur et qui voit toutes les ventes
-// voient tous les crédits.
-export default async function CreditsPage() {
+// Un dossier par client : ce qu'il doit, combien de ventes à crédit, la
+// dernière. Un caissier voit les montants de ses propres ventes uniquement.
+export default async function CreditsPage({ searchParams }: PageProps<'/credits'>) {
   const session = await requireUser();
+  const params = await searchParams;
+  const q = typeof params.q === 'string' ? params.q.trim().slice(0, 60) : '';
   const settings = await getSettings();
-  const currency = settings?.currency ?? 'GNF';
-  const tz = settings?.timezone ?? 'Africa/Conakry';
-  const money = (v: number) => formatMoney(v, currency);
+  const money = (v: number) => formatMoney(v, settings?.currency ?? 'GNF');
   const supabase = await createClient();
 
-  const [credits, methods] = await Promise.all([
+  const [customers, sales] = await Promise.all([
+    supabase.from('customers').select('id, name, phone, created_at').eq('is_active', true).order('name').limit(2000),
     supabase
       .from('sales')
-      .select('id, receipt_number, customer_name, customer_phone, total_amount, refunded_amount, created_at, cashier_name')
-      .eq('payment_status', 'pending')
+      .select('customer_id, total_amount, refunded_amount, payment_status, created_at')
+      .eq('payment_method', 'credit')
       .neq('sale_status', 'cancelled')
-      .order('created_at', { ascending: true })
-      .limit(500),
-    supabase.from('payment_methods').select('code, label').eq('is_active', true).neq('code', 'credit').order('sort_order'),
+      .not('customer_id', 'is', null)
+      .limit(5000),
   ]);
-  // Base pas encore mise à jour pour les crédits (colonnes absentes).
-  if (credits.error?.code === '42703' || /customer_name/.test(credits.error?.message ?? '')) {
+
+  // Base pas encore mise à jour pour les dossiers clients.
+  if (customers.error) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Crédits à encaisser" />
+        <PageHeader title="Clients à crédit" />
         <div className="rounded-xl bg-card shadow-card">
           <EmptyState
             icon={NotebookPen}
             title="Mise à jour de la base nécessaire"
-            description="Les ventes à crédit seront disponibles dès que l’administrateur aura exécuté le script SQL des crédits dans Supabase."
+            description="Les dossiers clients seront disponibles dès que l’administrateur aura exécuté le script SQL des dossiers clients dans Supabase."
           />
         </div>
       </div>
     );
   }
-  if (credits.error) throw new Error(credits.error.message);
+  if (sales.error) throw new Error(sales.error.message);
 
-  const rows = (credits.data ?? []) as CreditSale[];
-  const due = (s: CreditSale) => Number(s.total_amount) - Number(s.refunded_amount);
-  const groups = new Map<string, { name: string; phone: string | null; sales: CreditSale[]; total: number }>();
-  for (const sale of rows) {
-    const name = sale.customer_name || 'Client sans nom';
-    const key = name.trim().toLowerCase();
-    const group = groups.get(key) ?? { name, phone: sale.customer_phone, sales: [], total: 0 };
-    group.sales.push(sale);
-    group.total += due(sale);
-    if (!group.phone && sale.customer_phone) group.phone = sale.customer_phone;
-    groups.set(key, group);
+  const stats = new Map<string, { owed: number; open: number; count: number; last: string }>();
+  for (const sale of sales.data ?? []) {
+    if (!sale.customer_id) continue;
+    const entry = stats.get(sale.customer_id) ?? { owed: 0, open: 0, count: 0, last: sale.created_at };
+    entry.count += 1;
+    if (sale.created_at > entry.last) entry.last = sale.created_at;
+    if (sale.payment_status === 'pending') {
+      entry.owed += Number(sale.total_amount) - Number(sale.refunded_amount);
+      entry.open += 1;
+    }
+    stats.set(sale.customer_id, entry);
   }
-  const clients = [...groups.values()].sort((a, b) => b.total - a.total);
-  const total = clients.reduce((sum, c) => sum + c.total, 0);
-  const allSales = can(session.profile, 'view_all_sales');
+
+  const query = normalize(q);
+  const digits = q.replace(/\D/g, '');
+  const rows = (customers.data ?? [])
+    .filter((c) => !q || normalize(c.name).includes(query) || (digits.length >= 3 && (c.phone ?? '').replace(/\D/g, '').includes(digits)))
+    .map((c) => ({ ...c, ...(stats.get(c.id) ?? { owed: 0, open: 0, count: 0, last: c.created_at }) }))
+    .sort((a, b) => b.owed - a.owed || a.name.localeCompare(b.name, 'fr'));
+  const totalOwed = [...stats.values()].reduce((sum, s) => sum + s.owed, 0);
+  const debtors = [...stats.values()].filter((s) => s.owed > 0).length;
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Crédits à encaisser"
-        description={allSales ? 'Ventes à crédit pas encore payées, par client.' : 'Vos ventes à crédit pas encore payées, par client.'}
+        title="Clients à crédit"
+        description={
+          can(session.profile, 'view_all_sales')
+            ? 'Un dossier par client : ce qu’il doit et toutes ses ventes à crédit.'
+            : 'Un dossier par client ; les montants portent sur vos propres ventes.'
+        }
+        actions={<CustomerFormButton />}
       />
 
       <DayLine
         label="Reste à encaisser"
-        value={money(total)}
+        value={money(totalOwed)}
         facts={[
-          { label: 'Clients', value: clients.length },
-          { label: 'Ventes à crédit', value: rows.length },
+          { label: 'Clients qui doivent', value: debtors },
+          { label: 'Dossiers', value: customers.data?.length ?? 0 },
         ]}
       />
 
-      {clients.length === 0 ? (
+      <AutoSubmitForm method="get" action="/credits" className="relative">
+        <Label htmlFor="q" className="sr-only">
+          Rechercher un client
+        </Label>
+        <Search className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden />
+        <Input
+          id="q"
+          name="q"
+          defaultValue={q}
+          placeholder="Rechercher un client (nom ou téléphone)"
+          className="h-12 rounded-full border-transparent bg-card pl-12 shadow-card"
+        />
+      </AutoSubmitForm>
+
+      {rows.length === 0 ? (
         <div className="rounded-xl bg-card shadow-card">
           <EmptyState
             icon={NotebookPen}
-            title="Aucun crédit en cours"
-            description="À la caisse, choisissez « Crédit » comme mode de paiement pour noter une vente que le client paiera plus tard."
+            title={q ? 'Aucun client trouvé' : 'Aucun dossier client'}
+            description={
+              q
+                ? 'Vérifiez le nom ou le numéro, ou ouvrez un nouveau dossier.'
+                : 'Un dossier s’ouvre à la première vente à crédit, ou avec « Nouveau dossier ».'
+            }
           />
         </div>
       ) : (
-        <ul className="grid gap-4 lg:grid-cols-2">
-          {clients.map((client) => (
-            <li key={client.name}>
-              <article className="flex h-full flex-col rounded-xl bg-card shadow-card">
-                <header className="flex items-start justify-between gap-4 border-b p-5">
-                  <div className="min-w-0">
-                    <h2 className="truncate text-lg font-bold">{client.name}</h2>
-                    {client.phone ? (
-                      <p className="mt-0.5 flex items-center gap-1.5 text-sm text-muted-foreground select-all">
-                        <Phone className="size-4" aria-hidden /> {client.phone}
-                      </p>
+        <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {rows.map((c) => (
+            <li key={c.id}>
+              <Link
+                href={`/credits/${c.id}`}
+                className="group flex h-full items-center gap-4 rounded-xl bg-card p-4 shadow-card transition-transform hover:-translate-y-0.5"
+              >
+                <span
+                  aria-hidden
+                  className={cn(
+                    'flex size-12 shrink-0 items-center justify-center rounded-full font-serif text-lg font-bold',
+                    c.owed > 0 ? 'bg-warning text-warning-foreground' : 'bg-forest-soft text-forest',
+                  )}
+                >
+                  {c.name
+                    .split(/\s+/)
+                    .filter(Boolean)
+                    .slice(0, 2)
+                    .map((w) => w.charAt(0).toUpperCase())
+                    .join('')}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-lg font-bold">{c.name}</span>
+                  <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    {c.phone ? (
+                      <>
+                        <Phone className="size-3.5" aria-hidden /> {c.phone}
+                      </>
                     ) : (
-                      <p className="mt-0.5 text-sm text-muted-foreground">Pas de téléphone noté</p>
+                      'Pas de téléphone'
                     )}
-                  </div>
-                  <div className="shrink-0 text-right">
-                    <p className="text-sm text-muted-foreground">Doit</p>
-                    <p className="text-2xl font-bold tracking-tight whitespace-nowrap tabular-nums">{money(client.total)}</p>
-                  </div>
-                </header>
-                <ul className="divide-y">
-                  {client.sales.map((sale) => (
-                    <li key={sale.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3">
-                      <div className="min-w-0 flex-1">
-                        <p className="font-semibold">
-                          <Link href={`/receipts/${sale.id}`} className="hover:underline">
-                            {sale.receipt_number}
-                          </Link>
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {formatDateTime(sale.created_at, tz)} · {sale.cashier_name}
-                        </p>
-                      </div>
-                      <p className="font-bold whitespace-nowrap tabular-nums">{money(due(sale))}</p>
-                      <SettleCreditButton
-                        saleId={sale.id}
-                        receiptNumber={sale.receipt_number}
-                        customer={client.name}
-                        amount={money(due(sale))}
-                        methods={methods.data ?? []}
-                      />
-                    </li>
-                  ))}
-                </ul>
-                {client.sales.length > 1 && (
-                  <p className="mt-auto border-t px-5 py-2.5 text-sm text-muted-foreground">
-                    <Badge variant="warning">{client.sales.length} ventes</Badge> à encaisser une par une, avec le reçu.
-                  </p>
-                )}
-              </article>
+                  </span>
+                  <span className="mt-1 block text-sm text-muted-foreground">
+                    {c.count} vente{c.count > 1 ? 's' : ''} à crédit · depuis le {formatDate(c.created_at.slice(0, 10))}
+                  </span>
+                </span>
+                <span className="shrink-0 text-right">
+                  {c.owed > 0 ? (
+                    <>
+                      <span className="block text-sm text-muted-foreground">Doit</span>
+                      <span className="block font-bold whitespace-nowrap tabular-nums">{money(c.owed)}</span>
+                    </>
+                  ) : (
+                    <Badge className="border-transparent bg-forest-soft text-forest">À jour</Badge>
+                  )}
+                </span>
+                <ChevronRight className="size-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" aria-hidden />
+              </Link>
             </li>
           ))}
         </ul>

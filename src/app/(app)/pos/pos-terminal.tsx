@@ -62,7 +62,10 @@ type Props = {
   currency: string;
   showImages: boolean;
   canDiscount: boolean;
+  customers: PosCustomer[];
 };
+
+type PosCustomer = { id: string; name: string; phone: string | null };
 
 const newKey = () => crypto.randomUUID();
 
@@ -83,7 +86,7 @@ function cashSuggestions(total: number) {
   return [...values].sort((a, b) => a - b).slice(0, 4);
 }
 
-export function PosTerminal({ products, categories, paymentMethods, currency, showImages, canDiscount }: Props) {
+export function PosTerminal({ products, categories, paymentMethods, currency, showImages, canDiscount, customers }: Props) {
   const router = useRouter();
   const [lines, setLines] = useState<CartLine[]>([]);
   const [category, setCategory] = useState<string>('all');
@@ -93,6 +96,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
   const [received, setReceived] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
+  const [customerId, setCustomerId] = useState<string | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [success, setSuccess] = useState<CreateSaleResult | null>(null);
   const [pending, startTransition] = useTransition();
@@ -123,7 +127,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
   // Toute modification du panier invalide la clé précédente.
   useEffect(() => {
     keyRef.current = newKey();
-  }, [lines, paymentMethod, discountInput, customerName, customerPhone]);
+  }, [lines, paymentMethod, discountInput, customerName, customerPhone, customerId]);
 
   // Le tiroir du panier n'existe qu'en dessous de 1024 px : on le ferme si
   // l'écran s'agrandit (rotation d'une tablette).
@@ -184,6 +188,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
     setReceived('');
     setCustomerName('');
     setCustomerPhone('');
+    setCustomerId(null);
     setPaymentMethod(paymentMethods[0]?.code ?? '');
   }
 
@@ -193,7 +198,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
       toast.error('Choisissez un mode de paiement.');
       return;
     }
-    if (paymentMethod === 'credit' && customerName.trim().length < 2) {
+    if (paymentMethod === 'credit' && !customerId && customerName.trim().length < 2) {
       toast.error('Vente à crédit : indiquez le nom du client.');
       return;
     }
@@ -212,6 +217,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
           note: undefined,
           customerName: paymentMethod === 'credit' ? customerName.trim() : undefined,
           customerPhone: paymentMethod === 'credit' ? customerPhone.trim() : undefined,
+          customerId: paymentMethod === 'credit' ? customerId : undefined,
         });
         if (!result.ok) {
           toast.error(result.error);
@@ -248,9 +254,22 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
       received={received}
       onReceivedChange={setReceived}
       customerName={customerName}
-      onCustomerNameChange={setCustomerName}
+      onCustomerNameChange={(value) => {
+        setCustomerName(value);
+        setCustomerId(null);
+      }}
       customerPhone={customerPhone}
-      onCustomerPhoneChange={setCustomerPhone}
+      onCustomerPhoneChange={(value) => {
+        setCustomerPhone(value);
+        setCustomerId(null);
+      }}
+      customers={customers}
+      customerId={customerId}
+      onPickCustomer={(customer) => {
+        setCustomerId(customer?.id ?? null);
+        setCustomerName(customer?.name ?? '');
+        setCustomerPhone(customer?.phone ?? '');
+      }}
       onQuantity={(id, q) => setLines((current) => setQuantity(current, id, q))}
       onRemove={(id) => setLines((current) => removeFromCart(current, id))}
       onClear={() => setLines([])}
@@ -544,6 +563,9 @@ function TicketPanel({
   onCustomerNameChange,
   customerPhone,
   onCustomerPhoneChange,
+  customers,
+  customerId,
+  onPickCustomer,
   onQuantity,
   onRemove,
   onClear,
@@ -567,6 +589,9 @@ function TicketPanel({
   onCustomerNameChange: (value: string) => void;
   customerPhone: string;
   onCustomerPhoneChange: (value: string) => void;
+  customers: PosCustomer[];
+  customerId: string | null;
+  onPickCustomer: (customer: PosCustomer | null) => void;
   onQuantity: (productId: string, quantity: number) => void;
   onRemove: (productId: string) => void;
   onClear: () => void;
@@ -577,7 +602,21 @@ function TicketPanel({
   const discountShown = canDiscount && (showDiscount || discountInput !== '');
   const isCash = paymentMethod === 'cash';
   const isCredit = paymentMethod === 'credit';
-  const creditReady = !isCredit || customerName.trim().length >= 2;
+  const creditReady = !isCredit || customerId !== null || customerName.trim().length >= 2;
+  const picked = customerId ? customers.find((c) => c.id === customerId) : undefined;
+  // Dossiers qui ressemblent à ce qui est tapé (nom ou chiffres du téléphone).
+  const query = normalize(customerName.trim());
+  const digits = customerPhone.replace(/\D/g, '');
+  const matches =
+    isCredit && !customerId && (query.length >= 2 || digits.length >= 3)
+      ? customers
+          .filter(
+            (c) =>
+              (query.length >= 2 && normalize(c.name).includes(query)) ||
+              (digits.length >= 3 && (c.phone ?? '').replace(/\D/g, '').includes(digits)),
+          )
+          .slice(0, 4)
+      : [];
   const receivedAmount = Number(received || 0);
   const change = receivedAmount - totals.total;
 
@@ -784,39 +823,72 @@ function TicketPanel({
         {isCredit && totals.total > 0 && (
           <div className="space-y-2 rounded-xl bg-warning p-3">
             <p className="text-sm font-semibold text-warning-foreground">Vente à crédit : le client paiera plus tard.</p>
-            <div className="grid gap-2 sm:grid-cols-[3fr_2fr]">
-              <div>
-                <Label htmlFor="credit-name" className="sr-only">
-                  Nom du client
-                </Label>
-                <Input
-                  id="credit-name"
-                  value={customerName}
-                  onChange={(e) => onCustomerNameChange(e.target.value)}
-                  placeholder="Nom du client *"
-                  autoComplete="off"
-                  maxLength={120}
-                  aria-required
-                  className="h-11 rounded-full bg-card"
-                />
+            {picked ? (
+              <div className="flex items-center justify-between gap-3 rounded-full bg-card py-1.5 pr-1.5 pl-4">
+                <p className="min-w-0 truncate">
+                  <span className="font-semibold">Dossier : {picked.name}</span>
+                  {picked.phone && <span className="text-sm text-muted-foreground"> · {picked.phone}</span>}
+                </p>
+                <Button variant="ghost" size="sm" onClick={() => onPickCustomer(null)}>
+                  Changer
+                </Button>
               </div>
-              <div>
-                <Label htmlFor="credit-phone" className="sr-only">
-                  Téléphone du client
-                </Label>
-                <Input
-                  id="credit-phone"
-                  type="tel"
-                  inputMode="tel"
-                  value={customerPhone}
-                  onChange={(e) => onCustomerPhoneChange(e.target.value)}
-                  placeholder="Téléphone"
-                  autoComplete="off"
-                  maxLength={30}
-                  className="h-11 rounded-full bg-card"
-                />
-              </div>
-            </div>
+            ) : (
+              <>
+                <div className="grid gap-2 sm:grid-cols-[3fr_2fr]">
+                  <div>
+                    <Label htmlFor="credit-name" className="sr-only">
+                      Nom du client
+                    </Label>
+                    <Input
+                      id="credit-name"
+                      value={customerName}
+                      onChange={(e) => onCustomerNameChange(e.target.value)}
+                      placeholder="Nom du client *"
+                      autoComplete="off"
+                      maxLength={120}
+                      aria-required
+                      className="h-11 rounded-full bg-card"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="credit-phone" className="sr-only">
+                      Téléphone du client
+                    </Label>
+                    <Input
+                      id="credit-phone"
+                      type="tel"
+                      inputMode="tel"
+                      value={customerPhone}
+                      onChange={(e) => onCustomerPhoneChange(e.target.value)}
+                      placeholder="Téléphone"
+                      autoComplete="off"
+                      maxLength={30}
+                      className="h-11 rounded-full bg-card"
+                    />
+                  </div>
+                </div>
+                {matches.length > 0 && (
+                  <div role="group" aria-label="Dossiers clients existants" className="flex flex-col gap-1">
+                    <p className="text-sm text-warning-foreground">Déjà client ? Touchez son dossier :</p>
+                    {matches.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => onPickCustomer(c)}
+                        className="flex min-h-11 items-center justify-between gap-3 rounded-full bg-card px-4 text-left text-[15px] hover:ring-2 hover:ring-forest/40"
+                      >
+                        <span className="truncate font-semibold">{c.name}</span>
+                        {c.phone && <span className="shrink-0 text-sm text-muted-foreground">{c.phone}</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {customerName.trim().length >= 2 && matches.length === 0 && (
+                  <p className="text-sm text-warning-foreground">Un nouveau dossier sera ouvert pour ce client.</p>
+                )}
+              </>
+            )}
           </div>
         )}
 

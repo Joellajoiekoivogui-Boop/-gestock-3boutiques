@@ -12,7 +12,7 @@ export default async function PosPage() {
   const supabase = await createClient();
   const settings = await getSettings();
 
-  const [products, categories, methods] = await Promise.all([
+  const [products, categories, methods, customers] = await Promise.all([
     supabase
       .from('products')
       .select('id, name, description, price, image_url, category_id, track_stock, stock_quantity, is_available')
@@ -21,6 +21,8 @@ export default async function PosPage() {
       .order('name'),
     supabase.from('categories').select('id, name, is_active').order('sort_order').order('name'),
     supabase.from('payment_methods').select('code, label').eq('is_active', true).order('sort_order'),
+    // Dossiers clients, pour retrouver une personne lors d'une vente à crédit.
+    supabase.from('customers').select('id, name, phone').eq('is_active', true).order('name').limit(2000),
   ]);
 
   const error = products.error ?? categories.error ?? methods.error;
@@ -47,6 +49,7 @@ export default async function PosPage() {
       currency={settings?.currency ?? 'GNF'}
       showImages={settings?.pos_show_images ?? true}
       canDiscount={can(session.profile, 'apply_discount')}
+      customers={customers.error ? [] : (customers.data ?? [])}
     />
   );
 }

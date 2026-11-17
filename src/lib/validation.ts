@@ -57,7 +57,15 @@ export const saleSchema = z.object({
   note: optionalText(500),
   customerName: optionalText(120),
   customerPhone: optionalText(30),
+  customerId: idSchema.nullish(),
 });
+
+export const customerSchema = z.object({
+  name: trimmed(2, 120, 'Le nom'),
+  phone: optionalText(30),
+  note: optionalText(500),
+});
+export type CustomerInput = z.input<typeof customerSchema>;
 export type SaleInput = z.input<typeof saleSchema>;
 
 export const settleCreditSchema = z.object({
