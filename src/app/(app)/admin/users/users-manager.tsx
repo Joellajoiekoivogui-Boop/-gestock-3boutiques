@@ -301,11 +301,11 @@ export function UsersManager({ users, currentUserId, canManageAuth }: { users: P
                     {initials}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-lg leading-snug font-bold">
-                      {u.full_name || '—'}{' '}
-                      {u.id === currentUserId && <span className="text-sm font-medium text-muted-foreground">(vous)</span>}
-                    </h3>
+                    <h3 className="truncate text-lg leading-snug font-bold">{u.full_name || '—'}</h3>
                     <p className="truncate text-sm text-muted-foreground">{u.email}</p>
+                    {u.id === currentUserId && (
+                      <Badge className="mt-1 border-transparent bg-forest-soft text-forest">Votre compte</Badge>
+                    )}
                   </div>
                   {u.is_active ? (
                     <Badge className="border-transparent bg-forest-soft text-forest">Actif</Badge>

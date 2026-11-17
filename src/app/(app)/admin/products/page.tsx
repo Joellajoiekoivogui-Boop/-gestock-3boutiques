@@ -1,6 +1,7 @@
 import { Search } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { CollapsibleFilters } from '@/components/app/collapsible-filters';
 import { PageHeader } from '@/components/app/page-header';
 import { Pagination, parsePage } from '@/components/app/pagination';
 import { Button } from '@/components/ui/button';
@@ -76,35 +77,37 @@ export default async function ProductsPage({ searchParams }: PageProps<'/admin/p
             );
           })}
         </div>
-        <form method="get" action="/admin/products" className="flex flex-wrap items-end gap-3">
-          {category && <input type="hidden" name="category" value={category} />}
-          <div className="relative min-w-0 flex-[2_1_16rem]">
-            <Label htmlFor="q" className="sr-only">
-              Recherche
-            </Label>
-            <Search className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden />
-            <Input id="q" name="q" defaultValue={q} placeholder="Rechercher un produit" className="h-12 rounded-full border-transparent bg-card pl-12 shadow-card" />
-          </div>
-          <div className="min-w-0 flex-[1_1_12rem]">
-            <Label htmlFor="status" className="sr-only">
-              Statut
-            </Label>
-            <NativeSelect id="status" name="status" defaultValue={status} className="h-12 rounded-full bg-card">
-              <option value="active">Actifs (non archivés)</option>
-              <option value="available">En caisse</option>
-              <option value="unavailable">Retirés de la caisse</option>
-              <option value="archived">Archivés</option>
-            </NativeSelect>
-          </div>
-          <div className="flex gap-2">
-            <Button type="submit" variant="dark" size="lg">
-              Filtrer
-            </Button>
-            <Button asChild variant="ghost" size="lg">
-              <Link href="/admin/products">Effacer</Link>
-            </Button>
-          </div>
-        </form>
+        <CollapsibleFilters activeCount={[q, status !== 'active' ? status : ''].filter(Boolean).length}>
+          <form method="get" action="/admin/products" className="flex flex-wrap items-end gap-3">
+            {category && <input type="hidden" name="category" value={category} />}
+            <div className="relative min-w-0 flex-[2_1_16rem]">
+              <Label htmlFor="q" className="sr-only">
+                Recherche
+              </Label>
+              <Search className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden />
+              <Input id="q" name="q" defaultValue={q} placeholder="Rechercher un produit" className="h-12 rounded-full border-transparent bg-card pl-12 shadow-card" />
+            </div>
+            <div className="min-w-0 flex-[1_1_12rem]">
+              <Label htmlFor="status" className="sr-only">
+                Statut
+              </Label>
+              <NativeSelect id="status" name="status" defaultValue={status} className="h-12 rounded-full bg-card">
+                <option value="active">Actifs (non archivés)</option>
+                <option value="available">En caisse</option>
+                <option value="unavailable">Retirés de la caisse</option>
+                <option value="archived">Archivés</option>
+              </NativeSelect>
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" variant="dark" size="lg">
+                Filtrer
+              </Button>
+              <Button asChild variant="ghost" size="lg">
+                <Link href="/admin/products">Effacer</Link>
+              </Button>
+            </div>
+          </form>
+        </CollapsibleFilters>
         <p className="text-sm text-muted-foreground">
           {products.count ?? 0} produit{(products.count ?? 0) > 1 ? 's' : ''}
         </p>

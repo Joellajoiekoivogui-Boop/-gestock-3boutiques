@@ -141,19 +141,19 @@ export function CategoriesManager({ categories }: { categories: Category[] }) {
                     </div>
                     {c.description && <p className="mt-0.5 text-sm text-muted-foreground">{c.description}</p>}
                     <p className="mt-2 text-sm text-muted-foreground tabular-nums">
-                      {c.productCount} produit{c.productCount > 1 ? 's' : ''} · position {c.sort_order}
+                      {c.productCount} produit{c.productCount > 1 ? 's' : ''} · {index === 0 ? '1re' : `${index + 1}e`} à la caisse
                     </p>
                   </div>
                   <div className="flex shrink-0 flex-col gap-1">
-                    <Button variant="ghost" size="icon-sm" onClick={() => setEditing(c)} aria-label={`Modifier ${c.name}`}>
+                    <Button variant="ghost" size="icon" className="size-11" onClick={() => setEditing(c)} aria-label={`Modifier ${c.name}`}>
                       <Pencil />
                     </Button>
                     <Button
                       variant="ghost"
-                      size="icon-sm"
+                      size="icon"
+                      className="size-11 text-destructive-strong"
                       onClick={() => setDeleting(c)}
                       aria-label={`Supprimer ${c.name}`}
-                      className="text-destructive-strong"
                     >
                       <Trash2 />
                     </Button>

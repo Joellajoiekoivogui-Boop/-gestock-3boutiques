@@ -1,6 +1,7 @@
 import { Ban, Boxes, type LucideIcon, Receipt, Settings, UserRound } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { CollapsibleFilters } from '@/components/app/collapsible-filters';
 import { EmptyState } from '@/components/app/empty-state';
 import { PageHeader } from '@/components/app/page-header';
 import { Pagination, parsePage } from '@/components/app/pagination';
@@ -191,33 +192,35 @@ export default async function AuditPage({ searchParams }: PageProps<'/admin/audi
       <PageHeader title="Journal d’activité" description="Trace inaltérable des opérations importantes : ventes, annulations, stocks, configuration, comptes." />
       <Card className="mb-4">
         <CardContent>
-          <form method="get" action="/admin/audit" className="grid gap-3 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end">
-            <div className="grid gap-1.5">
-              <Label htmlFor="entity">Type</Label>
-              <NativeSelect id="entity" name="entity" defaultValue={entity}>
-                <option value="">Tout</option>
-                {Object.entries(ENTITY_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </NativeSelect>
-            </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor="from">Du</Label>
-              <Input id="from" name="from" type="date" defaultValue={from} />
-            </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor="to">Au</Label>
-              <Input id="to" name="to" type="date" defaultValue={to} />
-            </div>
-            <div className="flex gap-2">
-              <Button type="submit">Filtrer</Button>
-              <Button asChild variant="ghost">
-                <Link href="/admin/audit">Effacer</Link>
-              </Button>
-            </div>
-          </form>
+          <CollapsibleFilters activeCount={[entity, from, to].filter(Boolean).length}>
+            <form method="get" action="/admin/audit" className="grid gap-3 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end">
+              <div className="grid gap-1.5">
+                <Label htmlFor="entity">Type</Label>
+                <NativeSelect id="entity" name="entity" defaultValue={entity}>
+                  <option value="">Tout</option>
+                  {Object.entries(ENTITY_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="from">Du</Label>
+                <Input id="from" name="from" type="date" defaultValue={from} />
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="to">Au</Label>
+                <Input id="to" name="to" type="date" defaultValue={to} />
+              </div>
+              <div className="flex gap-2">
+                <Button type="submit">Filtrer</Button>
+                <Button asChild variant="ghost">
+                  <Link href="/admin/audit">Effacer</Link>
+                </Button>
+              </div>
+            </form>
+          </CollapsibleFilters>
         </CardContent>
       </Card>
       <Card className="overflow-hidden py-0">

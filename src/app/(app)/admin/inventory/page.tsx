@@ -19,6 +19,26 @@ import { StockMovementButton } from './stock-movement-dialog';
 
 export const metadata: Metadata = { title: 'Stocks' };
 
+function StockBar({ quantity, minimum, className }: { quantity: number; minimum: number; className?: string }) {
+  return (
+    <span aria-hidden className={cn('block h-2 overflow-hidden rounded-full bg-muted', className)}>
+      <span
+        className={cn(
+          'block h-full rounded-full',
+          quantity === 0 ? 'bg-destructive' : quantity <= minimum ? 'bg-warning-foreground' : 'bg-forest',
+        )}
+        style={{ width: `${Math.min(100, (quantity / Math.max(1, minimum * 3)) * 100)}%` }}
+      />
+    </span>
+  );
+}
+
+function StockStateBadge({ quantity, minimum }: { quantity: number; minimum: number }) {
+  if (quantity === 0) return <Badge variant="destructive">Rupture</Badge>;
+  if (quantity <= minimum) return <Badge variant="warning">Stock faible</Badge>;
+  return <Badge className="border-transparent bg-forest-soft text-forest">Suffisant</Badge>;
+}
+
 const PAGE_SIZE = 25;
 
 export default async function InventoryPage({ searchParams }: PageProps<'/admin/inventory'>) {
@@ -68,11 +88,18 @@ export default async function InventoryPage({ searchParams }: PageProps<'/admin/
 
       <DayLine
         label="État du stock"
-        value={outCount > 0 ? `${outCount} en rupture` : lowCount > 0 ? `${lowCount} à commander` : 'Tout est en stock'}
+        value={
+          outCount === 1
+            ? `${tracked.find((p) => p.stock_quantity === 0)?.name} en rupture`
+            : outCount > 1
+              ? `${outCount} produits en rupture`
+              : lowCount > 0
+                ? `${lowCount} à commander`
+                : 'Tout est en stock'
+        }
         facts={[
           { label: 'Produits suivis', value: tracked.length },
-          { label: 'Stock faible', value: lowCount },
-          { label: 'En rupture', value: outCount },
+          { label: 'Stock faible (rupture comprise)', value: lowCount },
         ]}
       />
 
@@ -101,9 +128,9 @@ export default async function InventoryPage({ searchParams }: PageProps<'/admin/
                 <TableRow>
                   <TableHead>Produit</TableHead>
                   <TableHead className="text-right">Stock</TableHead>
-                  <TableHead className="text-right">Minimum</TableHead>
-                  <TableHead>État</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="hidden text-right md:table-cell">Minimum</TableHead>
+                  <TableHead className="hidden md:table-cell">État</TableHead>
+                  <TableHead className="hidden text-right md:table-cell">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -113,32 +140,28 @@ export default async function InventoryPage({ searchParams }: PageProps<'/admin/
                       <Link href={`/admin/inventory?product=${p.id}`} className="hover:underline">
                         {p.name}
                       </Link>
+                      {/* Téléphone : seuil, état et actions sous le nom. */}
+                      <StockBar quantity={p.stock_quantity} minimum={p.minimum_stock} className="mt-2 w-full md:hidden" />
+                      <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm font-normal text-muted-foreground md:hidden">
+                        <span>Seuil {p.minimum_stock}</span>
+                        <StockStateBadge quantity={p.stock_quantity} minimum={p.minimum_stock} />
+                      </div>
+                      <div className="mt-2 flex gap-2 md:hidden [&>*]:flex-1">
+                        <StockMovementButton product={p} type="restock" />
+                        <StockMovementButton product={p} type="adjustment" />
+                      </div>
                     </TableCell>
-                    <TableCell className="text-right font-semibold tabular-nums">
+                    <TableCell className="text-right align-top font-semibold tabular-nums md:align-middle">
                       <span className="inline-flex items-center gap-3">
-                        <span aria-hidden className="hidden h-2 w-20 overflow-hidden rounded-full bg-muted sm:block">
-                          <span
-                            className={cn(
-                              'block h-full rounded-full',
-                              p.stock_quantity === 0 ? 'bg-destructive' : p.stock_quantity <= p.minimum_stock ? 'bg-gold' : 'bg-forest',
-                            )}
-                            style={{ width: `${Math.min(100, (p.stock_quantity / Math.max(1, p.minimum_stock * 3)) * 100)}%` }}
-                          />
-                        </span>
+                        <StockBar quantity={p.stock_quantity} minimum={p.minimum_stock} className="hidden w-20 md:block" />
                         {p.stock_quantity}
                       </span>
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">{p.minimum_stock}</TableCell>
-                    <TableCell>
-                      {p.stock_quantity === 0 ? (
-                        <Badge variant="destructive">Rupture</Badge>
-                      ) : p.stock_quantity <= p.minimum_stock ? (
-                        <Badge variant="warning">Stock faible</Badge>
-                      ) : (
-                        <Badge className="border-transparent bg-forest-soft text-forest">Suffisant</Badge>
-                      )}
+                    <TableCell className="hidden text-right tabular-nums md:table-cell">{p.minimum_stock}</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <StockStateBadge quantity={p.stock_quantity} minimum={p.minimum_stock} />
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="hidden text-right md:table-cell">
                       <div className="flex justify-end gap-2">
                         <StockMovementButton product={p} type="restock" />
                         <StockMovementButton product={p} type="adjustment" />
@@ -186,27 +209,33 @@ export default async function InventoryPage({ searchParams }: PageProps<'/admin/
                 <TableRow>
                   <TableHead>Date</TableHead>
                   <TableHead>Produit</TableHead>
-                  <TableHead>Type</TableHead>
+                  <TableHead className="hidden md:table-cell">Type</TableHead>
                   <TableHead className="text-right">Quantité</TableHead>
-                  <TableHead className="text-right">Stock après</TableHead>
-                  <TableHead>Motif</TableHead>
-                  <TableHead>Par</TableHead>
+                  <TableHead className="hidden text-right md:table-cell">Stock après</TableHead>
+                  <TableHead className="hidden lg:table-cell">Motif</TableHead>
+                  <TableHead className="hidden lg:table-cell">Par</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {(movements.data ?? []).map((m) => (
                   <TableRow key={m.id}>
-                    <TableCell className="whitespace-nowrap">{formatDateTime(m.created_at, tz)}</TableCell>
-                    <TableCell>{(m.products as { name: string } | null)?.name ?? '—'}</TableCell>
-                    <TableCell className="whitespace-nowrap">{MOVEMENT_TYPE_LABELS[m.movement_type]}</TableCell>
+                    <TableCell className="text-sm whitespace-nowrap">{formatDateTime(m.created_at, tz)}</TableCell>
+                    <TableCell>
+                      {(m.products as { name: string } | null)?.name ?? '—'}
+                      <span className="block text-sm text-muted-foreground lg:hidden">
+                        {MOVEMENT_TYPE_LABELS[m.movement_type]}
+                        {m.reason ? ` · ${m.reason}` : ''}
+                      </span>
+                    </TableCell>
+                    <TableCell className="hidden whitespace-nowrap md:table-cell">{MOVEMENT_TYPE_LABELS[m.movement_type]}</TableCell>
                     <TableCell
                       className={`text-right font-medium tabular-nums ${m.quantity > 0 ? 'text-accent-foreground' : 'text-destructive'}`}
                     >
                       {m.quantity > 0 ? `+${m.quantity}` : m.quantity}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">{m.stock_after}</TableCell>
-                    <TableCell className="max-w-xs truncate">{m.reason ?? '—'}</TableCell>
-                    <TableCell className="whitespace-nowrap">{(m.profiles as { full_name: string } | null)?.full_name || '—'}</TableCell>
+                    <TableCell className="hidden text-right tabular-nums md:table-cell">{m.stock_after}</TableCell>
+                    <TableCell className="hidden max-w-xs truncate lg:table-cell">{m.reason ?? '—'}</TableCell>
+                    <TableCell className="hidden whitespace-nowrap lg:table-cell">{(m.profiles as { full_name: string } | null)?.full_name || '—'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

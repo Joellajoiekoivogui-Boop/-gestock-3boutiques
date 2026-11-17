@@ -200,7 +200,7 @@ export function AppShell({ profile, brand, children }: ShellProps) {
                   className={cn(
                     'inline-flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors',
                     active
-                      ? 'border-forest bg-forest-soft text-forest'
+                      ? 'border-forest bg-forest text-forest-foreground'
                       : 'border-transparent text-muted-foreground hover:border-border hover:text-foreground',
                   )}
                 >

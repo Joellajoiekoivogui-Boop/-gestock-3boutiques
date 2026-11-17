@@ -98,24 +98,25 @@ export function ProductsTable({
                   <div className="absolute top-4 left-4 flex flex-wrap gap-1">
                     {p.is_archived ? (
                       <Badge className="border-transparent bg-foreground/80 text-background">Archivé</Badge>
-                    ) : p.is_available ? (
-                      <Badge className="border-transparent bg-forest text-forest-foreground">En caisse</Badge>
-                    ) : (
+                    ) : !p.is_available ? (
                       <Badge className="border-transparent bg-card text-foreground shadow-sm">Retiré de la caisse</Badge>
+                    ) : null}
+                    {stockEnabled && p.track_stock && p.stock_quantity === 0 && !p.is_archived && (
+                      <Badge className="border-transparent bg-destructive-strong text-destructive-foreground">Rupture</Badge>
                     )}
-                    {low && !p.is_archived && <Badge variant="warning">Stock faible</Badge>}
+                    {low && p.stock_quantity > 0 && !p.is_archived && <Badge variant="warning">Stock faible</Badge>}
                   </div>
                 </div>
                 <div className="flex flex-1 flex-col gap-1 p-4 pt-3">
-                  <p className="text-sm text-muted-foreground">
-                    {p.category_id ? categoryName.get(p.category_id) : 'Sans catégorie'}
-                  </p>
                   <h3 className="text-lg leading-snug font-bold">{p.name}</h3>
                   {p.description && <p className="line-clamp-2 text-sm text-muted-foreground">{p.description}</p>}
                   <div className="mt-auto flex items-end justify-between gap-3 pt-3">
                     <p className="text-xl font-bold tracking-tight whitespace-nowrap tabular-nums">{formatMoney(p.price, currency)}</p>
-                    <p className={cn('text-sm tabular-nums', low ? 'font-semibold text-warning-foreground' : 'text-muted-foreground')}>
-                      {p.track_stock ? `Stock : ${p.stock_quantity}` : 'Stock non suivi'}
+                    <p className="text-right text-sm text-muted-foreground tabular-nums">
+                      {p.category_id ? categoryName.get(p.category_id) : 'Sans catégorie'}
+                      {p.track_stock && (
+                        <span className={cn('block', low && 'font-semibold text-warning-foreground')}>Stock : {p.stock_quantity}</span>
+                      )}
                     </p>
                   </div>
                 </div>
