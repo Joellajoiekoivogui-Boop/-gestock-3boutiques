@@ -37,7 +37,7 @@ export default async function MySalesPage({ searchParams }: PageProps<'/pos/sale
     // Ma journée : mes ventes d'aujourd'hui (hors ventes annulées), nettes des remboursements.
     supabase
       .from('sales')
-      .select('total_amount, refunded_amount, payment_method, sale_status')
+      .select('total_amount, refunded_amount, payment_method, payment_status, sale_status')
       .eq('cashier_id', session.userId)
       .gte('created_at', todayRange.start)
       .lt('created_at', todayRange.end)
@@ -49,11 +49,15 @@ export default async function MySalesPage({ searchParams }: PageProps<'/pos/sale
     (acc, sale) => {
       const net = Number(sale.total_amount) - Number(sale.refunded_amount);
       acc.count += 1;
+      if (sale.payment_status === 'pending') {
+        acc.credit += net;
+        return acc;
+      }
       acc.total += net;
       if (sale.payment_method === 'cash') acc.cash += net;
       return acc;
     },
-    { count: 0, total: 0, cash: 0 },
+    { count: 0, total: 0, cash: 0, credit: 0 },
   );
 
   return (
@@ -75,11 +79,14 @@ export default async function MySalesPage({ searchParams }: PageProps<'/pos/sale
           value={formatMoney(day.total, currency)}
           facts={[
             { label: 'Ventes', value: day.count },
-            { label: 'Panier moyen', value: day.count > 0 ? formatMoney(Math.round(day.total / day.count), currency) : '—' },
+            { label: 'Panier moyen', value: day.count > 0 ? formatMoney(Math.round((day.total + day.credit) / day.count), currency) : '—' },
             { label: 'Dont espèces', value: formatMoney(day.cash, currency) },
+            ...(day.credit > 0 ? [{ label: 'À crédit (non payé)', value: formatMoney(day.credit, currency) }] : []),
           ]}
         />
-        <p className="mt-2 text-sm text-muted-foreground">Hors ventes annulées, remboursements déduits.</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Hors ventes annulées et ventes à crédit non payées, remboursements déduits.
+        </p>
       </section>
       <Card className="mb-4">
         <CardContent>

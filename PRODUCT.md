@@ -39,6 +39,7 @@ Une caisse faite pour un restaurant guinéen : montants en francs guinéens sans
 - Les droits sont vérifiés côté page, côté action serveur et en base ; masquer un bouton n'est jamais la seule protection.
 - Une démonstration statique (`public/demo.html`) remplace l'application tant que la base n'est pas branchée.
 - **Décision ouverte** : prise de commande par les serveurs aux tables (tables, envoi en cuisine ou à la caisse). Non construite.
+- Ventes à crédit : mode de paiement « Crédit » avec nom (obligatoire) et téléphone du client ; la vente reste « à payer » jusqu'à son encaissement depuis la page « Crédits à encaisser ». MTN Mobile Money et Virement bancaire sont désactivés (ils restent dans l'historique).
 - **Décision ouverte** : clôture de caisse de fin de journée (fond de caisse, écart). Non construite.
 
 ## Brand Commitments

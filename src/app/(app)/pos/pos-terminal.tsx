@@ -8,6 +8,7 @@ import {
   Landmark,
   Loader2,
   Minus,
+  NotebookPen,
   PackageX,
   Plus,
   Printer,
@@ -90,6 +91,8 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
   const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0]?.code ?? '');
   const [discountInput, setDiscountInput] = useState('');
   const [received, setReceived] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
   const [cartOpen, setCartOpen] = useState(false);
   const [success, setSuccess] = useState<CreateSaleResult | null>(null);
   const [pending, startTransition] = useTransition();
@@ -120,7 +123,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
   // Toute modification du panier invalide la clé précédente.
   useEffect(() => {
     keyRef.current = newKey();
-  }, [lines, paymentMethod, discountInput]);
+  }, [lines, paymentMethod, discountInput, customerName, customerPhone]);
 
   // Le tiroir du panier n'existe qu'en dessous de 1024 px : on le ferme si
   // l'écran s'agrandit (rotation d'une tablette).
@@ -179,6 +182,8 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
     setLines([]);
     setDiscountInput('');
     setReceived('');
+    setCustomerName('');
+    setCustomerPhone('');
     setPaymentMethod(paymentMethods[0]?.code ?? '');
   }
 
@@ -186,6 +191,10 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
     if (pending || !lines.length) return;
     if (!paymentMethod) {
       toast.error('Choisissez un mode de paiement.');
+      return;
+    }
+    if (paymentMethod === 'credit' && customerName.trim().length < 2) {
+      toast.error('Vente à crédit : indiquez le nom du client.');
       return;
     }
     if (discountInvalid) {
@@ -201,6 +210,8 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
           discount: totals.discount,
           idempotencyKey,
           note: undefined,
+          customerName: paymentMethod === 'credit' ? customerName.trim() : undefined,
+          customerPhone: paymentMethod === 'credit' ? customerPhone.trim() : undefined,
         });
         if (!result.ok) {
           toast.error(result.error);
@@ -236,6 +247,10 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
       }}
       received={received}
       onReceivedChange={setReceived}
+      customerName={customerName}
+      onCustomerNameChange={setCustomerName}
+      customerPhone={customerPhone}
+      onCustomerPhoneChange={setCustomerPhone}
       onQuantity={(id, q) => setLines((current) => setQuantity(current, id, q))}
       onRemove={(id) => setLines((current) => removeFromCart(current, id))}
       onClear={() => setLines([])}
@@ -505,6 +520,7 @@ function CategoryButton({
 function PaymentIcon({ code }: { code: string }) {
   const className = 'size-5 shrink-0';
   if (code === 'cash') return <Banknote className={className} aria-hidden />;
+  if (code === 'credit') return <NotebookPen className={className} aria-hidden />;
   if (code === 'bank_transfer') return <Landmark className={className} aria-hidden />;
   if (/money|momo|mobile/.test(code)) return <Smartphone className={className} aria-hidden />;
   return <Wallet className={className} aria-hidden />;
@@ -524,6 +540,10 @@ function TicketPanel({
   onPaymentMethodChange,
   received,
   onReceivedChange,
+  customerName,
+  onCustomerNameChange,
+  customerPhone,
+  onCustomerPhoneChange,
   onQuantity,
   onRemove,
   onClear,
@@ -543,6 +563,10 @@ function TicketPanel({
   onPaymentMethodChange: (code: string) => void;
   received: string;
   onReceivedChange: (value: string) => void;
+  customerName: string;
+  onCustomerNameChange: (value: string) => void;
+  customerPhone: string;
+  onCustomerPhoneChange: (value: string) => void;
   onQuantity: (productId: string, quantity: number) => void;
   onRemove: (productId: string) => void;
   onClear: () => void;
@@ -552,6 +576,8 @@ function TicketPanel({
   const [showDiscount, setShowDiscount] = useState(false);
   const discountShown = canDiscount && (showDiscount || discountInput !== '');
   const isCash = paymentMethod === 'cash';
+  const isCredit = paymentMethod === 'credit';
+  const creditReady = !isCredit || customerName.trim().length >= 2;
   const receivedAmount = Number(received || 0);
   const change = receivedAmount - totals.total;
 
@@ -755,15 +781,54 @@ function TicketPanel({
           </div>
         )}
 
+        {isCredit && totals.total > 0 && (
+          <div className="space-y-2 rounded-xl bg-warning p-3">
+            <p className="text-sm font-semibold text-warning-foreground">Vente à crédit : le client paiera plus tard.</p>
+            <div className="grid gap-2 sm:grid-cols-[3fr_2fr]">
+              <div>
+                <Label htmlFor="credit-name" className="sr-only">
+                  Nom du client
+                </Label>
+                <Input
+                  id="credit-name"
+                  value={customerName}
+                  onChange={(e) => onCustomerNameChange(e.target.value)}
+                  placeholder="Nom du client *"
+                  autoComplete="off"
+                  maxLength={120}
+                  aria-required
+                  className="h-11 rounded-full bg-card"
+                />
+              </div>
+              <div>
+                <Label htmlFor="credit-phone" className="sr-only">
+                  Téléphone du client
+                </Label>
+                <Input
+                  id="credit-phone"
+                  type="tel"
+                  inputMode="tel"
+                  value={customerPhone}
+                  onChange={(e) => onCustomerPhoneChange(e.target.value)}
+                  placeholder="Téléphone"
+                  autoComplete="off"
+                  maxLength={30}
+                  className="h-11 rounded-full bg-card"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
         <Button
           size="xl"
           className="h-16 w-full justify-between px-5 text-xl"
           onClick={onCheckout}
-          disabled={!lines.length || pending || !paymentMethod}
+          disabled={!lines.length || pending || !paymentMethod || !creditReady}
         >
           <span className="flex items-center gap-2">
             {pending ? <Loader2 className="size-6 animate-spin" aria-hidden /> : <CheckCircle2 className="size-6" aria-hidden />}
-            {pending ? 'Enregistrement…' : 'Encaisser'}
+            {pending ? 'Enregistrement…' : isCredit ? 'Mettre à crédit' : 'Encaisser'}
           </span>
           {!pending && lines.length > 0 && <span className="text-xl font-bold tracking-tight">{money(totals.total)}</span>}
         </Button>

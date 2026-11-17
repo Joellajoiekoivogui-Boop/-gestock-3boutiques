@@ -271,6 +271,29 @@ try {
     await shot('18-parametres');
   });
 
+  await step('crédit : vente à crédit au nom du client, puis encaissement', async () => {
+    await page.goto(`${BASE}/pos`);
+    await page.getByRole('button', { name: /Ajouter Riz au poulet/ }).click();
+    const cart = page.getByRole('complementary', { name: 'Panier' });
+    await cart.getByRole('button', { name: 'Crédit' }).click();
+    const save = cart.getByRole('button', { name: /Mettre à crédit/ });
+    assert.equal(await save.isDisabled(), true, 'le nom du client doit être obligatoire');
+    await cart.getByLabel('Nom du client').fill('Mamadou Bah');
+    await cart.getByLabel('Téléphone du client').fill('+224 622 00 00 00');
+    await save.click();
+    await page.getByRole('dialog', { name: 'Vente enregistrée' }).waitFor();
+    await page.keyboard.press('Escape');
+    await page.goto(`${BASE}/credits`);
+    await page.getByRole('heading', { name: 'Mamadou Bah' }).waitFor();
+    await page.getByText('+224 622 00 00 00').waitFor();
+    await shot('19-credits');
+    await page.getByRole('button', { name: 'Encaisser' }).first().click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Espèces' }).click();
+    await page.getByRole('button', { name: 'Confirmer le paiement' }).click();
+    await toast('Crédit de Mamadou Bah encaissé.').waitFor();
+    await page.getByText('Aucun crédit en cours').waitFor();
+  });
+
   assert.deepEqual(consoleErrors, [], `Erreurs JavaScript : ${consoleErrors.join(' | ')}`);
   console.log(`\n✔ ${steps.length} étapes réussies. Captures : ${SHOTS}`);
 } catch (error) {

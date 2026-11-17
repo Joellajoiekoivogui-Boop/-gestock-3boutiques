@@ -101,6 +101,13 @@ export type SaleRow = {
   cancelled_by: string | null;
   cancel_reason: string | null;
   created_at: string;
+  // Ventes à crédit : client, puis règlement.
+  customer_name: string | null;
+  customer_phone: string | null;
+  paid_at: string | null;
+  settled_by: string | null;
+  settled_payment_method: string | null;
+  settled_payment_label: string | null;
 };
 
 export type SaleItemRow = {
@@ -268,9 +275,12 @@ export type Database = {
           p_idempotency_key: string;
           p_discount_amount?: number;
           p_note?: string | null;
+          p_customer_name?: string | null;
+          p_customer_phone?: string | null;
         };
         Returns: Json;
       };
+      settle_credit: { Args: { p_sale_id: string; p_payment_method: string }; Returns: Json };
       cancel_sale: { Args: { p_sale_id: string; p_reason: string }; Returns: undefined };
       refund_sale: { Args: { p_sale_id: string; p_amount: number; p_reason: string }; Returns: Json };
       record_stock_movement: {

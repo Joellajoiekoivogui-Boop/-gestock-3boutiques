@@ -38,6 +38,7 @@ const ACTION_LABELS: Record<string, string> = {
   'sale.created': 'Vente enregistrée',
   'sale.cancelled': 'Vente annulée',
   'sale.refunded': 'Remboursement',
+  'sale.credit_settled': 'Crédit encaissé',
   'stock.restock': 'Approvisionnement',
   'stock.adjustment': 'Ajustement de stock',
   'user.created': 'Compte créé',
@@ -57,6 +58,7 @@ const PAYMENT_LABELS: Record<string, string> = {
   mtn_momo: 'MTN Mobile Money',
   bank_transfer: 'Virement bancaire',
   other: 'Autre',
+  credit: 'Crédit',
 };
 
 const FIELD_LABELS: Record<string, string> = {
@@ -100,10 +102,11 @@ function plain(value: Json | undefined): string {
 function summarize(action: string, details: Json): string {
   if (!details || typeof details !== 'object' || Array.isArray(details)) return '';
   const d = details as Record<string, Json | undefined>;
-  if (action === 'sale.created' || action === 'sale.cancelled') {
+  if (action === 'sale.created' || action === 'sale.cancelled' || action === 'sale.credit_settled') {
     const parts = [String(d.receipt_number ?? ''), money(d.total_amount)];
     if (d.payment_method) parts.push(PAYMENT_LABELS[String(d.payment_method)] ?? String(d.payment_method));
     if (Number(d.discount_amount ?? 0) > 0) parts.push(`remise ${money(d.discount_amount)}`);
+    if (d.customer_name) parts.push(`client : ${String(d.customer_name)}`);
     if (d.reason) parts.push(`motif : ${String(d.reason)}`);
     return parts.filter(Boolean).join(' · ');
   }

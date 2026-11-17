@@ -141,7 +141,11 @@ p { margin: 0; }
 .total { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .total span { font: 700 24px var(--serif); }
 .total b { font-size: 34px; line-height: 1; letter-spacing: -0.02em; }
-.pay { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.pay { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.credit { background: var(--warn); border-radius: 14px; padding: 10px; display: grid; gap: 8px; }
+.credit p { color: var(--warn-ink); font-size: 14px; font-weight: 600; }
+.credit .fields { display: grid; grid-template-columns: 3fr 2fr; gap: 8px; }
+.credit input { height: 44px; border: 1px solid var(--input); border-radius: 999px; background: var(--card); padding: 0 16px; min-width: 0; }
 .pay button { min-height: 52px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px; font-size: 14px; font-weight: 600; line-height: 1.15; text-align: center; }
 .pay button:hover { border-color: rgb(15 61 44 / 0.5); }
 .pay button[aria-pressed="true"] { background: var(--forest); border-color: var(--forest); color: #fff; }
@@ -267,7 +271,7 @@ const PRODUCTS = [
   ['Crêpe au chocolat', 'de', 25000, null, '', 'cake'], ['Salade de fruits', 'de', 20000, null, 'Fruits frais de saison', 'cake'],
   ['Croissant', 'pd', 8000, 0, '', 'croissant'], ['Omelette complète', 'pd', 30000, null, 'Œufs, pain, café ou thé', 'croissant'],
 ].map(([name, cat, price, stock, desc, icon], i) => ({ id: 'p' + i, name, cat, price, stock, desc, icon }));
-const PAYMENTS = [['cash', 'Espèces'], ['om', 'Orange Money'], ['mtn', 'MTN Mobile Money'], ['bank', 'Virement bancaire'], ['other', 'Autre']];
+const PAYMENTS = [['cash', 'Espèces'], ['om', 'Orange Money'], ['credit', 'Crédit'], ['other', 'Autre']];
 const ICONS = {
   grid: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
   pot: '<path d="M2 12h20"/><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="m4 8 16-4"/><path d="m8.86 6.78-.45-1.81a2 2 0 0 1 1.45-2.43l1.94-.48a2 2 0 0 1 2.43 1.46l.45 1.8"/>',
@@ -291,13 +295,14 @@ const ICONS = {
   receipt: '<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M13 16H8"/>',
   printer: '<path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/>',
   cart: '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>',
+  note: '<path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/>',
   bag: '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
   board: '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
 };
 const icon = (name) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`;
-const PAY_ICON = { cash: 'cash', om: 'phone', mtn: 'phone', bank: 'bank', other: 'wallet' };
+const PAY_ICON = { cash: 'cash', om: 'phone', credit: 'note', other: 'wallet' };
 
-const state = { view: 'caisse', cat: 'all', search: '', cart: [], pay: 'cash', received: '', cartOpen: false, sales: [], nextNo: 22 };
+const state = { view: 'caisse', cat: 'all', search: '', cart: [], pay: 'cash', received: '', customer: '', phone: '', cartOpen: false, sales: [], nextNo: 22 };
 
 const fmt = (v) => new Intl.NumberFormat('fr-FR').format(v).replace(/ /g, ' ');
 const money = (v) => fmt(v) + ' GNF';
@@ -341,7 +346,8 @@ function checkout() {
   const lines = state.cart.map((l) => ({ ...l }));
   lines.forEach((l) => { const p = prod(l.id); if (p.stock !== null) p.stock -= l.q; });
   const sale = recordSale(lines, state.pay, state.nextNo++);
-  state.cart = []; state.cartOpen = false; state.pay = 'cash'; state.received = '';
+  if (state.pay === 'credit') { sale.customer = state.customer.trim(); sale.phone = state.phone.trim(); }
+  state.cart = []; state.cartOpen = false; state.pay = 'cash'; state.received = ''; state.customer = ''; state.phone = '';
   render(); showReceipt(sale);
 }
 
@@ -353,7 +359,7 @@ function showReceipt(sale) {
     <div class="receipt">
       <b style="display:block;text-align:center">MASSAGUI FILS SARL.U</b><hr>
       ${sale.lines.map((l) => `<div>${esc(prod(l.id).name)}</div><div class="row"><span>${l.q} x ${fmt(prod(l.id).price)}</span><span>${fmt(prod(l.id).price * l.q)}</span></div>`).join('')}
-      <hr><div class="row"><b>TOTAL</b><b>${money(sale.total)}</b></div><div class="row"><span>Paiement</span><span>${esc(payLabel(sale.pay))}</span></div>
+      <hr><div class="row"><b>TOTAL</b><b>${money(sale.total)}</b></div><div class="row"><span>Paiement</span><span>${esc(payLabel(sale.pay))}</span></div>${sale.customer ? `<div class="row"><span>Client</span><span>${esc(sale.customer)}</span></div><div class="row"><b>Statut</b><b>À PAYER (CRÉDIT)</b></div>` : ''}
     </div>
     <div class="dactions">
       <button type="button" class="btn green" data-close>${icon('printer')} Imprimer le reçu</button>
@@ -412,7 +418,10 @@ function viewCaisse() {
         <div class="total"><span>Total</span><b>${money(total)}</b></div>
         <fieldset style="border:0;margin:0;padding:0"><legend class="sr-only">Mode de paiement</legend><div class="pay">${PAYMENTS.map(([code, label]) => `<button type="button" data-pay="${code}" aria-pressed="${state.pay === code}">${icon(state.pay === code ? 'check' : PAY_ICON[code])}<span>${label}</span></button>`).join('')}</div></fieldset>
         ${cash}
-        <button type="button" class="btn green go" data-checkout ${state.cart.length ? '' : 'disabled'}><span style="display:flex;align-items:center;gap:8px">${icon('ok')} Encaisser</span>${state.cart.length ? `<b>${money(total)}</b>` : ''}</button>
+        ${state.pay === 'credit' && total > 0 ? `<div class="credit"><p>Vente à crédit : le client paiera plus tard.</p><div class="fields">
+          <input id="cust" type="text" placeholder="Nom du client *" aria-label="Nom du client" value="${esc(state.customer)}" autocomplete="off">
+          <input id="phone" type="tel" placeholder="Téléphone" aria-label="Téléphone du client" value="${esc(state.phone)}" autocomplete="off"></div></div>` : ''}
+        <button type="button" class="btn green go" data-checkout ${state.cart.length && (state.pay !== 'credit' || state.customer.trim().length >= 2) ? '' : 'disabled'}><span style="display:flex;align-items:center;gap:8px">${icon('ok')} ${state.pay === 'credit' ? 'Mettre à crédit' : 'Encaisser'}</span>${state.cart.length ? `<b>${money(total)}</b>` : ''}</button>
       </div>
     </aside>
     <div class="cartbar"><button type="button" class="btn green" data-cart-toggle><span style="display:flex;align-items:center;gap:8px">${icon('cart')} Panier (${cartCount()})</span><b>${money(total)}</b></button></div>
@@ -422,7 +431,7 @@ function viewCaisse() {
 function salesTable(limit) {
   const rows = state.sales.slice(0, limit).map((s) => `<tr><td><b style="font-weight:600">${s.no}</b><span class="sub">Aujourd’hui ${s.time} · ${esc(payLabel(s.pay))}</span></td>
     <td class="hide-sm">Aujourd’hui ${s.time}</td><td class="num hide-sm">${s.lines.reduce((n, l) => n + l.q, 0)}</td>
-    <td class="num"><b style="font-weight:600">${money(s.total)}</b></td><td class="hide-sm">${esc(payLabel(s.pay))}</td><td><span class="badge">Payée</span></td></tr>`).join('');
+    <td class="num"><b style="font-weight:600">${money(s.total)}</b></td><td class="hide-sm">${esc(payLabel(s.pay))}</td><td>${s.pay === 'credit' ? '<span class="badge" style="background:var(--warn);color:var(--warn-ink)">À crédit</span>' : '<span class="badge">Payée</span>'}</td></tr>`).join('');
   return `<div class="panel"><div class="twrap"><table><thead><tr><th>Reçu</th><th class="hide-sm">Date</th><th class="num hide-sm">Articles</th><th class="num">Montant</th><th class="hide-sm">Paiement</th><th>Statut</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
 }
 const sum = (rows) => rows.reduce((s, r) => s + r.total, 0);
@@ -431,10 +440,11 @@ function banner(label, value, facts) {
     <dl>${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl></div>`;
 }
 function viewVentes() {
-  const total = sum(state.sales), cash = sum(state.sales.filter((s) => s.pay === 'cash')), n = state.sales.length;
+  const paid = state.sales.filter((s) => s.pay !== 'credit');
+  const total = sum(paid), cash = sum(state.sales.filter((s) => s.pay === 'cash')), credit = sum(state.sales.filter((s) => s.pay === 'credit')), n = state.sales.length;
   return `<div class="page">
     <div class="phead"><div><h1>Mes ventes</h1><p>Vos ventes et leurs reçus, à réimprimer si besoin.</p></div><button type="button" class="btn green" data-go="caisse">${icon('plus')} Nouvelle vente</button></div>
-    ${banner('Encaissé aujourd’hui', money(total), [['Ventes', n], ['Panier moyen', money(Math.round(total / n))], ['Dont espèces', money(cash)]])}
+    ${banner('Encaissé aujourd’hui', money(total), [['Ventes', n], ['Panier moyen', money(Math.round((total + credit) / n))], ['Dont espèces', money(cash)], ...(credit ? [['À crédit (non payé)', money(credit)]] : [])])}
     ${salesTable(50)}</div>`;
 }
 function barList(items, fmtValue) {
@@ -500,7 +510,14 @@ document.addEventListener('click', (e) => {
   else if ('checkout' in d) checkout();
   else if ('close' in d) document.getElementById('modal').innerHTML = '';
 });
-document.addEventListener('input', (e) => { if (e.target.id === 'search') { state.search = e.target.value; render(); } });
+document.addEventListener('input', (e) => {
+  if (e.target.id === 'search') { state.search = e.target.value; render(); }
+  else if (e.target.id === 'cust' || e.target.id === 'phone') {
+    state[e.target.id === 'cust' ? 'customer' : 'phone'] = e.target.value;
+    const go = document.querySelector('[data-checkout]');
+    if (go) go.disabled = !(state.cart.length && state.customer.trim().length >= 2);
+  }
+});
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   if (document.getElementById('modal').innerHTML) document.getElementById('modal').innerHTML = '';
@@ -514,7 +531,8 @@ document.body.dataset.today = today.charAt(0).toUpperCase() + today.slice(1);
 [[['p2', 2], ['p13', 1]], [['p8', 2], ['p6', 2]], [['p17', 3], ['p9', 3]], [['p3', 1], ['p11', 2]], [['p5', 1], ['p14', 2]]]
   .forEach((items, i) => {
     const at = new Date(Date.now() - (5 - i) * 41 * 60000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    recordSale(items.map(([id, q]) => ({ id, q })), ['cash', 'om', 'cash', 'mtn', 'cash'][i], 17 + i, at);
+    const sale = recordSale(items.map(([id, q]) => ({ id, q })), ['cash', 'om', 'cash', 'credit', 'cash'][i], 17 + i, at);
+    if (sale.pay === 'credit') { sale.customer = 'Mamadou Bah (exemple)'; sale.phone = '+224 6XX XX XX XX'; }
   });
 render();
 </script>

@@ -120,8 +120,30 @@ export function ReceiptView({ data, format }: { data: ReceiptData; format: Recei
       <dl className="grid grid-cols-[auto_1fr] gap-x-2">
         <dt>Mode de paiement :</dt>
         <dd className="text-right">{sale.payment_method_label}</dd>
+        {sale.customer_name && (
+          <>
+            <dt>Client :</dt>
+            <dd className="text-right">{sale.customer_name}</dd>
+          </>
+        )}
+        {sale.customer_phone && (
+          <>
+            <dt>Téléphone :</dt>
+            <dd className="text-right">{sale.customer_phone}</dd>
+          </>
+        )}
+        {sale.settled_payment_label && (
+          <>
+            <dt>Réglé en :</dt>
+            <dd className="text-right">{sale.settled_payment_label}</dd>
+          </>
+        )}
         <dt>Statut :</dt>
-        <dd className="text-right font-bold">{RECEIPT_STATUS_LABELS[sale.sale_status]}</dd>
+        <dd className="text-right font-bold">
+          {sale.payment_status === 'pending' && sale.sale_status !== 'cancelled'
+            ? 'À PAYER (CRÉDIT)'
+            : RECEIPT_STATUS_LABELS[sale.sale_status]}
+        </dd>
       </dl>
       {cancelled && sale.cancel_reason && <p className="mt-1">Motif d’annulation : {sale.cancel_reason}</p>}
 

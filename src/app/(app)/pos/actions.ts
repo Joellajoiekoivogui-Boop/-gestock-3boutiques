@@ -16,7 +16,10 @@ export async function createSaleAction(input: SaleInput): Promise<ActionResult<C
 
   const parsed = saleSchema.safeParse(input);
   if (!parsed.success) return fail('Le panier contient des données invalides.', fieldErrorsOf(parsed.error));
-  const { items, paymentMethod, discount, idempotencyKey, note } = parsed.data;
+  const { items, paymentMethod, discount, idempotencyKey, note, customerName, customerPhone } = parsed.data;
+  if (paymentMethod === 'credit' && (!customerName || customerName.length < 2)) {
+    return fail('Vente à crédit : indiquez le nom du client.');
+  }
 
   const supabase = await createClient();
   const { data, error } = await supabase.rpc('create_sale', {
@@ -25,6 +28,9 @@ export async function createSaleAction(input: SaleInput): Promise<ActionResult<C
     p_idempotency_key: idempotencyKey,
     p_discount_amount: discount,
     p_note: note,
+    // Paramètres envoyés seulement pour une vente à crédit : une base qui n'a
+    // pas encore la migration des crédits continue d'accepter les autres ventes.
+    ...(paymentMethod === 'credit' ? { p_customer_name: customerName, p_customer_phone: customerPhone } : {}),
   });
 
   if (error || !data) {
@@ -32,6 +38,7 @@ export async function createSaleAction(input: SaleInput): Promise<ActionResult<C
   }
 
   revalidatePath('/pos');
+  revalidatePath('/credits');
   revalidatePath('/admin/dashboard');
   return { ok: true, data: data as CreateSaleResult };
 }

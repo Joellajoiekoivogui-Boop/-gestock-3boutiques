@@ -97,12 +97,19 @@ export type SaleResult = {
 export async function createSale(
   uid: string,
   items: { product_id: string; quantity: number; [key: string]: unknown }[],
-  options: { method?: string; discount?: number; key?: string } = {},
+  options: { method?: string; discount?: number; key?: string; customer?: string; phone?: string } = {},
 ): Promise<SaleResult> {
   return as(uid, async (client) => {
     const { rows } = await client.query<{ result: SaleResult }>(
-      `select public.create_sale($1::jsonb, $2, $3::uuid, $4) as result`,
-      [JSON.stringify(items), options.method ?? 'cash', options.key ?? randomUUID(), options.discount ?? 0],
+      `select public.create_sale($1::jsonb, $2, $3::uuid, $4, null, $5, $6) as result`,
+      [
+        JSON.stringify(items),
+        options.method ?? 'cash',
+        options.key ?? randomUUID(),
+        options.discount ?? 0,
+        options.customer ?? null,
+        options.phone ?? null,
+      ],
     );
     return rows[0].result;
   });

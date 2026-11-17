@@ -55,8 +55,15 @@ export const saleSchema = z.object({
   discount: amount('La remise'),
   idempotencyKey: z.uuid(),
   note: optionalText(500),
+  customerName: optionalText(120),
+  customerPhone: optionalText(30),
 });
 export type SaleInput = z.input<typeof saleSchema>;
+
+export const settleCreditSchema = z.object({
+  saleId: idSchema,
+  paymentMethod: z.string().regex(/^[a-z0-9_]{2,32}$/, 'Mode de paiement invalide.'),
+});
 
 // --- Produits ----------------------------------------------------------------
 export const productSchema = z.object({

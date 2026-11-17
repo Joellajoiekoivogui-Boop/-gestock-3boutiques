@@ -36,7 +36,7 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
   const today = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: tz }).format(new Date());
 
   const supabase = await createClient();
-  const [summary, report, latest, lowStock] = await Promise.all([
+  const [summary, report, latest, lowStock, credits] = await Promise.all([
     getDashboardSummary(),
     getSalesReport(range.from, range.to),
     supabase.from('sales').select('*').order('created_at', { ascending: false }).limit(8),
@@ -47,8 +47,15 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
       .eq('is_archived', false)
       .order('stock_quantity')
       .limit(50),
+    supabase
+      .from('sales')
+      .select('total_amount, refunded_amount')
+      .eq('payment_status', 'pending')
+      .neq('sale_status', 'cancelled')
+      .limit(2000),
   ]);
 
+  const creditTotal = (credits.data ?? []).reduce((sum, c) => sum + Number(c.total_amount) - Number(c.refunded_amount), 0);
   const lowStockItems = settings?.stock_enabled
     ? (lowStock.data ?? []).filter((p) => p.stock_quantity <= p.minimum_stock).slice(0, 6)
     : [];
@@ -80,6 +87,7 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
             label: 'Panier moyen',
             value: summary.periods.today.count > 0 ? money(Math.round(summary.periods.today.net / summary.periods.today.count)) : '—',
           },
+          ...(creditTotal > 0 ? [{ label: 'Crédits à encaisser', value: money(creditTotal) }] : []),
           {
             label: 'Stock faible',
             value: summary.low_stock_products > 0 ? `${summary.low_stock_products} produit(s)` : 'Aucun',
