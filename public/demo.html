@@ -190,6 +190,32 @@ td { padding: 12px; border-top: 1px solid var(--border); }
 td .sub { display: none; color: var(--muted-ink); font-size: 13px; }
 .badge { display: inline-block; border-radius: 999px; padding: 2px 10px; font-size: 13px; font-weight: 600; background: #e3f4ea; color: #0b5c34; }
 .credits { color: var(--muted-ink); font-size: 13px; }
+/* Crédits et dossiers clients */
+.clients { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.client { width: 100%; text-align: left; display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); cursor: pointer; font: inherit; color: inherit; min-height: 76px; }
+.client:hover { border-color: var(--forest); }
+.initials { flex: none; width: 44px; height: 44px; border-radius: 50%; background: var(--forest); color: var(--gold); display: grid; place-items: center; font-weight: 700; }
+.client .who2 { flex: 1; min-width: 0; }
+.client .who2 b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.client .who2 small { color: var(--muted-ink); font-size: 13px; }
+.client .owe { text-align: right; font-weight: 700; white-space: nowrap; }
+.client .owe small { display: block; font-weight: 400; color: var(--muted-ink); font-size: 13px; }
+.badge.warn { background: var(--warn); color: var(--warn-ink); }
+.hist { list-style: none; margin: 0; padding: 0; }
+.hist li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 14px 20px; border-top: 1px solid var(--border); }
+.hist li:first-child { border-top: 0; }
+.hist small { display: block; color: var(--muted-ink); font-size: 13px; }
+.hist .right { display: flex; align-items: center; gap: 12px; font-weight: 700; }
+.back { display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; padding: 6px 0; color: var(--muted-ink); font: inherit; font-weight: 600; cursor: pointer; }
+.picks { display: flex; flex-wrap: wrap; gap: 6px; }
+.picks p { width: 100%; font-weight: 400; }
+.picks button { border: 1px solid var(--warn-ink); background: var(--card); color: var(--warn-ink); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; min-height: 40px; }
+.picked { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--card); border-radius: 999px; padding: 6px 6px 6px 16px; font-weight: 600; }
+.picked button { border: 0; background: var(--muted); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 14px; cursor: pointer; min-height: 36px; }
+.methods { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.methods button { min-height: 52px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); font: inherit; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.methods button[aria-pressed="true"] { background: var(--forest); border-color: var(--forest); color: #fff; }
+.methods svg, .back svg, .picked svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Vente enregistrée */
 .overlay { position: fixed; inset: 0; z-index: 50; background: rgb(15 32 25 / 0.55); display: grid; place-items: center; padding: 16px; }
@@ -246,8 +272,9 @@ td .sub { display: none; color: var(--muted-ink); font-size: 13px; }
       <button type="button" class="tab" data-view="caisse"><svg viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>Caisse</button>
       <button type="button" class="tab" data-view="ventes"><svg viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M13 16H8"/></svg>Mes ventes</button>
       <button type="button" class="tab" data-view="bord"><svg viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>Tableau de bord</button>
+      <button type="button" class="tab" data-view="credits"><svg viewBox="0 0 24 24"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/></svg>Crédits</button>
     </nav>
-    <div class="who"><b>Awa Camara</b><small>Démonstration</small></div>
+    <div class="who"><b>Awa Camara</b><small>Administrateur (démo)</small></div>
   </div>
 </header>
 <p class="note" id="note">Démonstration avec des données d’exemple : rien n’est enregistré, tout repart de zéro au rechargement.</p>
@@ -297,12 +324,35 @@ const ICONS = {
   cart: '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>',
   note: '<path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/>',
   bag: '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
+  back: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
   board: '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
 };
 const icon = (name) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`;
 const PAY_ICON = { cash: 'cash', om: 'phone', credit: 'note', other: 'wallet' };
 
-const state = { view: 'caisse', cat: 'all', search: '', cart: [], pay: 'cash', received: '', customer: '', phone: '', cartOpen: false, sales: [], nextNo: 22 };
+const state = { view: 'caisse', cat: 'all', search: '', cart: [], pay: 'cash', received: '', customer: '', phone: '', pickedId: null, cartOpen: false, sales: [], nextNo: 22, customers: [], dossier: null, q: '' };
+// Dossiers clients à crédit : un par personne, retrouvé par son numéro de téléphone.
+const phoneKey = (v) => (v || '').replace(/\D/g, '').slice(-9);
+const customer = (id) => state.customers.find((c) => c.id === id);
+function openDossier(name, phone) {
+  const key = phoneKey(phone);
+  const found = key.length >= 6 && state.customers.find((c) => phoneKey(c.phone) === key);
+  if (found) return found;
+  const c = { id: 'c' + (state.customers.length + 1), name, phone, since: 'Aujourd’hui' };
+  state.customers.push(c);
+  return c;
+}
+const isToday = (s) => !s.before;
+const unpaid = (s) => s.pay === 'credit' && !s.paid;
+const owed = (c) => sum(state.sales.filter((s) => s.customerId === c.id && unpaid(s)));
+const initials = (n) => n.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
+// Chiffres du jour : ventes du jour − crédits non payés du jour + anciens crédits réglés aujourd'hui.
+function dayFigures(rows) {
+  const today = rows.filter(isToday);
+  const sales = sum(today), credit = sum(today.filter(unpaid));
+  const settled = sum(rows.filter((s) => s.before && s.paid));
+  return { sales, credit, settled, cashed: sales - credit + settled, n: today.length };
+}
 
 const fmt = (v) => new Intl.NumberFormat('fr-FR').format(v).replace(/ /g, ' ');
 const money = (v) => fmt(v) + ' GNF';
@@ -346,8 +396,11 @@ function checkout() {
   const lines = state.cart.map((l) => ({ ...l }));
   lines.forEach((l) => { const p = prod(l.id); if (p.stock !== null) p.stock -= l.q; });
   const sale = recordSale(lines, state.pay, state.nextNo++);
-  if (state.pay === 'credit') { sale.customer = state.customer.trim(); sale.phone = state.phone.trim(); }
-  state.cart = []; state.cartOpen = false; state.pay = 'cash'; state.received = ''; state.customer = ''; state.phone = '';
+  if (state.pay === 'credit') {
+    const c = state.pickedId ? customer(state.pickedId) : openDossier(state.customer.trim(), state.phone.trim());
+    sale.customerId = c.id; sale.customer = c.name; sale.phone = c.phone;
+  }
+  state.cart = []; state.cartOpen = false; state.pay = 'cash'; state.received = ''; state.customer = ''; state.phone = ''; state.pickedId = null;
   render(); showReceipt(sale);
 }
 
@@ -374,6 +427,14 @@ function popular() {
   const sold = {};
   state.sales.forEach((s) => s.lines.forEach((l) => { sold[l.id] = (sold[l.id] || 0) + l.q; }));
   return new Set(Object.entries(sold).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([id]) => id));
+}
+const creditReady = () => !!state.pickedId || state.customer.trim().length >= 2;
+function picks() {
+  const q = norm(state.customer.trim()), d = state.phone.replace(/\D/g, '');
+  if (q.length < 2 && d.length < 3) return '';
+  const list = state.customers.filter((c) => (q.length >= 2 && norm(c.name).includes(q)) || (d.length >= 3 && c.phone.replace(/\D/g, '').includes(d))).slice(0, 4);
+  if (!list.length) return '<p>Un nouveau dossier sera ouvert pour ce client.</p>';
+  return '<p>Déjà client ? Touchez son dossier :</p>' + list.map((c) => `<button type="button" data-pick="${c.id}">${esc(c.name)}</button>`).join('');
 }
 function viewCaisse() {
   const top3 = popular();
@@ -418,10 +479,12 @@ function viewCaisse() {
         <div class="total"><span>Total</span><b>${money(total)}</b></div>
         <fieldset style="border:0;margin:0;padding:0"><legend class="sr-only">Mode de paiement</legend><div class="pay">${PAYMENTS.map(([code, label]) => `<button type="button" data-pay="${code}" aria-pressed="${state.pay === code}">${icon(state.pay === code ? 'check' : PAY_ICON[code])}<span>${label}</span></button>`).join('')}</div></fieldset>
         ${cash}
-        ${state.pay === 'credit' && total > 0 ? `<div class="credit"><p>Vente à crédit : le client paiera plus tard.</p><div class="fields">
+        ${state.pay === 'credit' && total > 0 ? `<div class="credit"><p>Vente à crédit : le client paiera plus tard.</p>${state.pickedId
+          ? `<div class="picked"><span>Dossier : ${esc(customer(state.pickedId).name)}</span><button type="button" data-unpick>Changer</button></div>`
+          : `<div class="fields">
           <input id="cust" type="text" placeholder="Nom du client *" aria-label="Nom du client" value="${esc(state.customer)}" autocomplete="off">
-          <input id="phone" type="tel" placeholder="Téléphone" aria-label="Téléphone du client" value="${esc(state.phone)}" autocomplete="off"></div></div>` : ''}
-        <button type="button" class="btn green go" data-checkout ${state.cart.length && (state.pay !== 'credit' || state.customer.trim().length >= 2) ? '' : 'disabled'}><span style="display:flex;align-items:center;gap:8px">${icon('ok')} ${state.pay === 'credit' ? 'Mettre à crédit' : 'Encaisser'}</span>${state.cart.length ? `<b>${money(total)}</b>` : ''}</button>
+          <input id="phone" type="tel" placeholder="Téléphone" aria-label="Téléphone du client" value="${esc(state.phone)}" autocomplete="off"></div><div class="picks" id="picks">${picks()}</div>`}</div>` : ''}
+        <button type="button" class="btn green go" data-checkout ${state.cart.length && (state.pay !== 'credit' || creditReady()) ? '' : 'disabled'}><span style="display:flex;align-items:center;gap:8px">${icon('ok')} ${state.pay === 'credit' ? 'Mettre à crédit' : 'Encaisser'}</span>${state.cart.length ? `<b>${money(total)}</b>` : ''}</button>
       </div>
     </aside>
     <div class="cartbar"><button type="button" class="btn green" data-cart-toggle><span style="display:flex;align-items:center;gap:8px">${icon('cart')} Panier (${cartCount()})</span><b>${money(total)}</b></button></div>
@@ -429,9 +492,9 @@ function viewCaisse() {
 }
 
 function salesTable(limit) {
-  const rows = state.sales.slice(0, limit).map((s) => `<tr><td><b style="font-weight:600">${s.no}</b><span class="sub">Aujourd’hui ${s.time} · ${esc(payLabel(s.pay))}</span></td>
+  const rows = state.sales.filter(isToday).slice(0, limit).map((s) => `<tr><td><b style="font-weight:600">${s.no}</b><span class="sub">Aujourd’hui ${s.time} · ${esc(payLabel(s.pay))}</span></td>
     <td class="hide-sm">Aujourd’hui ${s.time}</td><td class="num hide-sm">${s.lines.reduce((n, l) => n + l.q, 0)}</td>
-    <td class="num"><b style="font-weight:600">${money(s.total)}</b></td><td class="hide-sm">${esc(payLabel(s.pay))}</td><td>${s.pay === 'credit' ? '<span class="badge" style="background:var(--warn);color:var(--warn-ink)">À crédit</span>' : '<span class="badge">Payée</span>'}</td></tr>`).join('');
+    <td class="num"><b style="font-weight:600">${money(s.total)}</b></td><td class="hide-sm">${esc(payLabel(s.pay))}</td><td>${unpaid(s) ? '<span class="badge warn">À crédit</span>' : s.pay === 'credit' ? '<span class="badge">Crédit réglé</span>' : '<span class="badge">Payée</span>'}</td></tr>`).join('');
   return `<div class="panel"><div class="twrap"><table><thead><tr><th>Reçu</th><th class="hide-sm">Date</th><th class="num hide-sm">Articles</th><th class="num">Montant</th><th class="hide-sm">Paiement</th><th>Statut</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
 }
 const sum = (rows) => rows.reduce((s, r) => s + r.total, 0);
@@ -439,12 +502,16 @@ function banner(label, value, facts) {
   return `<div class="banner"><div><span class="label">${label}</span><p class="big">${value}</p></div>
     <dl>${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl></div>`;
 }
+function dayBanner(f, extra) {
+  return banner('Encaissé aujourd’hui', money(f.cashed), [['Ventes du jour', money(f.sales)], ['À crédit (non payé)', f.credit ? '− ' + money(f.credit) : money(0)],
+    ...(f.settled ? [['Crédits réglés aujourd’hui', '+ ' + money(f.settled)]] : []), ...extra]);
+}
 function viewVentes() {
-  const paid = state.sales.filter((s) => s.pay !== 'credit');
-  const total = sum(paid), cash = sum(state.sales.filter((s) => s.pay === 'cash')), credit = sum(state.sales.filter((s) => s.pay === 'credit')), n = state.sales.length;
+  const f = dayFigures(state.sales), cash = sum(state.sales.filter((s) => isToday(s) && s.pay === 'cash'));
   return `<div class="page">
     <div class="phead"><div><h1>Mes ventes</h1><p>Vos ventes et leurs reçus, à réimprimer si besoin.</p></div><button type="button" class="btn green" data-go="caisse">${icon('plus')} Nouvelle vente</button></div>
-    ${banner('Encaissé aujourd’hui', money(total), [['Ventes', n], ['Panier moyen', money(Math.round((total + credit) / n))], ['Dont espèces', money(cash)], ...(credit ? [['À crédit (non payé)', money(credit)]] : [])])}
+    ${dayBanner(f, [['Nombre de ventes', f.n], ['Dont espèces', money(cash)]])}
+    <p class="credits">Ventes du jour − crédits non payés + anciens crédits réglés aujourd’hui.</p>
     ${salesTable(50)}</div>`;
 }
 function barList(items, fmtValue) {
@@ -453,16 +520,17 @@ function barList(items, fmtValue) {
     <div class="track"><div class="fill" style="width:${(i.value / max) * 100}%;background:${i.color || 'var(--forest)'}"></div></div><small>${esc(i.detail)}</small></div>`).join('')}</div>`;
 }
 function viewBord() {
-  const total = sum(state.sales), n = state.sales.length;
-  const byPay = PAYMENTS.map(([code, label]) => { const r = state.sales.filter((s) => s.pay === code); return { label, value: sum(r), detail: `${r.length} vente(s) · ${total ? Math.round((sum(r) / total) * 100) : 0} %` }; }).filter((i) => i.value).sort((a, b) => b.value - a.value);
+  const todays = state.sales.filter(isToday), total = sum(todays), n = todays.length, f = dayFigures(state.sales);
+  const rest = sum(state.sales.filter(unpaid));
+  const byPay = PAYMENTS.map(([code, label]) => { const r = todays.filter((s) => s.pay === code); return { label, value: sum(r), detail: `${r.length} vente(s) · ${total ? Math.round((sum(r) / total) * 100) : 0} %` }; }).filter((i) => i.value).sort((a, b) => b.value - a.value);
   const sold = {};
-  state.sales.forEach((s) => s.lines.forEach((l) => { sold[l.id] = (sold[l.id] || 0) + l.q; }));
+  todays.forEach((s) => s.lines.forEach((l) => { sold[l.id] = (sold[l.id] || 0) + l.q; }));
   const top = Object.entries(sold).map(([id, q]) => ({ label: prod(id).name, value: q, detail: money(q * prod(id).price), color: `var(--cat-${toneOf(prod(id).cat)})` })).sort((a, b) => b.value - a.value).slice(0, 5);
   const low = PRODUCTS.filter((p) => p.stock !== null && p.stock <= 6);
-  const items = state.sales.reduce((s, r) => s + r.lines.reduce((a, l) => a + l.q, 0), 0);
+  const items = todays.reduce((s, r) => s + r.lines.reduce((a, l) => a + l.q, 0), 0);
   return `<div class="page">
     <div class="phead"><div><h1>Tableau de bord</h1><p>${document.body.dataset.today} · chiffres de la démonstration</p></div><button type="button" class="btn green" data-go="caisse">${icon('cart')} Ouvrir la caisse</button></div>
-    ${banner('CA net du jour', money(total), [['Ventes aujourd’hui', n], ['Panier moyen', money(Math.round(total / n))], ['Articles vendus', items], ['Stock faible', low.length + ' produit(s)']])}
+    ${dayBanner(f, [['Ventes aujourd’hui', n], ['Reste à encaisser (tous)', money(rest)], ['Stock faible', low.length + ' produit(s)']])}
     <div class="cols">
       <div class="panel pad"><h2>Plats les plus vendus</h2><p>Par quantité, aujourd’hui</p>${barList(top, (i) => i.value + ' vendu(s)')}</div>
       <div class="panel pad"><h2>Répartition des paiements</h2><p>Ventes par mode de paiement</p>${barList(byPay, (i) => money(i.value))}</div>
@@ -471,9 +539,46 @@ function viewBord() {
     <h2 class="serif" style="font-size:22px">Dernières transactions</h2>${salesTable(6)}</div>`;
 }
 
+function viewCredits() {
+  const q = norm(state.q.trim()), d = state.q.replace(/\D/g, '');
+  const list = state.customers.filter((c) => !q || norm(c.name).includes(q) || (d.length >= 3 && c.phone.replace(/\D/g, '').includes(d)))
+    .sort((a, b) => owed(b) - owed(a) || a.name.localeCompare(b.name));
+  const rest = sum(state.sales.filter(unpaid)), debtors = state.customers.filter((c) => owed(c) > 0).length;
+  return `<div class="page">
+    <div class="phead"><div><h1>Clients à crédit</h1><p>Un dossier par client : ce qu’il doit et l’historique de ses crédits.</p></div></div>
+    ${banner('Reste à encaisser', money(rest), [['Clients qui doivent', debtors], ['Dossiers', state.customers.length]])}
+    <div class="search" style="max-width:460px">${icon('search')}<input id="q" type="search" placeholder="Rechercher un client (nom ou téléphone)" aria-label="Rechercher un client" value="${esc(state.q)}" autocomplete="off"></div>
+    ${list.length ? `<ul class="clients">${list.map((c) => { const o = owed(c), n = state.sales.filter((s) => s.customerId === c.id).length; return `<li><button type="button" class="client" data-dossier="${c.id}">
+      <span class="initials" aria-hidden="true">${initials(c.name)}</span><span class="who2"><b>${esc(c.name)}</b><small>${esc(c.phone || 'Pas de téléphone')} · ${n} crédit(s)</small></span>
+      <span class="owe">${o ? `<small>Doit</small>${money(o)}` : '<span class="badge">À jour</span>'}</span></button></li>`; }).join('')}</ul>`
+      : '<div class="panel empty" style="padding:32px;text-align:center"><b>Aucun client trouvé</b></div>'}</div>`;
+}
+function viewDossier() {
+  const c = customer(state.dossier);
+  const rows = state.sales.filter((s) => s.customerId === c.id), o = owed(c), paid = sum(rows.filter((s) => s.paid));
+  return `<div class="page">
+    <div><button type="button" class="back" data-view="credits">${icon('back')} Tous les clients</button></div>
+    <div class="phead"><div><h1>${esc(c.name)}</h1><p>${esc(c.phone || 'Pas de téléphone')} · Dossier ouvert ${c.since === 'Aujourd’hui' ? 'aujourd’hui' : 'le ' + esc(c.since)}</p></div></div>
+    ${banner(o ? 'Doit encore' : 'Tout est réglé', money(o), [['Ventes à payer', rows.filter(unpaid).length], ['Déjà réglé', money(paid)], ['Ventes à crédit', rows.length]])}
+    <div class="panel"><h2 style="padding:18px 20px 6px">Historique des crédits</h2><ul class="hist">${rows.map((s) => `<li>
+      <div><b>${s.no}</b><small>${s.before ? esc(s.before) : 'Aujourd’hui ' + s.time} · ${s.lines.map((l) => l.q + ' × ' + esc(prod(l.id).name)).join(', ')}</small>
+      ${s.paid ? `<small>Réglé ${s.paidWhen} en ${esc(payLabel(s.paidWith))}</small>` : ''}</div>
+      <div class="right">${money(s.total)}${unpaid(s) ? `<button type="button" class="btn green" data-settle="${s.no}">${icon('cash')} Encaisser</button>` : '<span class="badge">Réglé</span>'}</div></li>`).join('')}</ul></div></div>`;
+}
+function settleDialog(no, pay = 'cash') {
+  const s = state.sales.find((r) => r.no === no);
+  document.getElementById('modal').innerHTML = `<div class="overlay" role="dialog" aria-modal="true" aria-labelledby="st-title"><div class="dialog">
+    <div><h2 id="st-title" style="font-size:26px">Encaisser le crédit</h2><p style="color:var(--muted-ink)">${esc(s.customer)} · reçu ${s.no}</p></div>
+    <p class="big">${money(s.total)}</p>
+    <div class="methods" role="group" aria-label="Payé en">${PAYMENTS.filter(([c]) => c !== 'credit').map(([c, l]) => `<button type="button" data-method="${c}" data-no="${no}" aria-pressed="${pay === c}">${icon(PAY_ICON[c])}${l}</button>`).join('')}</div>
+    <div class="dactions"><button type="button" class="btn green" data-confirm="${no}" data-with="${pay}">${icon('ok')} Confirmer le paiement</button><button type="button" class="btn" data-close style="grid-column:1/-1">Annuler</button></div>
+  </div></div>`;
+  document.querySelector('[data-confirm]').focus();
+}
+
 function renderBottom() {
   const tabs = [['caisse', 'cart', 'Caisse'], ['ventes', 'receipt', 'Ventes']];
-  const right = [['bord', 'board', 'Tableau']];
+  const right = [['bord', 'board', 'Tableau'], ['credits', 'note', 'Crédits']];
   const spacer = '<span style="flex:1" aria-hidden="true"></span>';
   const btn = ([v, ic, label]) => `<button type="button" data-view="${v}" ${state.view === v ? 'aria-current="page"' : ''}>${icon(ic)}${label}</button>`;
   const center = state.view === 'caisse'
@@ -483,16 +588,16 @@ function renderBottom() {
 }
 
 function render() {
-  const active = document.activeElement && document.activeElement.id === 'search';
+  const active = document.activeElement && ['search', 'q'].includes(document.activeElement.id) ? document.activeElement.id : null;
   const pos = active ? document.activeElement.selectionStart : null;
   document.querySelectorAll('.tabs [data-view]').forEach((b) => b.toggleAttribute('aria-current', false));
-  document.querySelector(`.tabs [data-view="${state.view}"]`).setAttribute('aria-current', 'page');
+  document.querySelector(`.tabs [data-view="${state.view === 'dossier' ? 'credits' : state.view}"]`).setAttribute('aria-current', 'page');
   document.documentElement.style.setProperty('--note', document.getElementById('note').offsetHeight + 'px');
-  document.getElementById('main').innerHTML = state.view === 'caisse' ? viewCaisse() : state.view === 'ventes' ? viewVentes() : viewBord();
+  document.getElementById('main').innerHTML = ({ caisse: viewCaisse, ventes: viewVentes, bord: viewBord, credits: viewCredits, dossier: viewDossier })[state.view]();
   renderBottom();
-  if (active) { const input = document.getElementById('search'); input.focus(); input.setSelectionRange(pos, pos); }
+  if (active) { const input = document.getElementById(active); input.focus(); input.setSelectionRange(pos, pos); }
 }
-function go(view) { state.view = view; state.cartOpen = false; document.getElementById('modal').innerHTML = ''; render(); window.scrollTo(0, 0); }
+function go(view) { state.view = view; try { history.replaceState(null, '', '#' + view); } catch (e) {} state.cartOpen = false; document.getElementById('modal').innerHTML = ''; render(); window.scrollTo(0, 0); }
 
 document.addEventListener('click', (e) => {
   const t = e.target.closest('button, [data-cart-toggle]'); if (!t) return;
@@ -509,13 +614,25 @@ document.addEventListener('click', (e) => {
   else if ('cartToggle' in d) { state.cartOpen = !state.cartOpen; render(); }
   else if ('checkout' in d) checkout();
   else if ('close' in d) document.getElementById('modal').innerHTML = '';
+  else if (d.pick) { state.pickedId = d.pick; render(); }
+  else if ('unpick' in d) { state.pickedId = null; render(); }
+  else if (d.dossier) { state.dossier = d.dossier; go('dossier'); }
+  else if (d.settle) settleDialog(d.settle);
+  else if (d.method) settleDialog(d.no, d.method);
+  else if (d.confirm) {
+    const s = state.sales.find((r) => r.no === d.confirm);
+    s.paid = true; s.paidWith = d.with; s.paidWhen = 'aujourd’hui à ' + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('modal').innerHTML = ''; render();
+  }
 });
 document.addEventListener('input', (e) => {
   if (e.target.id === 'search') { state.search = e.target.value; render(); }
+  else if (e.target.id === 'q') { state.q = e.target.value; render(); }
   else if (e.target.id === 'cust' || e.target.id === 'phone') {
     state[e.target.id === 'cust' ? 'customer' : 'phone'] = e.target.value;
     const go = document.querySelector('[data-checkout]');
-    if (go) go.disabled = !(state.cart.length && state.customer.trim().length >= 2);
+    if (go) go.disabled = !(state.cart.length && creditReady());
+    const box = document.getElementById('picks'); if (box) box.innerHTML = picks();
   }
 });
 document.addEventListener('keydown', (e) => {
@@ -532,9 +649,21 @@ document.body.dataset.today = today.charAt(0).toUpperCase() + today.slice(1);
   .forEach((items, i) => {
     const at = new Date(Date.now() - (5 - i) * 41 * 60000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     const sale = recordSale(items.map(([id, q]) => ({ id, q })), ['cash', 'om', 'cash', 'credit', 'cash'][i], 17 + i, at);
-    if (sale.pay === 'credit') { sale.customer = 'Mamadou Bah (exemple)'; sale.phone = '+224 6XX XX XX XX'; }
+    if (sale.pay === 'credit') { const c = openDossier('Mamadou Bah', '+224 621 00 00 01'); c.since = '12 novembre'; sale.customerId = c.id; sale.customer = c.name; sale.phone = c.phone; }
   });
+// Crédits d'avant aujourd'hui (exemples), dont un réglé ce matin.
+[['Mamadou Bah', '+224 621 00 00 01', [['p0', 1]], 'Hier', false], ['Fatoumata Diallo', '+224 622 00 00 02', [['p8', 1], ['p10', 2]], 'Hier', true],
+ ['Ibrahima Sow', '+224 623 00 00 03', [['p2', 2]], 'Lundi', false]].forEach(([name, phone, items, when, paid], i) => {
+  const c = openDossier(name, phone); if (c.since === 'Aujourd’hui') c.since = '10 novembre';
+  const sale = recordSale(items.map(([id, q]) => ({ id, q })), 'credit', 10 + i, '');
+  state.sales.push(state.sales.shift());
+  Object.assign(sale, { before: when, customerId: c.id, customer: c.name, phone: c.phone });
+  if (paid) Object.assign(sale, { paid: true, paidWith: 'om', paidWhen: 'aujourd’hui à 09:15' });
+});
+const start = location.hash.slice(1);
+if (['caisse', 'ventes', 'bord', 'credits'].includes(start)) state.view = start;
 render();
+window.addEventListener('hashchange', () => { const v = location.hash.slice(1); if (['caisse', 'ventes', 'bord', 'credits'].includes(v) && v !== state.view) go(v); });
 </script>
 </body>
 </html>
