@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { PageHeader } from '@/components/app/page-header';
-import { Card, CardContent } from '@/components/ui/card';
 import { requireAdmin } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { CategoriesManager } from './categories-manager';
@@ -24,11 +23,7 @@ export default async function CategoriesPage() {
   return (
     <div>
       <PageHeader title="Catégories" description="Organisation du catalogue et de la caisse." />
-      <Card>
-        <CardContent>
-          <CategoriesManager categories={(categories.data ?? []).map((c) => ({ ...c, productCount: counts.get(c.id) ?? 0 }))} />
-        </CardContent>
-      </Card>
+      <CategoriesManager categories={(categories.data ?? []).map((c) => ({ ...c, productCount: counts.get(c.id) ?? 0 }))} />
     </div>
   );
 }

@@ -1,8 +1,8 @@
-import { Ban, Download, ShoppingBag, TrendingUp, Undo2, Wallet } from 'lucide-react';
+import { Download } from 'lucide-react';
 import type { Metadata } from 'next';
 import { PageHeader } from '@/components/app/page-header';
 import { PeriodFilter } from '@/components/app/period-filter';
-import { StatCard } from '@/components/app/stat-card';
+import { DayLine, FactRow } from '@/components/app/day-line';
 import { BarList } from '@/components/charts/bar-list';
 import { RevenueTrendChart } from '@/components/charts/revenue-trend-chart';
 import { AnimatedCount, AnimatedMoney } from '@/components/motion/animated-number';
@@ -55,26 +55,30 @@ export default async function ReportsPage({ searchParams }: PageProps<'/admin/re
 
       <PeriodFilter basePath="/admin/reports" period={range.period} from={range.from} to={range.to} />
 
-      <div className="mg-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Chiffre d’affaires net" value={<AnimatedMoney value={report.net_revenue} currency={currency} />} icon={TrendingUp} tone="positive" hint="Ventes brutes − remboursements" />
-        <StatCard label="Ventes brutes" value={<AnimatedMoney value={report.gross_sales} currency={currency} />} icon={Wallet} hint={`Remises accordées : ${money(report.discount_total)}`} />
-        <StatCard label="Nombre de ventes" value={<AnimatedCount value={report.sales_count} />} icon={ShoppingBag} hint={`Panier moyen : ${money(report.average_basket)}`} />
-        <StatCard
-          label="Remboursements"
-          value={<AnimatedMoney value={report.refunds_total} currency={currency} />}
-          icon={Undo2}
-          hint={`${report.refunds_count} remboursement(s)`}
-        />
-      </div>
-      <div className="mg-stagger grid gap-4 sm:grid-cols-2">
-        <StatCard
-          label="Ventes annulées (exclues du CA)"
-          value={<AnimatedMoney value={report.cancelled_amount} currency={currency} />}
-          icon={Ban}
-          hint={`${report.cancelled_count} vente(s) annulée(s)`}
-        />
-        <StatCard label="Articles vendus" value={<AnimatedCount value={report.items_sold} />} icon={ShoppingBag} />
-      </div>
+      <DayLine
+        label="Chiffre d’affaires net de la période"
+        value={<AnimatedMoney value={report.net_revenue} currency={currency} />}
+        facts={[
+          { label: 'Ventes', value: <AnimatedCount value={report.sales_count} /> },
+          { label: 'Panier moyen', value: money(report.average_basket) },
+          { label: 'Articles vendus', value: <AnimatedCount value={report.items_sold} /> },
+        ]}
+      />
+      <Card>
+        <CardContent>
+          <FactRow
+            facts={[
+              { label: 'Ventes brutes', value: money(report.gross_sales), hint: `Remises accordées : ${money(report.discount_total)}` },
+              { label: 'Remboursements', value: money(report.refunds_total), hint: `${report.refunds_count} remboursement(s)` },
+              {
+                label: 'Ventes annulées (exclues du CA)',
+                value: money(report.cancelled_amount),
+                hint: `${report.cancelled_count} vente(s) annulée(s)`,
+              },
+            ]}
+          />
+        </CardContent>
+      </Card>
 
       {empty ? (
         <Card>

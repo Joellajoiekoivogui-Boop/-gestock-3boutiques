@@ -1,10 +1,11 @@
-import { AlertTriangle, Boxes, PackageX } from 'lucide-react';
+import { Boxes } from 'lucide-react';
 import type { Metadata } from 'next';
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { EmptyState } from '@/components/app/empty-state';
 import { PageHeader } from '@/components/app/page-header';
 import { Pagination, parsePage } from '@/components/app/pagination';
-import { StatCard } from '@/components/app/stat-card';
+import { DayLine } from '@/components/app/day-line';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -65,11 +66,15 @@ export default async function InventoryPage({ searchParams }: PageProps<'/admin/
         </p>
       )}
 
-      <div className="mg-stagger grid gap-4 sm:grid-cols-3">
-        <StatCard label="Produits suivis" value={tracked.length} icon={Boxes} />
-        <StatCard label="Stock faible" value={lowCount} icon={AlertTriangle} tone={lowCount ? 'warning' : 'default'} />
-        <StatCard label="En rupture" value={outCount} icon={PackageX} tone={outCount ? 'warning' : 'default'} />
-      </div>
+      <DayLine
+        label="État du stock"
+        value={outCount > 0 ? `${outCount} en rupture` : lowCount > 0 ? `${lowCount} à commander` : 'Tout est en stock'}
+        facts={[
+          { label: 'Produits suivis', value: tracked.length },
+          { label: 'Stock faible', value: lowCount },
+          { label: 'En rupture', value: outCount },
+        ]}
+      />
 
       <Card className="py-0">
         <CardHeader className="flex-row flex-wrap items-center justify-between gap-2 pt-5">
@@ -109,7 +114,20 @@ export default async function InventoryPage({ searchParams }: PageProps<'/admin/
                         {p.name}
                       </Link>
                     </TableCell>
-                    <TableCell className="text-right font-semibold tabular-nums">{p.stock_quantity}</TableCell>
+                    <TableCell className="text-right font-semibold tabular-nums">
+                      <span className="inline-flex items-center gap-3">
+                        <span aria-hidden className="hidden h-2 w-20 overflow-hidden rounded-full bg-muted sm:block">
+                          <span
+                            className={cn(
+                              'block h-full rounded-full',
+                              p.stock_quantity === 0 ? 'bg-destructive' : p.stock_quantity <= p.minimum_stock ? 'bg-gold' : 'bg-forest',
+                            )}
+                            style={{ width: `${Math.min(100, (p.stock_quantity / Math.max(1, p.minimum_stock * 3)) * 100)}%` }}
+                          />
+                        </span>
+                        {p.stock_quantity}
+                      </span>
+                    </TableCell>
                     <TableCell className="text-right tabular-nums">{p.minimum_stock}</TableCell>
                     <TableCell>
                       {p.stock_quantity === 0 ? (
@@ -117,7 +135,7 @@ export default async function InventoryPage({ searchParams }: PageProps<'/admin/
                       ) : p.stock_quantity <= p.minimum_stock ? (
                         <Badge variant="warning">Stock faible</Badge>
                       ) : (
-                        <Badge variant="success">OK</Badge>
+                        <Badge className="border-transparent bg-forest-soft text-forest">Suffisant</Badge>
                       )}
                     </TableCell>
                     <TableCell className="text-right">

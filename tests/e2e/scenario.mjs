@@ -87,8 +87,8 @@ try {
     await dialog().getByRole('button', { name: 'Enregistrer' }).click();
     await toast('Produit créé.').waitFor();
 
-    await page.getByRole('cell', { name: 'Jus naturel', exact: true }).waitFor();
-    await page.getByRole('cell', { name: 'Riz au poulet', exact: true }).waitFor();
+    await page.getByRole('heading', { name: 'Jus naturel', exact: true }).waitFor();
+    await page.getByRole('heading', { name: 'Riz au poulet', exact: true }).waitFor();
     await shot('03-produits');
   });
 
@@ -109,7 +109,8 @@ try {
     await dialog().getByLabel('Mot de passe provisoire', { exact: true }).fill(CASHIER.password);
     await page.getByRole('button', { name: 'Créer le compte' }).click();
     await toast('Compte créé').waitFor();
-    await page.getByRole('cell', { name: new RegExp(`${CASHIER.name} ${CASHIER.email}`) }).waitFor();
+    await page.getByRole('heading', { name: CASHIER.name }).waitFor();
+    await page.getByText(CASHIER.email, { exact: true }).waitFor();
     await shot('04-utilisateurs');
     await logout();
   });
