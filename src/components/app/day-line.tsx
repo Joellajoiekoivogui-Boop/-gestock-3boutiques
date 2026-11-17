@@ -25,7 +25,9 @@ export function DayLine({
     >
       <div className="shrink-0">
         <p className="text-sm font-semibold text-gold-light">{label}</p>
-        <p className="mt-1.5 text-[2.5rem] leading-none font-bold tracking-tight tabular-nums">{value}</p>
+        <p data-testid="day-value" className="mt-1.5 text-[2.5rem] leading-none font-bold tracking-tight tabular-nums">
+          {value}
+        </p>
       </div>
       <dl className="flex flex-wrap gap-x-10 gap-y-3 sm:pb-1">
         {facts.map((fact) => (

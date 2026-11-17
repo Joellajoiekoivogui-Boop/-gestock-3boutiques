@@ -176,10 +176,14 @@ function filters(params, values) {
   const clauses = [];
   for (const [key, raw] of params) {
     if (['select', 'order', 'limit', 'offset', 'columns'].includes(key)) continue;
-    const dot = raw.indexOf('.');
-    const op = raw.slice(0, dot);
-    const value = raw.slice(dot + 1);
+    // « not.is.null » : négation PostgREST de l'opérateur qui suit.
+    const negate = raw.startsWith('not.');
+    const body = negate ? raw.slice(4) : raw;
+    const dot = body.indexOf('.');
+    const op = body.slice(0, dot);
+    const value = body.slice(dot + 1);
     const col = `t.${ident(key)}`;
+    const before = clauses.length;
     const push = (v) => {
       values.push(v);
       return `$${values.length}`;
@@ -202,6 +206,7 @@ function filters(params, values) {
       default:
         throw Object.assign(new Error(`opérateur non pris en charge : ${op}`), { code: 'PGRST100' });
     }
+    if (negate && clauses.length > before) clauses[clauses.length - 1] = `not (${clauses.at(-1)})`;
   }
   return clauses.length ? `where ${clauses.join(' and ')}` : '';
 }

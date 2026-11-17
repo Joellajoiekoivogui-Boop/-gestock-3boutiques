@@ -123,3 +123,76 @@ describe('règlement d’un crédit', () => {
     );
   });
 });
+
+describe('dossiers clients', () => {
+  const customerOf = async (saleId: string) =>
+    (await sql(`select customer_id from public.sales where id = $1`, [saleId]))[0].customer_id as string;
+
+  it('une vente à crédit ouvre un dossier au nom du client', async () => {
+    const sale = await createSale(cashierA, [{ product_id: product, quantity: 1 }], {
+      method: 'credit',
+      customer: 'Oumou Diallo',
+      phone: '+224 621 11 22 33',
+    });
+    const id = await customerOf(sale.sale_id);
+    const [client] = await sql(`select name, phone, created_by from public.customers where id = $1`, [id]);
+    expect(client).toEqual({ name: 'Oumou Diallo', phone: '+224 621 11 22 33', created_by: cashierA });
+  });
+
+  it('le même téléphone, même écrit autrement, retrouve le même dossier', async () => {
+    const first = await createSale(cashierA, [{ product_id: product, quantity: 1 }], {
+      method: 'credit',
+      customer: 'Alpha Condé',
+      phone: '+224 655 44 33 22',
+    });
+    const second = await createSale(cashierB, [{ product_id: product, quantity: 1 }], {
+      method: 'credit',
+      customer: 'Alpha',
+      phone: '655443322',
+    });
+    expect(await customerOf(second.sale_id)).toBe(await customerOf(first.sale_id));
+    const [row] = await sql(`select customer_name from public.sales where id = $1`, [second.sale_id]);
+    expect(row.customer_name).toBe('Alpha Condé');
+  });
+
+  it('une vente peut viser un dossier choisi à la caisse', async () => {
+    const id = await as(cashierA, async (c) => {
+      const { rows } = await c.query(`select public.create_customer('Hawa Sylla', '+224 664 00 11 22') as id`);
+      return rows[0].id as string;
+    });
+    const sale = await createSale(cashierB, [{ product_id: product, quantity: 1 }], { method: 'credit', customerId: id });
+    expect(await customerOf(sale.sale_id)).toBe(id);
+    const [row] = await sql(`select customer_name, customer_phone from public.sales where id = $1`, [sale.sale_id]);
+    expect(row).toEqual({ customer_name: 'Hawa Sylla', customer_phone: '+224 664 00 11 22' });
+  });
+
+  it('refuse un second dossier avec le même téléphone', async () => {
+    await as(cashierA, (c) => c.query(`select public.create_customer('Binta', '+224 610 10 10 10')`));
+    await expect(as(cashierB, (c) => c.query(`select public.create_customer('Binta B', '610101010')`))).rejects.toThrow(
+      /existe déjà/,
+    );
+  });
+
+  it('un caissier lit les dossiers mais ne les modifie pas ; l’admin peut', async () => {
+    const id = await as(cashierA, async (c) => (await c.query(`select public.create_customer('Moussa Keita') as id`)).rows[0].id as string);
+    const seen = await as(cashierB, (c) => c.query(`select id from public.customers where id = $1`, [id]));
+    expect(seen.rowCount).toBe(1);
+    await as(cashierB, (c) => c.query(`update public.customers set name = 'Changé' where id = $1`, [id]));
+    expect((await sql(`select name from public.customers where id = $1`, [id]))[0].name).toBe('Moussa Keita');
+    await as(admin, (c) => c.query(`update public.customers set phone = '+224 600 99 99 99' where id = $1`, [id]));
+    expect((await sql(`select phone from public.customers where id = $1`, [id]))[0].phone).toBe('+224 600 99 99 99');
+  });
+
+  it('une vente ne change pas de dossier', async () => {
+    const sale = await createSale(cashierA, [{ product_id: product, quantity: 1 }], { method: 'credit', customer: 'Lansana' });
+    const other = await as(admin, async (c) => (await c.query(`select public.create_customer('Autre client') as id`)).rows[0].id as string);
+    await expect(sql(`update public.sales set customer_id = $2 where id = $1`, [sale.sale_id, other])).rejects.toThrow(
+      /ne peut pas être changé/,
+    );
+  });
+
+  it('une vente ordinaire n’ouvre pas de dossier', async () => {
+    const sale = await createSale(cashierA, [{ product_id: product, quantity: 1 }], { method: 'cash', customer: 'Ignoré' });
+    expect(await customerOf(sale.sale_id)).toBeNull();
+  });
+});
