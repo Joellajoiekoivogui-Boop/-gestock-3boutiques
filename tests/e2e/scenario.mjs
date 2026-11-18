@@ -343,6 +343,27 @@ try {
     await page.getByTestId('day-value').getByText('0\u00a0GNF', { exact: true }).waitFor({ state: 'detached' });
   });
 
+  await step('journée passée : choisir une date pour revoir ses ventes', async () => {
+    await page.goto(`${BASE}/admin/dashboard`);
+    const today = await page.getByTestId('day-value').textContent();
+    assert.notEqual(today?.trim(), '0\u00a0GNF', 'aujourd’hui doit avoir des ventes');
+    await page.getByRole('link', { name: 'Jour précédent' }).click();
+    await page.waitForURL('**jour=**');
+    await page.getByText('Encaissé ce jour-là').waitFor();
+    await page.getByTestId('day-value').getByText('0\u00a0GNF', { exact: true }).waitFor();
+    await shot('21-jour-precedent');
+    // Date précise saisie dans le calendrier.
+    await page.getByLabel('Choisir une date').fill('2026-01-15');
+    await page.waitForURL('**jour=2026-01-15**');
+    await page.getByRole('heading', { name: /15 janvier 2026/ }).first().waitFor();
+    await page.getByRole('link', { name: 'Revenir à aujourd’hui' }).click();
+    await page.getByText('Encaissé aujourd’hui').waitFor();
+    // Même chose dans « Mes ventes ».
+    await page.goto(`${BASE}/pos/sales?jour=2026-01-15`);
+    await page.getByText('Encaissé ce jour-là').waitFor();
+    await page.getByRole('heading', { name: /15 janvier 2026/ }).first().waitFor();
+  });
+
   assert.deepEqual(consoleErrors, [], `Erreurs JavaScript : ${consoleErrors.join(' | ')}`);
   console.log(`\n✔ ${steps.length} étapes réussies. Captures : ${SHOTS}`);
 } catch (error) {

@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { PageHeader } from '@/components/app/page-header';
 import { PeriodFilter } from '@/components/app/period-filter';
+import { DayPicker, parseDay } from '@/components/app/day-picker';
 import { DayLine, FactRow } from '@/components/app/day-line';
 import { BarList } from '@/components/charts/bar-list';
 import { RevenueTrendChart } from '@/components/charts/revenue-trend-chart';
@@ -12,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getSettings, requireAdmin } from '@/lib/auth';
 import { formatDate, formatMoney } from '@/lib/format';
-import { PERIOD_LABELS, resolvePeriod } from '@/lib/dates';
+import { dayRangeUtc, PERIOD_LABELS, resolvePeriod, todayIn } from '@/lib/dates';
 import { getDayCredit } from '@/lib/credit-day';
 import { getShopScope } from '@/lib/shop';
 import { getDashboardSummary, getSalesReport } from '@/lib/reports';
@@ -35,13 +36,33 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
     tz,
   );
 
-  const today = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: tz }).format(new Date());
+  // Journée affichée en haut : aujourd'hui, ou une date passée choisie.
+  const todayDay = todayIn(tz);
+  const day = parseDay(params.jour, todayDay);
+  const isToday = day === todayDay;
+  const dayRange = dayRangeUtc(day, day, tz);
+  const dayLabel = new Intl.DateTimeFormat('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(`${day}T12:00:00Z`));
+
+  const today = new Intl.DateTimeFormat('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: tz,
+  }).format(new Date());
 
   const supabase = await createClient();
   const scope = await getShopScope();
   const shopId = scope.current?.id ?? null;
   // Chaque requête suit la boutique choisie en haut de l'écran.
   let latestQuery = supabase.from('sales').select('*');
+  // Jour passé : ses ventes à lui, au lieu des dernières.
+  if (!isToday) latestQuery = latestQuery.gte('created_at', dayRange.start).lt('created_at', dayRange.end);
   let lowStockQuery = supabase
     .from('products')
     .select('id, name, stock_quantity, minimum_stock')
@@ -57,18 +78,26 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
     lowStockQuery = lowStockQuery.eq('shop_id', shopId);
     creditsQuery = creditsQuery.eq('shop_id', shopId);
   }
-  const [summary, report, latest, lowStock, credits] = await Promise.all([
+  const [summary, report, latest, lowStock, credits, pastDay] = await Promise.all([
     getDashboardSummary(),
     getSalesReport(range.from, range.to),
     latestQuery.order('created_at', { ascending: false }).limit(8),
     lowStockQuery.order('stock_quantity').limit(50),
     creditsQuery.limit(2000),
+    isToday ? Promise.resolve(null) : getSalesReport(day, day),
   ]);
 
-  const creditTotal = (credits.data ?? []).reduce((sum, c) => sum + Number(c.total_amount) - Number(c.refunded_amount), 0);
-  const dayCredit = await getDayCredit(supabase, tz, undefined, shopId);
-  // Argent réellement entré aujourd'hui : ventes du jour − crédits non payés + crédits d'avant réglés.
-  const cashedToday = summary.periods.today.net - dayCredit.unpaidToday + dayCredit.settledToday;
+  const creditTotal = (credits.data ?? []).reduce(
+    (sum, c) => sum + Number(c.total_amount) - Number(c.refunded_amount),
+    0,
+  );
+  const dayCredit = await getDayCredit(supabase, tz, undefined, shopId, day);
+  // Chiffres de la journée affichée (aujourd'hui ou une date passée).
+  const dayNet = pastDay ? Number(pastDay.net_revenue) : summary.periods.today.net;
+  const dayCount = pastDay ? pastDay.sales_count : summary.periods.today.count;
+  // Argent réellement entré ce jour-là : ventes du jour − crédits non payés + crédits d'avant réglés.
+  const cashedToday = dayNet - dayCredit.unpaidToday + dayCredit.settledToday;
+  const dayWord = isToday ? 'aujourd’hui' : 'ce jour-là';
   const lowStockItems = settings?.stock_enabled
     ? (lowStock.data ?? []).filter((p) => p.stock_quantity <= p.minimum_stock).slice(0, 6)
     : [];
@@ -81,7 +110,16 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
     <div className="space-y-6">
       <PageHeader
         title="Tableau de bord"
-        description={<span className="inline-block first-letter:uppercase">{today} · {scope.current ? scope.current.name : scope.shops.length > 1 ? 'toutes les boutiques' : 'chiffres en temps réel'}</span>}
+        description={
+          <span className="inline-block first-letter:uppercase">
+            {today} ·{' '}
+            {scope.current
+              ? scope.current.name
+              : scope.shops.length > 1
+                ? 'toutes les boutiques'
+                : 'chiffres en temps réel'}
+          </span>
+        }
         actions={
           <Button asChild size="lg">
             <Link href="/pos">
@@ -91,29 +129,58 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
         }
       />
 
-      <DayLine
-        label="Encaissé aujourd’hui"
-        value={<AnimatedMoney value={cashedToday} currency={currency} />}
-        facts={[
-          { label: 'CA net du jour', value: money(summary.periods.today.net) },
-          { label: 'À crédit aujourd’hui', value: dayCredit.unpaidToday > 0 ? `− ${money(dayCredit.unpaidToday)}` : money(0) },
-          ...(dayCredit.settledToday > 0 ? [{ label: 'Crédits réglés aujourd’hui', value: `+ ${money(dayCredit.settledToday)}` }] : []),
-          { label: 'Ventes aujourd’hui', value: summary.periods.today.count },
-          ...(creditTotal > 0 ? [{ label: 'Reste à encaisser (tous)', value: money(creditTotal) }] : []),
-          {
-            label: 'Stock faible',
-            value: summary.low_stock_products > 0 ? `${summary.low_stock_products} produit(s)` : 'Aucun',
-          },
-        ]}
-      />
+      <section aria-label="Journée" className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-serif text-xl font-semibold first-letter:uppercase">
+            {isToday ? 'Aujourd’hui' : dayLabel}
+          </h2>
+          <DayPicker
+            basePath="/admin/dashboard"
+            day={day}
+            today={todayDay}
+            keep={{
+              period: typeof params.period === 'string' ? params.period : undefined,
+              from: typeof params.from === 'string' ? params.from : undefined,
+              to: typeof params.to === 'string' ? params.to : undefined,
+            }}
+          />
+        </div>
+        <DayLine
+          label={isToday ? 'Encaissé aujourd’hui' : 'Encaissé ce jour-là'}
+          value={<AnimatedMoney value={cashedToday} currency={currency} />}
+          facts={[
+            { label: 'CA net du jour', value: money(dayNet) },
+            {
+              label: `À crédit ${dayWord}`,
+              value: dayCredit.unpaidToday > 0 ? `− ${money(dayCredit.unpaidToday)}` : money(0),
+            },
+            ...(dayCredit.settledToday > 0
+              ? [{ label: `Crédits réglés ${dayWord}`, value: `+ ${money(dayCredit.settledToday)}` }]
+              : []),
+            { label: `Ventes ${dayWord}`, value: dayCount },
+            ...(creditTotal > 0 ? [{ label: 'Reste à encaisser (tous)', value: money(creditTotal) }] : []),
+            {
+              label: 'Stock faible',
+              value: summary.low_stock_products > 0 ? `${summary.low_stock_products} produit(s)` : 'Aucun',
+            },
+          ]}
+        />
+      </section>
 
       <Card>
         <CardContent className="space-y-6">
           <PeriodFilter basePath="/admin/dashboard" period={range.period} from={range.from} to={range.to} />
           <FactRow
             facts={[
-              { label: `CA net (${periodLabel})`, value: <AnimatedMoney value={report.net_revenue} currency={currency} /> },
-              { label: 'Ventes réalisées', value: <AnimatedCount value={report.sales_count} />, hint: `${report.items_sold} article(s) vendus` },
+              {
+                label: `CA net (${periodLabel})`,
+                value: <AnimatedMoney value={report.net_revenue} currency={currency} />,
+              },
+              {
+                label: 'Ventes réalisées',
+                value: <AnimatedCount value={report.sales_count} />,
+                hint: `${report.items_sold} article(s) vendus`,
+              },
               { label: 'Panier moyen', value: <AnimatedMoney value={report.average_basket} currency={currency} /> },
               { label: 'Produits actifs', value: <AnimatedCount value={summary.active_products} /> },
             ]}
@@ -121,8 +188,8 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
           {(Number(report.refunds_total) > 0 || report.cancelled_count > 0) && (
             <p className="text-muted-foreground">
               Ventes brutes {money(report.gross_sales)} − remboursements {money(report.refunds_total)} ={' '}
-              <strong className="text-foreground">CA net {money(report.net_revenue)}</strong>. {report.cancelled_count} vente(s)
-              annulée(s) ({money(report.cancelled_amount)}) exclue(s).
+              <strong className="text-foreground">CA net {money(report.net_revenue)}</strong>. {report.cancelled_count}{' '}
+              vente(s) annulée(s) ({money(report.cancelled_amount)}) exclue(s).
             </p>
           )}
         </CardContent>
@@ -187,10 +254,12 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
         <Card className="py-0 xl:col-span-2">
           <CardHeader className="flex-row items-center justify-between pt-5">
             <div>
-              <CardTitle>Dernières transactions</CardTitle>
+              <CardTitle className="first-letter:uppercase">
+                {isToday ? 'Dernières transactions' : `Ventes du ${dayLabel}`}
+              </CardTitle>
             </div>
             <Button asChild variant="outline" size="sm">
-              <Link href="/admin/sales">Tout voir</Link>
+              <Link href={isToday ? '/admin/sales' : `/admin/sales?from=${day}&to=${day}`}>Tout voir</Link>
             </Button>
           </CardHeader>
           <CardContent className="px-0 pb-3">
@@ -200,7 +269,9 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
               timeZone={tz}
               detailBase="/admin/sales"
               compact
-              shopNames={!shopId && scope.shops.length > 1 ? new Map(scope.shops.map((s) => [s.id, s.name])) : undefined}
+              shopNames={
+                !shopId && scope.shops.length > 1 ? new Map(scope.shops.map((s) => [s.id, s.name])) : undefined
+              }
             />
           </CardContent>
         </Card>
@@ -220,7 +291,10 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
           <CardContent>
             <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {lowStockItems.map((p) => (
-                <li key={p.id} className="flex items-center justify-between rounded-md bg-warning px-3 py-2 text-sm text-warning-foreground">
+                <li
+                  key={p.id}
+                  className="flex items-center justify-between rounded-md bg-warning px-3 py-2 text-sm text-warning-foreground"
+                >
                   <span className="truncate font-medium">{p.name}</span>
                   <span className="shrink-0 tabular-nums">
                     {p.stock_quantity} / min. {p.minimum_stock}
