@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/app/page-header';
 import { Pagination, parsePage } from '@/components/app/pagination';
 import { SalesFiltersForm } from '@/components/sales/sales-filters';
 import { DayLine } from '@/components/app/day-line';
+import { DayPicker, parseDay } from '@/components/app/day-picker';
 import { SalesTable } from '@/components/sales/sales-table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -30,28 +31,42 @@ export default async function MySalesPage({ searchParams }: PageProps<'/pos/sale
   const currency = settings?.currency ?? 'GNF';
   const supabase = await createClient();
   const today = todayIn(tz);
-  const todayRange = dayRangeUtc(today, today, tz);
+  // Journée résumée en haut : aujourd'hui, ou une date passée choisie.
+  const shownDay = parseDay(params.jour, today);
+  const isToday = shownDay === today;
+  const todayRange = dayRangeUtc(shownDay, shownDay, tz);
+  const dayLabel = new Intl.DateTimeFormat('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(`${shownDay}T12:00:00Z`));
 
   const [{ rows, count }, methods, todaySales, dayCredit] = await Promise.all([
     listSales(supabase, filters, tz, { offset: (page - 1) * PAGE_SIZE, limit: PAGE_SIZE, cashierId: session.userId }),
     supabase.from('payment_methods').select('code, label').order('sort_order'),
-    // Ma journée : mes ventes d'aujourd'hui (hors ventes annulées), nettes des remboursements.
+    // Ma journée : mes ventes du jour affiché (hors ventes annulées), nettes des remboursements.
     supabase
       .from('sales')
-      .select('total_amount, refunded_amount, payment_method, payment_status, sale_status')
+      .select('total_amount, refunded_amount, payment_method, payment_status, sale_status, paid_at')
       .eq('cashier_id', session.userId)
       .gte('created_at', todayRange.start)
       .lt('created_at', todayRange.end)
       .neq('sale_status', 'cancelled')
       .limit(2000),
-    getDayCredit(supabase, tz, session.userId),
+    getDayCredit(supabase, tz, session.userId, null, shownDay),
   ]);
 
   const day = (todaySales.data ?? []).reduce(
     (acc, sale) => {
       const net = Number(sale.total_amount) - Number(sale.refunded_amount);
       acc.count += 1;
-      if (sale.payment_status === 'pending') {
+      // Crédit encore impayé à la fin de la journée affichée.
+      if (
+        sale.payment_method === 'credit' &&
+        (!sale.paid_at || Date.parse(sale.paid_at) >= Date.parse(todayRange.end))
+      ) {
         acc.credit += net;
         return acc;
       }
@@ -75,23 +90,41 @@ export default async function MySalesPage({ searchParams }: PageProps<'/pos/sale
           </Button>
         }
       />
-      <section aria-label="Ma journée" className="mb-4">
+      <section aria-label="Ma journée" className="mb-4 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-serif text-xl font-semibold first-letter:uppercase">
+            {isToday ? 'Aujourd’hui' : dayLabel}
+          </h2>
+          <DayPicker basePath="/pos/sales" day={shownDay} today={today} />
+        </div>
         <DayLine
-          label="Encaissé aujourd’hui"
+          label={isToday ? 'Encaissé aujourd’hui' : 'Encaissé ce jour-là'}
           value={formatMoney(day.total + dayCredit.settledToday, currency)}
           facts={[
             { label: 'Ventes du jour', value: formatMoney(day.total + day.credit, currency) },
-            { label: 'À crédit (non payé)', value: day.credit > 0 ? `− ${formatMoney(day.credit, currency)}` : formatMoney(0, currency) },
+            {
+              label: 'À crédit (non payé)',
+              value: day.credit > 0 ? `− ${formatMoney(day.credit, currency)}` : formatMoney(0, currency),
+            },
             ...(dayCredit.settledToday > 0
-              ? [{ label: 'Crédits réglés aujourd’hui', value: `+ ${formatMoney(dayCredit.settledToday, currency)}` }]
+              ? [
+                  {
+                    label: isToday ? 'Crédits réglés aujourd’hui' : 'Crédits réglés ce jour-là',
+                    value: `+ ${formatMoney(dayCredit.settledToday, currency)}`,
+                  },
+                ]
               : []),
             { label: 'Nombre de ventes', value: day.count },
-            { label: 'Panier moyen', value: day.count > 0 ? formatMoney(Math.round((day.total + day.credit) / day.count), currency) : '—' },
+            {
+              label: 'Panier moyen',
+              value: day.count > 0 ? formatMoney(Math.round((day.total + day.credit) / day.count), currency) : '—',
+            },
             { label: 'Dont espèces', value: formatMoney(day.cash, currency) },
           ]}
         />
         <p className="mt-2 text-sm text-muted-foreground">
-          Ventes du jour − crédits non payés + anciens crédits réglés aujourd’hui. Hors ventes annulées, remboursements déduits.
+          Ventes du jour − crédits non payés + anciens crédits réglés aujourd’hui. Hors ventes annulées, remboursements
+          déduits.
         </p>
       </section>
       <Card className="mb-4">
@@ -103,13 +136,7 @@ export default async function MySalesPage({ searchParams }: PageProps<'/pos/sale
       </Card>
       <Card className="py-0">
         <CardContent className="px-0 pb-4">
-          <SalesTable
-            rows={rows}
-            currency={currency}
-            timeZone={tz}
-            detailBase="/pos/sales"
-            showCashier={false}
-          />
+          <SalesTable rows={rows} currency={currency} timeZone={tz} detailBase="/pos/sales" showCashier={false} />
           <div className="px-4">
             <Pagination page={page} pageSize={PAGE_SIZE} total={count} basePath="/pos/sales" params={filters} />
           </div>
