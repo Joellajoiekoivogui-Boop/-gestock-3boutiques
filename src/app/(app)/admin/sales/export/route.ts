@@ -4,6 +4,7 @@ import type { SaleRow } from '@/lib/database.types';
 import { formatDateTime, SALE_STATUS_LABELS } from '@/lib/format';
 import { can } from '@/lib/permissions';
 import { listSales, parseSalesFilters } from '@/lib/sales-query';
+import { getShopScope } from '@/lib/shop';
 import { createClient } from '@/lib/supabase/server';
 
 const MAX_ROWS = 10_000;
@@ -19,11 +20,14 @@ export async function GET(request: Request) {
   const settings = await getSettings();
   const tz = settings?.timezone ?? 'Africa/Conakry';
   const supabase = await createClient();
-  const { rows } = await listSales(supabase, filters, tz, { offset: 0, limit: MAX_ROWS });
+  const scope = await getShopScope();
+  const names = new Map(scope.shops.map((s) => [s.id, s.name]));
+  const { rows } = await listSales(supabase, filters, tz, { offset: 0, limit: MAX_ROWS, shopId: scope.current?.id });
 
   const csv = toCsv<SaleRow>(rows, [
     { header: 'N° de reçu', value: (s) => s.receipt_number },
     { header: 'Date', value: (s) => formatDateTime(s.created_at, tz) },
+    ...(names.size ? [{ header: 'Boutique', value: (s: SaleRow) => names.get(s.shop_id) ?? '' }] : []),
     { header: 'Caissier', value: (s) => s.cashier_name },
     { header: 'Articles', value: (s) => s.item_count },
     { header: 'Sous-total', value: (s) => Number(s.subtotal) },

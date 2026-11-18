@@ -42,6 +42,9 @@ select distinct on (lower(btrim(s.customer_name)), coalesce(public.phone_key(s.c
  where s.customer_name is not null and s.customer_id is null
  order by lower(btrim(s.customer_name)), coalesce(public.phone_key(s.customer_phone), ''), s.created_at;
 
+-- Les ventes annulées sont figées par le déclencheur sales_protect : on le
+-- suspend le temps de ce rattachement (seule la colonne customer_id change).
+alter table public.sales disable trigger sales_protect;
 update public.sales s
    set customer_id = c.id
   from public.customers c
@@ -49,6 +52,7 @@ update public.sales s
    and s.customer_name is not null
    and lower(btrim(s.customer_name)) = lower(c.name)
    and coalesce(public.phone_key(s.customer_phone), '') = coalesce(c.phone_key, '');
+alter table public.sales enable trigger sales_protect;
 
 -- Accès : tout compte actif consulte les dossiers (pour les retrouver à la
 -- caisse) ; seul l'administrateur les modifie directement. La caisse crée les

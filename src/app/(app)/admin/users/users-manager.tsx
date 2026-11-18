@@ -73,15 +73,52 @@ function PermissionsField({
   );
 }
 
-function CreateUserDialog({ onClose }: { onClose: () => void }) {
+type Shop = { id: string; name: string };
+
+function ShopField({
+  shops,
+  id,
+  value,
+  onChange,
+  error,
+}: {
+  shops: Shop[];
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+}) {
+  return (
+    <Field label="Boutique" htmlFor={id} error={error} hint="Le caissier ne voit et ne vend que dans cette boutique.">
+      <NativeSelect id={id} value={value} aria-invalid={!!error} onChange={(event) => onChange(event.target.value)}>
+        <option value="">Choisir la boutique</option>
+        {shops.map((shop) => (
+          <option key={shop.id} value={shop.id}>
+            {shop.name}
+          </option>
+        ))}
+      </NativeSelect>
+    </Field>
+  );
+}
+
+function CreateUserDialog({ onClose, shops }: { onClose: () => void; shops: Shop[] }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const form = useForm<CreateUserValues>({
     resolver: zodResolver(createUserSchema),
-    defaultValues: { fullName: '', email: '', password: '', role: 'cashier', permissions: [] },
+    defaultValues: {
+      fullName: '',
+      email: '',
+      password: '',
+      role: 'cashier',
+      permissions: [],
+      shopId: shops.length === 1 ? shops[0]?.id : null,
+    },
   });
   const { errors } = form.formState;
   const role = useWatch({ control: form.control, name: 'role' });
+  const shopId = useWatch({ control: form.control, name: 'shopId' });
 
   const submit = form.handleSubmit((values) =>
     startTransition(async () => {
@@ -122,6 +159,15 @@ function CreateUserDialog({ onClose }: { onClose: () => void }) {
               <option value="admin">{ROLE_LABELS.admin}</option>
             </NativeSelect>
           </Field>
+          {shops.length > 0 && role !== 'admin' && (
+            <ShopField
+              shops={shops}
+              id="u-shop"
+              value={shopId ?? ''}
+              onChange={(v) => form.setValue('shopId', v || null, { shouldValidate: false })}
+              error={errors.shopId?.message}
+            />
+          )}
           <PermissionsField control={form.control} disabled={role === 'admin'} />
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={pending}>
@@ -137,7 +183,17 @@ function CreateUserDialog({ onClose }: { onClose: () => void }) {
   );
 }
 
-function EditUserDialog({ user, isSelf, onClose }: { user: ProfileRow; isSelf: boolean; onClose: () => void }) {
+function EditUserDialog({
+  user,
+  isSelf,
+  onClose,
+  shops,
+}: {
+  user: ProfileRow;
+  isSelf: boolean;
+  onClose: () => void;
+  shops: Shop[];
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const form = useForm<UpdateUserValues>({
@@ -148,10 +204,12 @@ function EditUserDialog({ user, isSelf, onClose }: { user: ProfileRow; isSelf: b
       role: user.role,
       permissions: user.permissions as Permission[],
       isActive: user.is_active,
+      shopId: user.shop_id ?? null,
     },
   });
   const { errors } = form.formState;
   const role = useWatch({ control: form.control, name: 'role' });
+  const shopId = useWatch({ control: form.control, name: 'shopId' });
 
   const submit = form.handleSubmit((values) =>
     startTransition(async () => {
@@ -187,6 +245,15 @@ function EditUserDialog({ user, isSelf, onClose }: { user: ProfileRow; isSelf: b
               </NativeSelect>
             )}
           </Field>
+          {shops.length > 0 && role !== 'admin' && (
+            <ShopField
+              shops={shops}
+              id="e-shop"
+              value={shopId ?? ''}
+              onChange={(v) => form.setValue('shopId', v || null, { shouldValidate: false })}
+              error={errors.shopId?.message}
+            />
+          )}
           <PermissionsField control={form.control} disabled={role === 'admin'} />
           <Controller
             control={form.control}
@@ -259,7 +326,18 @@ function PasswordDialog({ user, onClose }: { user: ProfileRow; onClose: () => vo
   );
 }
 
-export function UsersManager({ users, currentUserId, canManageAuth }: { users: ProfileRow[]; currentUserId: string; canManageAuth: boolean }) {
+export function UsersManager({
+  users,
+  currentUserId,
+  canManageAuth,
+  shops = [],
+}: {
+  users: ProfileRow[];
+  currentUserId: string;
+  canManageAuth: boolean;
+  shops?: Shop[];
+}) {
+  const shopName = new Map(shops.map((s) => [s.id, s.name]));
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<ProfileRow | null>(null);
   const [password, setPassword] = useState<ProfileRow | null>(null);
@@ -318,6 +396,14 @@ export function UsersManager({ users, currentUserId, canManageAuth }: { users: P
                     <dt className="text-muted-foreground">Rôle</dt>
                     <dd className="font-semibold">{ROLE_LABELS[u.role]}</dd>
                   </div>
+                  {shops.length > 0 && (
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-muted-foreground">Boutique</dt>
+                      <dd className={cn('font-semibold', u.role !== 'admin' && !u.shop_id && 'text-destructive')}>
+                        {u.role === 'admin' ? 'Toutes' : u.shop_id ? (shopName.get(u.shop_id) ?? '—') : 'À choisir'}
+                      </dd>
+                    </div>
+                  )}
                   <div className="flex justify-between gap-3">
                     <dt className="text-muted-foreground">Compte créé le</dt>
                     <dd className="tabular-nums">{formatDate(u.created_at)}</dd>
@@ -356,8 +442,13 @@ export function UsersManager({ users, currentUserId, canManageAuth }: { users: P
           );
         })}
       </ul>
-      {creating && <CreateUserDialog onClose={() => setCreating(false)} />}
-      {editing && <EditUserDialog user={editing} isSelf={editing.id === currentUserId} onClose={() => setEditing(null)} />}
+      {creating && <CreateUserDialog shops={shops} onClose={() => setCreating(false)} />}
+      {editing && <EditUserDialog
+          shops={shops}
+          user={editing}
+          isSelf={editing.id === currentUserId}
+          onClose={() => setEditing(null)}
+        />}
       {password && <PasswordDialog user={password} onClose={() => setPassword(null)} />}
     </>
   );

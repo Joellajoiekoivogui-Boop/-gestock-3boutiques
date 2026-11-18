@@ -13,6 +13,7 @@ export function SalesTable({
   detailBase,
   showCashier = true,
   compact = false,
+  shopNames,
 }: {
   rows: SaleRow[];
   currency: string;
@@ -21,6 +22,8 @@ export function SalesTable({
   showCashier?: boolean;
   // Version courte pour le tableau de bord : reçu, date, montant, statut.
   compact?: boolean;
+  /** Nom des boutiques : affiché sous le numéro de reçu (vue « toutes les boutiques »). */
+  shopNames?: Map<string, string>;
 }) {
   if (rows.length === 0) {
     return <EmptyState title="Aucune vente" description="Aucune vente ne correspond à ces critères." />;
@@ -46,6 +49,7 @@ export function SalesTable({
               <Link href={`${detailBase}/${sale.id}`} className="hover:underline">
                 {sale.receipt_number}
               </Link>
+              {shopNames && <p className="text-xs font-semibold text-gold-strong">{shopNames.get(sale.shop_id) ?? ''}</p>}
               <p className="text-xs font-normal text-muted-foreground sm:hidden">
                 {formatDateTime(sale.created_at, timeZone)}
               </p>

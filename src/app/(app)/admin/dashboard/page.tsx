@@ -14,6 +14,7 @@ import { getSettings, requireAdmin } from '@/lib/auth';
 import { formatDate, formatMoney } from '@/lib/format';
 import { PERIOD_LABELS, resolvePeriod } from '@/lib/dates';
 import { getDayCredit } from '@/lib/credit-day';
+import { getShopScope } from '@/lib/shop';
 import { getDashboardSummary, getSalesReport } from '@/lib/reports';
 import { createClient } from '@/lib/supabase/server';
 
@@ -37,27 +38,35 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
   const today = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: tz }).format(new Date());
 
   const supabase = await createClient();
+  const scope = await getShopScope();
+  const shopId = scope.current?.id ?? null;
+  // Chaque requête suit la boutique choisie en haut de l'écran.
+  let latestQuery = supabase.from('sales').select('*');
+  let lowStockQuery = supabase
+    .from('products')
+    .select('id, name, stock_quantity, minimum_stock')
+    .eq('track_stock', true)
+    .eq('is_archived', false);
+  let creditsQuery = supabase
+    .from('sales')
+    .select('total_amount, refunded_amount')
+    .eq('payment_status', 'pending')
+    .neq('sale_status', 'cancelled');
+  if (shopId) {
+    latestQuery = latestQuery.eq('shop_id', shopId);
+    lowStockQuery = lowStockQuery.eq('shop_id', shopId);
+    creditsQuery = creditsQuery.eq('shop_id', shopId);
+  }
   const [summary, report, latest, lowStock, credits] = await Promise.all([
     getDashboardSummary(),
     getSalesReport(range.from, range.to),
-    supabase.from('sales').select('*').order('created_at', { ascending: false }).limit(8),
-    supabase
-      .from('products')
-      .select('id, name, stock_quantity, minimum_stock')
-      .eq('track_stock', true)
-      .eq('is_archived', false)
-      .order('stock_quantity')
-      .limit(50),
-    supabase
-      .from('sales')
-      .select('total_amount, refunded_amount')
-      .eq('payment_status', 'pending')
-      .neq('sale_status', 'cancelled')
-      .limit(2000),
+    latestQuery.order('created_at', { ascending: false }).limit(8),
+    lowStockQuery.order('stock_quantity').limit(50),
+    creditsQuery.limit(2000),
   ]);
 
   const creditTotal = (credits.data ?? []).reduce((sum, c) => sum + Number(c.total_amount) - Number(c.refunded_amount), 0);
-  const dayCredit = await getDayCredit(supabase, tz);
+  const dayCredit = await getDayCredit(supabase, tz, undefined, shopId);
   // Argent réellement entré aujourd'hui : ventes du jour − crédits non payés + crédits d'avant réglés.
   const cashedToday = summary.periods.today.net - dayCredit.unpaidToday + dayCredit.settledToday;
   const lowStockItems = settings?.stock_enabled
@@ -72,7 +81,7 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
     <div className="space-y-6">
       <PageHeader
         title="Tableau de bord"
-        description={<span className="inline-block first-letter:uppercase">{today} · chiffres en temps réel</span>}
+        description={<span className="inline-block first-letter:uppercase">{today} · {scope.current ? scope.current.name : scope.shops.length > 1 ? 'toutes les boutiques' : 'chiffres en temps réel'}</span>}
         actions={
           <Button asChild size="lg">
             <Link href="/pos">
@@ -185,7 +194,14 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
             </Button>
           </CardHeader>
           <CardContent className="px-0 pb-3">
-            <SalesTable rows={latest.data ?? []} currency={currency} timeZone={tz} detailBase="/admin/sales" compact />
+            <SalesTable
+              rows={latest.data ?? []}
+              currency={currency}
+              timeZone={tz}
+              detailBase="/admin/sales"
+              compact
+              shopNames={!shopId && scope.shops.length > 1 ? new Map(scope.shops.map((s) => [s.id, s.name])) : undefined}
+            />
           </CardContent>
         </Card>
       </div>

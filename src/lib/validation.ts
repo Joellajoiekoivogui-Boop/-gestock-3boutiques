@@ -167,6 +167,8 @@ export const createUserSchema = z.object({
   password: passwordSchema,
   role: roleSchema,
   permissions: permissionsSchema,
+  // Boutique du caissier (sans objet pour un administrateur).
+  shopId: idSchema.nullish(),
 });
 export type CreateUserValues = z.input<typeof createUserSchema>;
 export type CreateUserOutput = z.output<typeof createUserSchema>;
@@ -177,6 +179,7 @@ export const updateUserSchema = z.object({
   role: roleSchema,
   permissions: permissionsSchema,
   isActive: z.boolean(),
+  shopId: idSchema.nullish(),
 });
 export type UpdateUserValues = z.input<typeof updateUserSchema>;
 export type UpdateUserOutput = z.output<typeof updateUserSchema>;

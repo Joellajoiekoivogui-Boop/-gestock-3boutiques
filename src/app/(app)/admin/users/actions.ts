@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { authorizeAdmin } from '@/lib/auth';
 import { DENIED, fail, toUserMessage, type ActionResult } from '@/lib/errors';
+import { getShopScope } from '@/lib/shop';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import {
@@ -19,6 +20,20 @@ const NO_SERVICE_KEY =
   'La gestion des comptes nécessite la variable SUPABASE_SERVICE_ROLE_KEY côté serveur (voir README).';
 const BAN_FOREVER = '876000h'; // ~100 ans : bloque la connexion et le renouvellement de session
 
+// Boutique d'un compte : obligatoire pour un caissier dès que la base a des
+// boutiques ; un administrateur n'en a pas (il voit les deux).
+async function shopFor(
+  role: 'admin' | 'cashier',
+  shopId: string | null | undefined,
+): Promise<{ ok: true; value: { shop_id?: string | null } } | { ok: false; error: string }> {
+  const { shops } = await getShopScope();
+  if (!shops.length) return { ok: true, value: {} };
+  if (role === 'admin') return { ok: true, value: { shop_id: null } };
+  const shop = shops.find((s) => s.id === shopId);
+  if (!shop) return { ok: false, error: 'Choisissez la boutique de ce caissier.' };
+  return { ok: true, value: { shop_id: shop.id } };
+}
+
 export async function createUserAction(values: CreateUserValues): Promise<ActionResult> {
   if (!(await authorizeAdmin())) return fail(DENIED);
   const parsed = createUserSchema.safeParse(values);
@@ -26,7 +41,9 @@ export async function createUserAction(values: CreateUserValues): Promise<Action
   const admin = createAdminClient();
   if (!admin) return fail(NO_SERVICE_KEY);
 
-  const { email, password, fullName, role, permissions } = parsed.data;
+  const { email, password, fullName, role, permissions, shopId } = parsed.data;
+  const shop = await shopFor(role, shopId);
+  if (!shop.ok) return fail(shop.error, { shopId: [shop.error] });
   const { data, error } = await admin.auth.admin.createUser({
     email,
     password,
@@ -46,7 +63,7 @@ export async function createUserAction(values: CreateUserValues): Promise<Action
   const supabase = await createClient();
   const { error: profileError } = await supabase
     .from('profiles')
-    .update({ full_name: fullName, role, permissions: role === 'admin' ? [] : permissions, is_active: true })
+    .update({ full_name: fullName, role, permissions: role === 'admin' ? [] : permissions, is_active: true, ...shop.value })
     .eq('id', data.user.id);
   if (profileError) {
     await admin.auth.admin.deleteUser(data.user.id);
@@ -57,7 +74,7 @@ export async function createUserAction(values: CreateUserValues): Promise<Action
     p_action: 'user.created',
     p_entity_type: 'profiles',
     p_entity_id: data.user.id,
-    p_details: { email, role },
+    p_details: { email, role, ...shop.value },
   });
   revalidatePath('/admin/users');
   return { ok: true, data: undefined };
@@ -68,7 +85,9 @@ export async function updateUserAction(values: UpdateUserValues): Promise<Action
   if (!session) return fail(DENIED);
   const parsed = updateUserSchema.safeParse(values);
   if (!parsed.success) return fail('Vérifiez le formulaire.', fieldErrorsOf(parsed.error));
-  const { id, fullName, role, permissions, isActive } = parsed.data;
+  const { id, fullName, role, permissions, isActive, shopId } = parsed.data;
+  const shop = await shopFor(role, shopId);
+  if (!shop.ok) return fail(shop.error, { shopId: [shop.error] });
 
   if (id === session.userId && (!isActive || role !== 'admin')) {
     return fail('Vous ne pouvez pas désactiver votre propre compte ni retirer votre rôle d’administrateur.');
@@ -80,7 +99,7 @@ export async function updateUserAction(values: UpdateUserValues): Promise<Action
 
   const { error } = await supabase
     .from('profiles')
-    .update({ full_name: fullName, role, permissions: role === 'admin' ? [] : permissions, is_active: isActive })
+    .update({ full_name: fullName, role, permissions: role === 'admin' ? [] : permissions, is_active: isActive, ...shop.value })
     .eq('id', id);
   if (error) return fail(toUserMessage(error));
 

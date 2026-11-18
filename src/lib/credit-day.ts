@@ -15,6 +15,7 @@ export async function getDayCredit(
   supabase: Client,
   timeZone: string,
   cashierId?: string,
+  shopId?: string | null,
 ): Promise<{ unpaidToday: number; settledToday: number }> {
   const today = todayIn(timeZone);
   const { start, end } = dayRangeUtc(today, today, timeZone);
@@ -41,6 +42,10 @@ export async function getDayCredit(
     // Un crédit fait et réglé aujourd'hui est déjà compté dans les ventes du jour.
     .lt('created_at', start)
     .limit(2000);
+  if (shopId) {
+    unpaid = unpaid.eq('shop_id', shopId);
+    settled = settled.eq('shop_id', shopId);
+  }
   if (cashierId) {
     unpaid = unpaid.eq('cashier_id', cashierId);
     settled = settled.eq('settled_by', cashierId);

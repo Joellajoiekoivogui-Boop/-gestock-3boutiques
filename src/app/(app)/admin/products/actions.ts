@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { authorizeAdmin } from '@/lib/auth';
 import { DENIED, fail, toUserMessage, type ActionResult } from '@/lib/errors';
+import { getShopScope } from '@/lib/shop';
 import { removeImage, uploadImage } from '@/lib/storage';
 import { createClient } from '@/lib/supabase/server';
 import { fieldErrorsOf, idSchema, productSchema, validateImage } from '@/lib/validation';
@@ -40,6 +41,18 @@ export async function saveProductAction(formData: FormData): Promise<ActionResul
   const imageError = validateImage(file);
   if (imageError) return fail(imageError, { image: [imageError] });
 
+  // Un nouveau produit appartient à une boutique (choisie dans le formulaire).
+  let shopId: string | undefined;
+  if (!id) {
+    const { shops } = await getShopScope();
+    if (shops.length > 0) {
+      const raw = formData.get('shopId');
+      const shop = shops.find((s) => s.id === raw);
+      if (!shop) return fail('Choisissez la boutique du produit.', { shopId: ['Choisissez la boutique du produit.'] });
+      shopId = shop.id;
+    }
+  }
+
   const supabase = await createClient();
 
   let previousImage: string | null = null;
@@ -75,7 +88,11 @@ export async function saveProductAction(formData: FormData): Promise<ActionResul
     const { error } = await supabase.from('products').update(record).eq('id', id);
     if (error) return fail(toUserMessage(error));
   } else {
-    const { data, error } = await supabase.from('products').insert(record).select('id').single();
+    const { data, error } = await supabase
+      .from('products')
+      .insert({ ...record, ...(shopId ? { shop_id: shopId } : {}) })
+      .select('id')
+      .single();
     if (error || !data) return fail(toUserMessage(error));
     productId = data.id;
 

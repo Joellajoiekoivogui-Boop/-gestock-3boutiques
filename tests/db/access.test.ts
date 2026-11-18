@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { as, createProduct, createSale, createUser, n, pool, sql, stockOf } from './helpers';
+import { as, createProduct, createSale, createUser, n, pool, SHOP1, sql, stockOf } from './helpers';
 
 let admin: string;
 let cashierA: string;
@@ -17,9 +17,17 @@ afterAll(async () => {
 
 describe('comptes et rôles', () => {
   it('crée un profil caissier INACTIF pour tout nouveau compte', async () => {
-    await sql(`insert into auth.users (email, raw_user_meta_data) values ('nouveau@test.local', '{"full_name":"Nouveau"}')`);
-    const [profile] = await sql(`select role, is_active, full_name from public.profiles where email = 'nouveau@test.local'`);
-    expect(profile).toEqual({ role: 'cashier', is_active: false, full_name: 'Nouveau' });
+    await sql(
+      `insert into auth.users (email, raw_user_meta_data) values ('nouveau@test.local', '{"full_name":"Nouveau"}')`,
+    );
+    const [profile] = await sql(
+      `select role, is_active, full_name from public.profiles where email = 'nouveau@test.local'`,
+    );
+    expect(profile).toEqual({
+      role: 'cashier',
+      is_active: false,
+      full_name: 'Nouveau',
+    });
   });
 
   it('un compte inactif ne voit rien', async () => {
@@ -80,7 +88,9 @@ describe('catalogue', () => {
     ).rejects.toThrow(/row-level security/);
 
     const { rows } = await as(admin, (c) =>
-      c.query(`insert into public.products (name, price, track_stock) values ('Attiéké poisson', 30000, true) returning id`),
+      c.query(
+        `insert into public.products (name, price, track_stock, shop_id) values ('Attiéké poisson', 30000, true, '${SHOP1}') returning id`,
+      ),
     );
     const id = rows[0].id;
     const updated = await as(cashierA, (c) => c.query(`update public.products set price = 1 where id = $1`, [id]));
@@ -93,9 +103,7 @@ describe('catalogue', () => {
       as(admin, (c) => c.query(`update public.products set stock_quantity = 999 where id = $1`, [p])),
     ).rejects.toThrow(/permission denied/);
     await expect(
-      as(admin, (c) =>
-        c.query(`insert into public.products (name, price, stock_quantity) values ('X', 1, 50)`),
-      ),
+      as(admin, (c) => c.query(`insert into public.products (name, price, stock_quantity) values ('X', 1, 50)`)),
     ).rejects.toThrow(/permission denied/);
     expect(await stockOf(p)).toBe(3);
   });
@@ -110,13 +118,12 @@ describe('catalogue', () => {
 
   it('journalise les modifications de produits', async () => {
     const { rows } = await as(admin, (c) =>
-      c.query(`insert into public.products (name, price) values ('Café', 5000) returning id`),
+      c.query(`insert into public.products (name, price, shop_id) values ('Café', 5000, '${SHOP1}') returning id`),
     );
     await as(admin, (c) => c.query(`update public.products set price = 6000 where id = $1`, [rows[0].id]));
-    const logs = await sql(
-      `select action, user_id, details from public.audit_logs where entity_id = $1 order by id`,
-      [rows[0].id],
-    );
+    const logs = await sql(`select action, user_id, details from public.audit_logs where entity_id = $1 order by id`, [
+      rows[0].id,
+    ]);
     expect(logs.map((l) => l.action)).toEqual(['products.insert', 'products.update']);
     expect(logs[1].user_id).toBe(admin);
     expect(logs[1].details.changes.price).toEqual({ old: 5000, new: 6000 });
@@ -157,8 +164,12 @@ describe('visibilité des ventes', () => {
     await expect(
       as(cashierA, (c) => c.query(`select public.log_admin_event('user.created', 'profiles', 'x', '{}')`)),
     ).rejects.toThrow(/réservé aux administrateurs/);
-    await as(admin, (c) => c.query(`select public.log_admin_event('user.password_reset', 'profiles', $1, '{}')`, [cashierA]));
-    const [log] = await sql(`select user_id, action from public.audit_logs where action = 'user.password_reset' order by id desc limit 1`);
+    await as(admin, (c) =>
+      c.query(`select public.log_admin_event('user.password_reset', 'profiles', $1, '{}')`, [cashierA]),
+    );
+    const [log] = await sql(
+      `select user_id, action from public.audit_logs where action = 'user.password_reset' order by id desc limit 1`,
+    );
     expect(log).toEqual({ user_id: admin, action: 'user.password_reset' });
     await expect(
       as(admin, (c) => c.query(`select public.log_admin_event('pas valide', 'profiles', 'x', '{}')`)),
@@ -190,8 +201,20 @@ describe('mouvements de stock', () => {
       [p],
     );
     expect(moves).toEqual([
-      { movement_type: 'restock', quantity: 20, stock_after: 20, reason: 'Livraison', user_id: admin },
-      { movement_type: 'adjustment', quantity: -3, stock_after: 17, reason: 'Casse', user_id: admin },
+      {
+        movement_type: 'restock',
+        quantity: 20,
+        stock_after: 20,
+        reason: 'Livraison',
+        user_id: admin,
+      },
+      {
+        movement_type: 'adjustment',
+        quantity: -3,
+        stock_after: 17,
+        reason: 'Casse',
+        user_id: admin,
+      },
     ]);
   });
 
@@ -237,11 +260,15 @@ describe('annulations et remboursements', () => {
     const [row] = await sql(`select sale_status, cancel_reason, cancelled_by from public.sales where id = $1`, [
       sale.sale_id,
     ]);
-    expect(row).toEqual({ sale_status: 'cancelled', cancel_reason: 'Erreur de saisie', cancelled_by: admin });
+    expect(row).toEqual({
+      sale_status: 'cancelled',
+      cancel_reason: 'Erreur de saisie',
+      cancelled_by: admin,
+    });
 
-    await expect(
-      as(admin, (c) => c.query(`select public.cancel_sale($1, 'Encore')`, [sale.sale_id])),
-    ).rejects.toThrow(/déjà annulée/);
+    await expect(as(admin, (c) => c.query(`select public.cancel_sale($1, 'Encore')`, [sale.sale_id]))).rejects.toThrow(
+      /déjà annulée/,
+    );
 
     const logs = await sql(`select action from public.audit_logs where entity_id = $1 order by id`, [sale.sale_id]);
     expect(logs.map((l) => l.action)).toEqual(['sale.created', 'sale.cancelled']);
