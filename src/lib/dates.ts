@@ -1,5 +1,11 @@
 // Calculs de dates dans le fuseau de l'établissement (Africa/Conakry par défaut).
 // Les jours sont manipulés sous forme « AAAA-MM-JJ ».
+//
+// JOURNÉE DE VENTE : elle commence à 7h et finit le lendemain à 7h. Une vente
+// faite le 17 à 2h du matin compte pour la journée du 16. La même heure est
+// utilisée par la base (fonction public.day_start_hours).
+export const DAY_START_HOUR = 7;
+const DAY_START_MS = DAY_START_HOUR * 3_600_000;
 
 export type PeriodKey = 'today' | 'week' | 'month' | 'custom';
 
@@ -18,9 +24,12 @@ export function isDay(value: unknown): value is string {
   return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
 }
 
+/** Journée de vente en cours (avant 7h, c'est encore celle de la veille). */
 export function todayIn(timeZone: string, now: Date = new Date()): string {
   // en-CA formate en AAAA-MM-JJ.
-  return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
+  return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(
+    new Date(now.getTime() - DAY_START_MS),
+  );
 }
 
 export function addDays(day: string, days: number): string {
@@ -97,10 +106,11 @@ export function startOfDayUtc(day: string, timeZone: string): Date {
   return new Date(result);
 }
 
-// Intervalle [début, fin[ en UTC couvrant les jours from..to inclus.
+// Intervalle [début, fin[ en UTC couvrant les journées de vente from..to
+// incluses : du premier jour à 7h jusqu'au lendemain du dernier jour à 7h.
 export function dayRangeUtc(from: string, to: string, timeZone: string): { start: string; end: string } {
   return {
-    start: startOfDayUtc(from, timeZone).toISOString(),
-    end: startOfDayUtc(addDays(to, 1), timeZone).toISOString(),
+    start: new Date(startOfDayUtc(from, timeZone).getTime() + DAY_START_MS).toISOString(),
+    end: new Date(startOfDayUtc(addDays(to, 1), timeZone).getTime() + DAY_START_MS).toISOString(),
   };
 }

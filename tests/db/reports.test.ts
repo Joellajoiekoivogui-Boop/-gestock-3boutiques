@@ -38,9 +38,7 @@ type Report = Record<string, unknown> & {
 };
 
 async function today(): Promise<string> {
-  const [row] = await sql<{ d: string }>(
-    `select to_char((now() at time zone timezone)::date, 'YYYY-MM-DD') as d from public.restaurant_settings`,
-  );
+  const [row] = await sql<{ d: string }>(`select to_char(public.current_business_day(), 'YYYY-MM-DD') as d`);
   return row.d;
 }
 

@@ -16,6 +16,8 @@ import { formatDate, formatMoney } from '@/lib/format';
 import { dayRangeUtc, PERIOD_LABELS, resolvePeriod, todayIn } from '@/lib/dates';
 import { getDayCredit } from '@/lib/credit-day';
 import { getShopScope } from '@/lib/shop';
+import { getDayExpenses } from '@/lib/expenses';
+import { ExpensesCard } from '@/components/app/expenses-card';
 import { getDashboardSummary, getSalesReport } from '@/lib/reports';
 import { createClient } from '@/lib/supabase/server';
 
@@ -53,8 +55,9 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
     weekday: 'long',
     day: 'numeric',
     month: 'long',
-    timeZone: tz,
-  }).format(new Date());
+    // Journée de vente (de 7h à 7h) : avant 7h, c'est encore la veille.
+    timeZone: 'UTC',
+  }).format(new Date(`${todayDay}T12:00:00Z`));
 
   const supabase = await createClient();
   const scope = await getShopScope();
@@ -91,12 +94,16 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
     (sum, c) => sum + Number(c.total_amount) - Number(c.refunded_amount),
     0,
   );
-  const dayCredit = await getDayCredit(supabase, tz, undefined, shopId, day);
+  const [dayCredit, expenses] = await Promise.all([
+    getDayCredit(supabase, tz, undefined, shopId, day),
+    getDayExpenses(supabase, day, { shopId }),
+  ]);
   // Chiffres de la journée affichée (aujourd'hui ou une date passée).
   const dayNet = pastDay ? Number(pastDay.net_revenue) : summary.periods.today.net;
   const dayCount = pastDay ? pastDay.sales_count : summary.periods.today.count;
   // Argent réellement entré ce jour-là : ventes du jour − crédits non payés + crédits d'avant réglés.
-  const cashedToday = dayNet - dayCredit.unpaidToday + dayCredit.settledToday;
+  // … moins les dépenses payées avec l'argent de la caisse.
+  const cashedToday = dayNet - dayCredit.unpaidToday + dayCredit.settledToday - expenses.total;
   const dayWord = isToday ? 'aujourd’hui' : 'ce jour-là';
   const lowStockItems = settings?.stock_enabled
     ? (lowStock.data ?? []).filter((p) => p.stock_quantity <= p.minimum_stock).slice(0, 6)
@@ -157,6 +164,7 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
             ...(dayCredit.settledToday > 0
               ? [{ label: `Crédits réglés ${dayWord}`, value: `+ ${money(dayCredit.settledToday)}` }]
               : []),
+            ...(expenses.total > 0 ? [{ label: 'Dépenses', value: `− ${money(expenses.total)}` }] : []),
             { label: `Ventes ${dayWord}`, value: dayCount },
             ...(creditTotal > 0 ? [{ label: 'Reste à encaisser (tous)', value: money(creditTotal) }] : []),
             {
@@ -165,6 +173,19 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
             },
           ]}
         />
+        {expenses.available && (
+          <ExpensesCard
+            expenses={expenses.rows}
+            total={expenses.total}
+            currency={currency}
+            timeZone={tz}
+            canAdd={!!scope.current}
+            addHint="Choisissez une boutique en haut de l’écran pour noter une dépense."
+            canDelete
+            day={day}
+            shopNames={!shopId && scope.shops.length > 1 ? new Map(scope.shops.map((s) => [s.id, s.name])) : undefined}
+          />
+        )}
       </section>
 
       <Card>

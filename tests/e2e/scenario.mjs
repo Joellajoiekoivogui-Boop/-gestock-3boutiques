@@ -209,6 +209,22 @@ try {
     await shot('10-mes-ventes');
   });
 
+  await step('dépenses : le caissier note un achat de condiments, retiré de l’argent du jour', async () => {
+    await page.goto(`${BASE}/pos/sales`);
+    await page.getByTestId('day-value').getByText('60\u00a0000\u00a0GNF').waitFor();
+    await page.getByRole('button', { name: 'Ajouter la dépense' }).click();
+    await page.getByText('Indiquez ce qui a été acheté.').waitFor();
+    await page.getByLabel('Ce qui a été acheté').fill('Piment et oignons');
+    await page.getByLabel('Prix (GNF)').fill('5000');
+    await page.getByRole('button', { name: 'Ajouter la dépense' }).click();
+    await toast('Dépense notée').waitFor();
+    await page.getByTestId('day-value').getByText('55\u00a0000\u00a0GNF').waitFor();
+    await page.getByRole('region', { name: 'Dépenses du jour' }).getByText('Piment et oignons').waitFor();
+    // Seul l'administrateur peut supprimer une dépense.
+    assert.equal(await page.getByRole('button', { name: /Supprimer la dépense/ }).count(), 0);
+    await shot('10b-depenses');
+  });
+
   await step('responsive : caisse sur téléphone et tablette', async () => {
     for (const [name, width, height] of [['11-caisse-telephone', 390, 844], ['12-caisse-tablette', 820, 1180]]) {
       await page.setViewportSize({ width, height });
@@ -251,6 +267,11 @@ try {
   await step('admin : tableau de bord à jour avec la vente réelle', async () => {
     await login(ADMIN.email, ADMIN.password);
     await page.waitForURL('**/admin/dashboard');
+    // La dépense du caissier est déduite ; l'admin la supprime (erreur de saisie).
+    await page.getByTestId('day-value').getByText('55\u00a0000\u00a0GNF').waitFor();
+    await page.getByRole('button', { name: 'Supprimer la dépense Piment et oignons' }).click();
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Supprimer' }).click();
+    await toast('Dépense supprimée.').waitFor();
     await page.getByTestId('day-value').getByText('60\u00a0000\u00a0GNF').waitFor();
     await page.getByText('Orange Money').first().waitFor();
     await shot('13-dashboard-avec-vente');

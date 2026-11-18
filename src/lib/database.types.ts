@@ -135,6 +135,17 @@ export type CustomerRow = {
   updated_at: string;
 };
 
+export type ExpenseRow = {
+  id: string;
+  shop_id: string;
+  business_date: string;
+  label: string;
+  amount: number;
+  created_by: string;
+  created_by_name: string;
+  created_at: string;
+};
+
 export type SaleItemRow = {
   id: string;
   sale_id: string;
@@ -239,6 +250,7 @@ export type Database = {
         { label?: string; is_active?: boolean; sort_order?: number }
       >;
       sales: Table<SaleRow, never, never>;
+      expenses: Table<ExpenseRow, never, never>;
       customers: Table<CustomerRow, never, Partial<Pick<CustomerRow, 'name' | 'phone' | 'note' | 'is_active'>>>;
       sale_items: Table<
         SaleItemRow,
@@ -312,6 +324,11 @@ export type Database = {
         Returns: Json;
       };
       create_customer: { Args: { p_name: string; p_phone?: string | null; p_note?: string | null }; Returns: string };
+      add_expense: {
+        Args: { p_label: string; p_amount: number; p_shop_id?: string | null; p_day?: string | null };
+        Returns: string;
+      };
+      current_business_day: { Args: Record<string, never>; Returns: string };
       settle_credit: { Args: { p_sale_id: string; p_payment_method: string }; Returns: Json };
       cancel_sale: { Args: { p_sale_id: string; p_reason: string }; Returns: undefined };
       refund_sale: { Args: { p_sale_id: string; p_amount: number; p_reason: string }; Returns: Json };

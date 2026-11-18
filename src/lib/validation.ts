@@ -60,6 +60,17 @@ export const saleSchema = z.object({
   customerId: idSchema.nullish(),
 });
 
+// Dépense de caisse (condiments achetés…), en francs guinéens entiers.
+export const expenseSchema = z.object({
+  label: trimmed(2, 120, 'Ce qui a été acheté'),
+  amount: z.coerce
+    .number({ message: 'Indiquez le prix.' })
+    .int('Prix en francs, nombre entier attendu.')
+    .positive('Le prix doit être supérieur à 0.')
+    .max(1_000_000_000, 'Prix trop élevé.'),
+});
+export type ExpenseInput = z.input<typeof expenseSchema>;
+
 export const customerSchema = z.object({
   name: trimmed(2, 120, 'Le nom'),
   phone: optionalText(30),
