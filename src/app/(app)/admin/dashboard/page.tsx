@@ -1,4 +1,4 @@
-import { AlertTriangle, ShoppingCart } from 'lucide-react';
+import { AlertTriangle, Printer, ShoppingCart } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { PageHeader } from '@/components/app/page-header';
@@ -151,6 +151,11 @@ export default async function DashboardPage({ searchParams }: PageProps<'/admin/
               to: typeof params.to === 'string' ? params.to : undefined,
             }}
           />
+          <Button asChild variant="outline" className="h-11 rounded-full">
+            <Link href={`/admin/sales/journee?jour=${day}`}>
+              <Printer aria-hidden /> Imprimer les ventes
+            </Link>
+          </Button>
         </div>
         <DayLine
           label={isToday ? 'Encaissé aujourd’hui' : 'Encaissé ce jour-là'}

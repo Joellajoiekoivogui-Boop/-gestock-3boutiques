@@ -1,12 +1,13 @@
 import type { AppRole, ProfileRow } from '@/lib/database.types';
 
-// Doit rester identique à la contrainte profiles_permissions_valid (SQL).
+// Permissions proposées aux caissiers. La contrainte profiles_permissions_valid (SQL)
+// accepte aussi l'ancienne « manage_stock » : les stocks sont désormais réservés à
+// l'administrateur (migration …1000_admin_only_stock).
 export const PERMISSIONS = [
   { key: 'apply_discount', label: 'Appliquer une remise', description: 'Saisir une remise à la caisse.' },
   { key: 'view_all_sales', label: 'Voir toutes les ventes', description: 'Consulter l’historique de tous les caissiers.' },
   { key: 'cancel_sales', label: 'Annuler une vente', description: 'Annuler une vente (motif obligatoire).' },
   { key: 'refund_sales', label: 'Rembourser une vente', description: 'Enregistrer un remboursement total ou partiel.' },
-  { key: 'manage_stock', label: 'Gérer les stocks', description: 'Approvisionnements et ajustements de stock.' },
   { key: 'view_reports', label: 'Voir les rapports', description: 'Consulter et exporter les rapports.' },
 ] as const;
 

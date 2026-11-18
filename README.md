@@ -88,7 +88,7 @@ cp .env.example .env.local   # puis renseignez les 3 variables
    - avec la CLI : `npx supabase link --project-ref <ref>` puis `npx supabase db push` ;
    - ou à la main : *SQL Editor → New query*, collez puis exécutez chaque fichier de `supabase/migrations/` dans l'ordre
      des noms (`…0100_schema`, `…0200_functions`, `…0300_security`, `…0400_storage`, `…0500_initial_data`,
-     `…0600_credit_sales`, `…0700_customers`, `…0800_shops`, `…0900_business_day_expenses`).
+     `…0600_credit_sales`, `…0700_customers`, `…0800_shops`, `…0900_business_day_expenses`, `…1000_admin_only_stock`).
 3. **Désactivez les inscriptions publiques** : *Authentication → Sign In / Providers → Email* → décochez
    *Allow new users to sign up*. (Même si elles restaient ouvertes, un compte créé ainsi est inactif et n'accède à rien.)
 4. Récupérez l'URL et les clés dans *Project Settings → API* et remplissez `.env.local`.

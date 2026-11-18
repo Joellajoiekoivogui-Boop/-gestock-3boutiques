@@ -145,11 +145,15 @@ describe('droits limités à sa boutique', () => {
     ).rejects.toThrow(/Vente introuvable/);
   });
 
-  it('ne peut pas modifier le stock d’un produit de l’autre boutique', async () => {
-    await expect(
-      as(manager1, (c) => c.query(`select public.record_stock_movement($1::uuid, 'restock', 5, null)`, [product2])),
-    ).rejects.toThrow(/Produit introuvable/);
-    await as(manager1, (c) => c.query(`select public.record_stock_movement($1::uuid, 'restock', 5, null)`, [product1]));
+  it('ne modifie aucun stock : réservé à l’administrateur, qui gère les deux boutiques', async () => {
+    for (const product of [product1, product2]) {
+      await expect(
+        as(manager1, (c) => c.query(`select public.record_stock_movement($1::uuid, 'restock', 5, null)`, [product])),
+      ).rejects.toThrow(/Seul l'administrateur/);
+      await as(admin, (c) => c.query(`select public.record_stock_movement($1::uuid, 'restock', 5, null)`, [product]));
+    }
+    const seen = await as(manager1, async (c) => (await c.query(`select id from public.stock_movements`)).rows);
+    expect(seen).toHaveLength(0);
   });
 
   it('un caissier ne peut pas changer sa propre boutique', async () => {

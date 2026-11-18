@@ -43,8 +43,9 @@ export function navFor(profile: ProfileLike): NavSection[] {
   if (admin) {
     catalogue.push({ href: '/admin/products', label: 'Produits', icon: UtensilsCrossed });
     catalogue.push({ href: '/admin/categories', label: 'Catégories', icon: FolderTree });
+    // Les stocks (approvisionnements, ajustements) sont réservés à l'administrateur.
+    catalogue.push({ href: '/admin/inventory', label: 'Stocks', icon: Boxes });
   }
-  if (can(profile, 'manage_stock')) catalogue.push({ href: '/admin/inventory', label: 'Stocks', icon: Boxes });
   if (catalogue.length) sections.push({ title: 'Catalogue', items: catalogue });
 
   const gestion: NavItem[] = [];

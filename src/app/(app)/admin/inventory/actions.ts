@@ -1,13 +1,14 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { authorizePermission } from '@/lib/auth';
+import { authorizeAdmin } from '@/lib/auth';
 import { DENIED, fail, toUserMessage, type ActionResult } from '@/lib/errors';
 import { createClient } from '@/lib/supabase/server';
 import { fieldErrorsOf, stockMovementSchema, type StockMovementValues } from '@/lib/validation';
 
 export async function recordStockMovementAction(values: StockMovementValues): Promise<ActionResult<{ stock: number }>> {
-  if (!(await authorizePermission('manage_stock'))) return fail(DENIED);
+  // Seul l'administrateur modifie les stocks (vérifié aussi en base).
+  if (!(await authorizeAdmin())) return fail(DENIED);
   const parsed = stockMovementSchema.safeParse(values);
   if (!parsed.success) return fail('Vérifiez le formulaire.', fieldErrorsOf(parsed.error));
 

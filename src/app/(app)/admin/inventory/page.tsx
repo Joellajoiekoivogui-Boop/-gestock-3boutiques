@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { NativeSelect } from '@/components/ui/native-select';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { getSettings, requirePermission } from '@/lib/auth';
+import { getSettings, requireAdmin } from '@/lib/auth';
 import { formatDateTime, MOVEMENT_TYPE_LABELS } from '@/lib/format';
 import { getShopScope } from '@/lib/shop';
 import { createClient } from '@/lib/supabase/server';
@@ -43,7 +43,8 @@ function StockStateBadge({ quantity, minimum }: { quantity: number; minimum: num
 const PAGE_SIZE = 25;
 
 export default async function InventoryPage({ searchParams }: PageProps<'/admin/inventory'>) {
-  await requirePermission('manage_stock');
+  // Stocks réservés à l'administrateur.
+  await requireAdmin();
   const params = await searchParams;
   const lowOnly = params.low === '1';
   const productFilter =

@@ -228,9 +228,13 @@ describe('mouvements de stock', () => {
     ).rejects.toThrow(/motif/);
     await expect(
       as(cashierA, (c) => c.query(`select public.record_stock_movement($1, 'restock', 5, null)`, [p])),
-    ).rejects.toThrow(/pas autorisé/);
+    ).rejects.toThrow(/Seul l'administrateur/);
+    // Stocks réservés à l'administrateur : l'ancienne permission manage_stock ne suffit plus.
     const stockKeeper = await createUser({ permissions: ['manage_stock'] });
-    await as(stockKeeper, (c) => c.query(`select public.record_stock_movement($1, 'restock', 5, null)`, [p]));
+    await expect(
+      as(stockKeeper, (c) => c.query(`select public.record_stock_movement($1, 'restock', 5, null)`, [p])),
+    ).rejects.toThrow(/Seul l'administrateur/);
+    await as(admin, (c) => c.query(`select public.record_stock_movement($1, 'restock', 5, null)`, [p]));
     expect(await stockOf(p)).toBe(7);
   });
 

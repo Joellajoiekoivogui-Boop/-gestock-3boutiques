@@ -33,7 +33,7 @@ Une caisse faite pour un restaurant guinéen : montants en francs guinéens sans
 
 ## Capabilities and Constraints
 
-- Rôles : **Administrateur** (tout) et **Gérant / Caissier** (la caisse et ses propres ventes, plus des permissions accordées une à une : remise, voir toutes les ventes, annuler, rembourser, gérer le stock, voir les rapports).
+- Rôles : **Administrateur** (tout) et **Gérant / Caissier** (la caisse et ses propres ventes, plus des permissions accordées une à une : remise, voir toutes les ventes, annuler, rembourser, voir les rapports). Les produits, leurs photos et les stocks (approvisionnements, ajustements) sont réservés à l'administrateur.
 - Espaces : connexion, caisse, reçus, mes ventes, tableau de bord, produits, catégories, stocks, historique des ventes, rapports (CSV et PDF), utilisateurs, journal d'activité, paramètres.
 - Pile : Next.js 16 (App Router), TypeScript, Tailwind CSS 4, composants shadcn/ui (Radix), Supabase (PostgreSQL, Auth, Storage, RLS). Hébergement Vercel.
 - Les droits sont vérifiés côté page, côté action serveur et en base ; masquer un bouton n'est jamais la seule protection.
@@ -43,6 +43,7 @@ Une caisse faite pour un restaurant guinéen : montants en francs guinéens sans
 - Deux boutiques de vente, **Nabele Plus 1** et **Nabele Plus 2** : chacune a ses produits, ses prix et son stock ; chaque vente appartient à une boutique. Un caissier est rattaché à une seule boutique et ne voit qu'elle ; l'administrateur choisit en haut de l'écran la boutique affichée (ou les deux cumulées) et doit choisir une boutique pour encaisser. Les dossiers clients à crédit sont communs aux deux boutiques.
 - **Journée de vente de 7h à 7h** : une vente faite le 17 à 2h du matin compte pour la journée du 16 (caisse, tableau de bord, rapports, historique). Heure fixée dans `DAY_START_HOUR` (src/lib/dates.ts) et `public.day_start()` en base.
 - **Dépenses de caisse** : le caissier note ce qu'il achète avec l'argent de la caisse (condiments…) et son prix, dans « Mes ventes », pour la journée en cours ; le montant est retiré de l'argent encaissé du jour. Seul l'administrateur peut supprimer une dépense (tracé au journal) ; il peut aussi en noter une pour un jour passé depuis le tableau de bord.
+- **Impression des ventes d'une journée** (administrateur) : depuis le tableau de bord ou l'historique, feuille A4 de la journée choisie (résumé, encaissé, modes de paiement, dépenses, produits vendus, liste des ventes, signatures), à imprimer ou enregistrer en PDF.
 - **Décision ouverte** : clôture de caisse de fin de journée (fond de caisse, écart). Non construite.
 
 ## Brand Commitments
