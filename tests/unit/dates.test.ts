@@ -9,10 +9,15 @@ describe('dates', () => {
     expect(isDay(undefined)).toBe(false);
   });
 
-  it('calcule le jour courant dans le fuseau', () => {
-    const instant = new Date('2026-10-30T23:30:00Z');
-    expect(todayIn('Africa/Conakry', instant)).toBe('2026-10-30');
-    expect(todayIn('Europe/Paris', instant)).toBe('2026-10-31');
+  it('calcule la journée de vente en cours (elle commence à 7h)', () => {
+    expect(todayIn('Africa/Conakry', new Date('2026-10-30T23:30:00Z'))).toBe('2026-10-30');
+    // Le 17 à 4h du matin : c'est encore la journée du 16.
+    expect(todayIn('Africa/Conakry', new Date('2026-11-17T04:00:00Z'))).toBe('2026-11-16');
+    expect(todayIn('Africa/Conakry', new Date('2026-11-17T06:59:00Z'))).toBe('2026-11-16');
+    expect(todayIn('Africa/Conakry', new Date('2026-11-17T07:00:00Z'))).toBe('2026-11-17');
+    // Paris : 8h30 locale le 31 → journée du 31 ; 00h30 locale le 31 → journée du 30.
+    expect(todayIn('Europe/Paris', new Date('2026-10-31T07:30:00Z'))).toBe('2026-10-31');
+    expect(todayIn('Europe/Paris', new Date('2026-10-30T22:30:00Z'))).toBe('2026-10-30');
   });
 
   it('semaine du lundi, mois, jours ajoutés', () => {
@@ -37,9 +42,14 @@ describe('dates', () => {
   it('convertit un jour local en intervalle UTC', () => {
     expect(startOfDayUtc('2026-10-30', 'Africa/Conakry').toISOString()).toBe('2026-10-30T00:00:00.000Z');
     expect(startOfDayUtc('2026-07-01', 'Europe/Paris').toISOString()).toBe('2026-06-30T22:00:00.000Z');
+    // Journées de vente : de 7h le premier jour à 7h le lendemain du dernier.
     expect(dayRangeUtc('2026-10-01', '2026-10-31', 'Africa/Conakry')).toEqual({
-      start: '2026-10-01T00:00:00.000Z',
-      end: '2026-11-01T00:00:00.000Z',
+      start: '2026-10-01T07:00:00.000Z',
+      end: '2026-11-01T07:00:00.000Z',
+    });
+    expect(dayRangeUtc('2026-11-16', '2026-11-16', 'Africa/Conakry')).toEqual({
+      start: '2026-11-16T07:00:00.000Z',
+      end: '2026-11-17T07:00:00.000Z',
     });
   });
 });

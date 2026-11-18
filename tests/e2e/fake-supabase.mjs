@@ -240,7 +240,8 @@ async function handleRest(req, res, url, claims) {
     const result = await asRole(claims, (c) => c.query(`select public.${fn}(${args.join(', ')}) as r`, values));
     const value = result.rows[0]?.r;
     if (value === '' || value === undefined) return send(res, 204, undefined);
-    return send(res, 200, value);
+    // Comme PostgREST : la valeur est toujours encodée en JSON (un texte ou un uuid aussi).
+    return send(res, 200, JSON.stringify(value));
   }
 
   const table = ident(path);

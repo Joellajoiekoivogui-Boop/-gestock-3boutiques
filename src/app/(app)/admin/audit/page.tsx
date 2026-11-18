@@ -32,6 +32,9 @@ const ENTITY_LABELS: Record<string, string> = {
   profiles: 'Utilisateurs',
   payment_methods: 'Modes de paiement',
   restaurant_settings: 'Paramètres',
+  expenses: 'Dépenses',
+  shops: 'Boutiques',
+  customers: 'Dossiers clients',
 };
 
 const ACTION_LABELS: Record<string, string> = {
@@ -43,6 +46,8 @@ const ACTION_LABELS: Record<string, string> = {
   'stock.adjustment': 'Ajustement de stock',
   'user.created': 'Compte créé',
   'user.password_reset': 'Mot de passe réinitialisé',
+  'expenses.insert': 'Dépense notée',
+  'expenses.delete': 'Dépense supprimée',
 };
 
 function actionLabel(action: string): string {
@@ -109,6 +114,12 @@ function summarize(action: string, details: Json): string {
     if (d.customer_name) parts.push(`client : ${String(d.customer_name)}`);
     if (d.reason) parts.push(`motif : ${String(d.reason)}`);
     return parts.filter(Boolean).join(' · ');
+  }
+  if (action === 'expenses.insert' || action === 'expenses.delete') {
+    const r = (d.record ?? {}) as Record<string, Json | undefined>;
+    return [String(r.label ?? ''), money(r.amount), r.created_by_name ? `noté par ${String(r.created_by_name)}` : '']
+      .filter(Boolean)
+      .join(' · ');
   }
   if (action === 'sale.refunded') {
     return [String(d.receipt_number ?? ''), money(d.amount), d.reason ? `motif : ${String(d.reason)}` : '']
