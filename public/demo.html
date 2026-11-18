@@ -56,6 +56,7 @@ p { margin: 0; }
 .tab svg { width: 18px; height: 18px; }
 .tab:hover { color: var(--ink); }
 .tab[aria-current="page"] { background: var(--forest); color: #fff; }
+.tab[hidden] { display: none; }
 .who { text-align: right; line-height: 1.25; }
 .who b { display: block; font-size: 14px; }
 .who small { color: var(--muted-ink); font-size: 12px; }
@@ -219,6 +220,50 @@ td .sub { display: none; color: var(--muted-ink); font-size: 13px; }
 .expenses .del svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
 .expenses .empty2 { padding: 20px; text-align: center; color: var(--muted-ink); }
 @media (max-width: 767px) { .expenses form { grid-template-columns: 1fr; } .chooser .opts { grid-template-columns: 1fr; } }
+/* Rôle de démonstration, stocks, impression */
+.shopbar .sep { flex: 1; min-width: 12px; }
+.shopbar .fixed { flex: none; font-size: 14px; font-weight: 700; white-space: nowrap; }
+.flash { position: fixed; z-index: 60; left: 50%; top: 84px; transform: translateX(-50%); max-width: calc(100vw - 32px); background: var(--ink); color: #fff; border-radius: 14px; padding: 12px 18px; font-weight: 600; box-shadow: var(--shadow); }
+td .sub2 { display: block; color: var(--muted-ink); font-size: 13px; }
+.stockbar { display: block; height: 8px; width: 120px; max-width: 100%; border-radius: 999px; background: var(--muted); overflow: hidden; margin-top: 6px; }
+.stockbar span { display: block; height: 100%; border-radius: 999px; }
+.badge.out { background: #f8dcd7; color: var(--danger); }
+.acts { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.acts .btn { min-height: 40px; padding: 0 14px; font-size: 14px; }
+.mv-plus { color: #0b5c34; font-weight: 700; }
+.mv-minus { color: var(--danger); font-weight: 700; }
+.dialog label.f { display: grid; gap: 6px; text-align: left; font-size: 14px; font-weight: 600; }
+.dialog label.f input { height: 48px; border: 1px solid var(--input); border-radius: 999px; padding: 0 16px; font: inherit; }
+.dialog .err { color: var(--danger); font-size: 13px; font-weight: 600; text-align: left; }
+.sheet { background: #fff; color: #000; border-radius: 18px; box-shadow: var(--shadow); padding: 28px; font-size: 14px; }
+.sheet header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+.sheet h1 { font: 700 24px/1.2 var(--serif); }
+.sheet h2 { font-size: 15px; font-weight: 700; margin: 18px 0 4px; }
+.sheet table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.sheet th { background: none; color: #000; font-size: 11px; border-bottom: 1px solid rgb(0 0 0 / 0.35); padding: 6px 8px; }
+.sheet td { border-top: 0; border-bottom: 1px solid rgb(0 0 0 / 0.1); padding: 6px 8px; }
+.sheet .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
+.sheet .tot td { font-weight: 700; font-size: 15px; border-bottom: 0; }
+.sheet .cancelled td { text-decoration: line-through; opacity: 0.6; }
+.sheet .sign { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 28px; }
+.sheet .sign span { display: inline-block; width: 150px; border-bottom: 1px solid #000; }
+@media (max-width: 767px) {
+  .sheet { padding: 16px; } .sheet .two { grid-template-columns: 1fr; }
+  .stocktable thead { display: none; }
+  .stocktable tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 12px; padding: 14px 16px; border-top: 1px solid var(--border); }
+  .stocktable tr:first-child { border-top: 0; }
+  .stocktable td { border: 0; padding: 0; }
+  .stocktable td.num { font-size: 20px; }
+  .stocktable td:last-child { grid-column: 1 / -1; }
+  .acts { justify-content: stretch; } .acts .btn { flex: 1; }
+}
+@media print {
+  body { background: #fff; }
+  .top, .note, .shopbar, .bottom, .no-print { display: none !important; }
+  .page { padding: 0 !important; max-width: none; }
+  .sheet { box-shadow: none; border-radius: 0; padding: 0; font-size: 12px; }
+  .sheet .two { grid-template-columns: 1fr 1fr; }
+}
 /* Crédits et dossiers clients */
 .clients { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
 .client { width: 100%; text-align: left; display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); cursor: pointer; font: inherit; color: inherit; min-height: 76px; }
@@ -300,10 +345,11 @@ td .sub { display: none; color: var(--muted-ink); font-size: 13px; }
     <nav class="tabs" aria-label="Navigation principale">
       <button type="button" class="tab" data-view="caisse"><svg viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>Caisse</button>
       <button type="button" class="tab" data-view="ventes"><svg viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M13 16H8"/></svg>Mes ventes</button>
-      <button type="button" class="tab" data-view="bord"><svg viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>Tableau de bord</button>
+      <button type="button" class="tab" data-view="bord" data-admin><svg viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>Tableau de bord</button>
       <button type="button" class="tab" data-view="credits"><svg viewBox="0 0 24 24"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/></svg>Crédits</button>
+      <button type="button" class="tab" data-view="stocks" data-admin><svg viewBox="0 0 24 24"><path d="M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z"/><path d="m7 16.5-4.74-2.85"/><path d="m7 16.5 5-3"/><path d="M7 16.5v5.17"/><path d="M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z"/><path d="m17 16.5-5-3"/><path d="m17 16.5 4.74-2.85"/><path d="M17 16.5v5.17"/><path d="M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z"/><path d="M12 8 7.26 5.15"/><path d="m12 8 4.74-2.85"/><path d="M12 13.5V8"/></svg>Stocks</button>
     </nav>
-    <div class="who"><b>Awa Camara</b><small>Administrateur (démo)</small></div>
+    <div class="who" id="who"></div>
   </div>
 </header>
 <p class="note" id="note">Démonstration avec des données d’exemple : rien n’est enregistré, tout repart de zéro au rechargement.</p>
@@ -331,6 +377,15 @@ const PRODUCTS = [
 // Deux boutiques : chacune a ses produits, ses prix et son stock.
 const SHOPS = [{ id: 'np1', name: 'Nabele Plus 1' }, { id: 'np2', name: 'Nabele Plus 2' }];
 const shopName = (id) => (SHOPS.find((x) => x.id === id) || { name: '' }).name;
+// Rôle de démonstration : l'administrateur voit tout ; le caissier est rattaché à Nabele Plus 1.
+const USERS = { admin: { name: 'Mariama Sylla', label: 'Administrateur' }, cashier: { name: 'Awa Camara', label: 'Caissier · Nabele Plus 1' } };
+const ADMIN_VIEWS = ['bord', 'stocks', 'impression'];
+const isAdminRole = () => state.role === 'admin';
+const MIN_STOCK = 5;
+const nowTime = () => new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+function addMovement(p, type, qty, reason) {
+  state.movements.unshift({ id: 'm' + Date.now() + Math.random(), shop: p.shop, product: p.name, type, qty, after: p.stock, reason, by: USERS[state.role].name, time: nowTime() });
+}
 [
   ['Riz sauce arachide', 'af', 35000, null, 'Riz blanc, sauce arachide et viande', 'soup'], ['Poulet braisé', 'af', 50000, null, 'Demi-poulet, alloco', 'pot'],
   ['Poisson braisé', 'af', 55000, null, 'Poisson du jour, attiéké', 'pot'], ['Hamburger frites', 'eu', 45000, null, 'Bœuf, cheddar, frites', 'beef'],
@@ -364,6 +419,7 @@ const ICONS = {
   note: '<path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/>',
   bag: '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
   store: '<path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/>',
+  boxes: '<path d="M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z"/><path d="M12 8 7.26 5.15"/><path d="m12 8 4.74-2.85"/><path d="M12 13.5V8"/><path d="M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z"/><path d="M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z"/>',
   basket: '<path d="m15 11-1 9"/><path d="m19 11-4-7"/><path d="M2 11h20"/><path d="m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4"/><path d="M4.5 15.5h15"/><path d="m5 11 4-7"/><path d="m9 11 1 9"/>',
   back: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
   board: '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
@@ -371,7 +427,7 @@ const ICONS = {
 const icon = (name) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`;
 const PAY_ICON = { cash: 'cash', om: 'phone', credit: 'note', other: 'wallet' };
 
-const state = { shop: 'all', expenses: [], expErr: {}, view: 'caisse', cat: 'all', search: '', cart: [], pay: 'cash', received: '', customer: '', phone: '', pickedId: null, cartOpen: false, sales: [], nextNo: 22, customers: [], dossier: null, q: '' };
+const state = { role: 'admin', adminShop: 'all', movements: [], flash: '', stockErr: '', shop: 'all', expenses: [], expErr: {}, view: 'caisse', cat: 'all', search: '', cart: [], pay: 'cash', received: '', customer: '', phone: '', pickedId: null, cartOpen: false, sales: [], nextNo: 22, customers: [], dossier: null, q: '' };
 // Dossiers clients à crédit : un par personne, retrouvé par son numéro de téléphone.
 const phoneKey = (v) => (v || '').replace(/\D/g, '').slice(-9);
 const customer = (id) => state.customers.find((c) => c.id === id);
@@ -422,7 +478,7 @@ const cashSuggestions = (total) => {
 
 function recordSale(lines, pay, no, time, shop) {
   const total = lines.reduce((s, l) => s + prod(l.id).price * l.q, 0);
-  const sale = { shop: shop || prod(lines[0].id).shop, no: 'MG-2026-' + String(no).padStart(6, '0'), time: time || new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }), lines, pay, total };
+  const sale = { by: USERS[state.role].name, shop: shop || prod(lines[0].id).shop, no: 'MG-2026-' + String(no).padStart(6, '0'), time: time || new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }), lines, pay, total };
   state.sales.unshift(sale);
   return sale;
 }
@@ -444,6 +500,7 @@ function checkout() {
   const lines = state.cart.map((l) => ({ ...l }));
   lines.forEach((l) => { const p = prod(l.id); if (p.stock !== null) p.stock -= l.q; });
   const sale = recordSale(lines, state.pay, state.nextNo++, null, state.shop);
+  lines.forEach((l) => { const p = prod(l.id); if (p.stock !== null) addMovement(p, 'Vente', -l.q, 'Vente ' + sale.no); });
   if (state.pay === 'credit') {
     const c = state.pickedId ? customer(state.pickedId) : openDossier(state.customer.trim(), state.phone.trim());
     sale.customerId = c.id; sale.customer = c.name; sale.phone = c.phone;
@@ -572,9 +629,9 @@ function expensesCard() {
       <button type="submit" class="btn green" style="min-height:48px">${icon('plus')} Ajouter la dépense</button></form>`
       : '<p style="padding:12px 20px;color:var(--muted-ink);font-size:14px;border-bottom:1px solid var(--border)">Choisissez une boutique en haut de l’écran pour noter une dépense.</p>'}
     ${rows.length ? `<ul>${rows.map((x) => `<li><div><b style="font-weight:600">${esc(x.label)}</b><small>${x.time} · ${esc(x.by)}${state.shop === 'all' ? ' · ' + esc(shopName(x.shop)) : ''}</small></div>
-      <span class="amt">− ${money(x.amount)}<button type="button" class="del" data-del-exp="${x.id}" aria-label="Supprimer la dépense ${esc(x.label)}">${icon('trash')}</button></span></li>`).join('')}</ul>`
+      <span class="amt">− ${money(x.amount)}${isAdminRole() ? `<button type="button" class="del" data-del-exp="${x.id}" aria-label="Supprimer la dépense ${esc(x.label)}">${icon('trash')}</button>` : ''}</span></li>`).join('')}</ul>`
       : '<p class="empty2">Aucune dépense aujourd’hui.</p>'}
-    <p style="padding:10px 20px;color:var(--muted-ink);font-size:13px;border-top:1px solid var(--border)">Dans l’application, le caissier note ses dépenses ; seul l’administrateur peut en supprimer une.</p>
+    <p style="padding:10px 20px;color:var(--muted-ink);font-size:13px;border-top:1px solid var(--border)">Le caissier note ses dépenses ; seul l’administrateur peut en supprimer une.</p>
   </section>`;
 }
 function viewVentes() {
@@ -601,7 +658,7 @@ function viewBord() {
   const low = PRODUCTS.filter((p) => inShop(p) && p.stock !== null && p.stock <= 6);
   const items = todays.reduce((s, r) => s + r.lines.reduce((a, l) => a + l.q, 0), 0);
   return `<div class="page">
-    <div class="phead"><div><h1>Tableau de bord</h1><p>${document.body.dataset.today} · ${state.shop === 'all' ? 'toutes les boutiques' : esc(shopName(state.shop))} · journée de 7h à 7h</p></div><button type="button" class="btn green" data-go="caisse">${icon('cart')} Ouvrir la caisse</button></div>
+    <div class="phead"><div><h1>Tableau de bord</h1><p>${document.body.dataset.today} · ${state.shop === 'all' ? 'toutes les boutiques' : esc(shopName(state.shop))} · journée de 7h à 7h</p></div><span style="display:flex;flex-wrap:wrap;gap:8px"><button type="button" class="btn" data-go="impression">${icon('printer')} Imprimer les ventes du jour</button><button type="button" class="btn green" data-go="caisse">${icon('cart')} Ouvrir la caisse</button></span></div>
     ${dayBanner(f, [['Ventes aujourd’hui', n], ['Reste à encaisser (tous)', money(rest)], ['Stock faible', low.length + ' produit(s)']])}
     ${expensesCard()}
     <div class="cols">
@@ -649,9 +706,81 @@ function settleDialog(no, pay = 'cash') {
   document.querySelector('[data-confirm]').focus();
 }
 
+// Stocks : réservés à l'administrateur (approvisionner, ajuster, historique).
+function viewStocks() {
+  const tracked = PRODUCTS.filter((p) => inShop(p) && p.stock !== null).sort((a, b) => a.stock - b.stock || a.name.localeCompare(b.name));
+  const low = tracked.filter((p) => p.stock <= MIN_STOCK), out = tracked.filter((p) => p.stock === 0);
+  const moves = state.movements.filter(inShop);
+  const state1 = out.length ? `${out.length} en rupture` : low.length ? `${low.length} à commander` : 'Tout est en stock';
+  const badge = (p) => p.stock === 0 ? '<span class="badge out">Rupture</span>' : p.stock <= MIN_STOCK ? '<span class="badge warn">Stock faible</span>' : '<span class="badge">Suffisant</span>';
+  const color = (p) => p.stock === 0 ? 'var(--danger)' : p.stock <= MIN_STOCK ? '#b8914a' : 'var(--forest)';
+  return `<div class="page">
+    <div class="phead"><div><h1>Stocks</h1><p>${state.shop === 'all' ? 'Les deux boutiques' : esc(shopName(state.shop))} · approvisionnements et ajustements, réservés à l’administrateur.</p></div></div>
+    ${banner('État du stock', state1, [['Produits suivis', tracked.length], ['Sous le seuil', low.length]])}
+    <div class="panel"><div class="twrap"><table class="stocktable"><thead><tr><th>Produit</th><th class="num">Stock</th><th class="hide-sm">État</th><th class="num">Actions</th></tr></thead><tbody>
+      ${tracked.map((p) => `<tr><td><b style="font-weight:600">${esc(p.name)}</b>${state.shop === 'all' ? `<span class="sub2">${esc(shopName(p.shop))}</span>` : ''}<span class="stockbar"><span style="width:${Math.min(100, (p.stock / (MIN_STOCK * 4)) * 100)}%;background:${color(p)}"></span></span></td>
+        <td class="num"><b>${p.stock}</b></td><td class="hide-sm">${badge(p)}</td>
+        <td><div class="acts"><button type="button" class="btn green" data-stock="${p.id}" data-type="restock">${icon('plus')} Approvisionner</button><button type="button" class="btn" data-stock="${p.id}" data-type="adjust">Ajuster</button></div></td></tr>`).join('')}
+    </tbody></table></div></div>
+    <h2 class="serif" style="font-size:22px">Mouvements de stock</h2>
+    <div class="panel"><div class="twrap"><table><thead><tr><th>Heure</th><th>Produit</th><th class="hide-sm">Type</th><th class="num">Quantité</th><th class="num hide-sm">Stock après</th><th class="hide-sm">Motif</th></tr></thead><tbody>
+      ${moves.length ? moves.map((m) => `<tr><td>${m.time}</td><td>${esc(m.product)}${state.shop === 'all' ? `<span class="sub2">${esc(shopName(m.shop))}</span>` : ''}<span class="sub">${esc(m.type)} · ${esc(m.by)}</span></td><td class="hide-sm">${esc(m.type)}</td>
+        <td class="num"><span class="${m.qty > 0 ? 'mv-plus' : 'mv-minus'}">${m.qty > 0 ? '+' : ''}${m.qty}</span></td><td class="num hide-sm">${m.after}</td><td class="hide-sm">${esc(m.reason || '')} · ${esc(m.by)}</td></tr>`).join('')
+        : '<tr><td colspan="6" style="text-align:center;color:var(--muted-ink)">Aucun mouvement.</td></tr>'}
+    </tbody></table></div></div></div>`;
+}
+function stockDialog(id, type) {
+  const p = prod(id), restock = type === 'restock';
+  document.getElementById('modal').innerHTML = `<div class="overlay" role="dialog" aria-modal="true" aria-labelledby="sk-title"><form class="dialog" id="stock-form" data-id="${id}" data-type="${type}" novalidate>
+    <div><h2 id="sk-title" style="font-size:26px">${restock ? 'Approvisionner' : 'Ajuster le stock'}</h2><p style="color:var(--muted-ink)">${esc(p.name)} · ${esc(shopName(p.shop))} · stock actuel : <b style="color:var(--ink)">${p.stock}</b></p></div>
+    <label class="f">${restock ? 'Quantité reçue' : 'Quantité à ajouter (+) ou à retirer (−)'}<input id="sk-qty" type="text" inputmode="numeric" placeholder="${restock ? '12' : '-2'}" autocomplete="off"></label>
+    <label class="f">${restock ? 'Motif (facultatif)' : 'Motif (obligatoire)'}<input id="sk-reason" type="text" placeholder="${restock ? 'Livraison du fournisseur' : 'Casse, erreur de comptage…'}" autocomplete="off"></label>
+    <p class="err" id="sk-err" role="alert">${esc(state.stockErr)}</p>
+    <div class="dactions"><button type="submit" class="btn green">${icon('ok')} Enregistrer</button><button type="button" class="btn" data-close style="grid-column:1/-1">Annuler</button></div>
+  </form></div>`;
+  document.getElementById('sk-qty').focus();
+}
+// Feuille des ventes du jour, à imprimer ou enregistrer en PDF (administrateur).
+function viewImpression() {
+  const rows = shopSales().filter(isToday).slice().reverse(), valid = rows;
+  const f = dayFigures(shopSales(), shopExpenses()), exps = shopExpenses(), all = state.shop === 'all';
+  const byPay = PAYMENTS.map(([code, label]) => { const r = valid.filter((x) => x.pay === code); return { label, n: r.length, total: sum(r) }; }).filter((x) => x.n);
+  const sold = {};
+  valid.forEach((x) => x.lines.forEach((l) => { sold[l.id] = (sold[l.id] || 0) + l.q; }));
+  const products = Object.entries(sold).map(([id, q]) => ({ name: prod(id).name, q, total: q * prod(id).price })).sort((a, b) => b.q - a.q);
+  const items = valid.reduce((t, x) => t + x.lines.reduce((a, l) => a + l.q, 0), 0);
+  const dayTitle = document.body.dataset.todayLong;
+  const row = (k, v, cls = '') => `<tr class="${cls}"><td>${k}</td><td class="num">${v}</td></tr>`;
+  return `<div class="page">
+    <div class="phead no-print"><div><button type="button" class="back" data-view="bord">${icon('back')} Tableau de bord</button></div>
+      <button type="button" class="btn green" data-print>${icon('printer')} Imprimer les ventes</button></div>
+    <p class="credits no-print">Dans l’application, l’administrateur choisit aussi une date passée avec le calendrier, puis imprime ou enregistre la feuille en PDF.</p>
+    <article class="sheet" id="day-sheet">
+      <header><div><b style="font-size:17px">MASSAGUI FILS SARL.U</b><div style="font-size:12px">HÔTELLERIE — RESTAURANT</div></div>
+        <div style="text-align:right"><h1>Ventes du ${esc(dayTitle)}</h1><div style="font-weight:700">${all ? 'Toutes les boutiques' : esc(shopName(state.shop))}</div><div style="font-size:12px">Journée de vente : de 7h à 7h le lendemain</div></div></header>
+      <div class="two">
+        <table><tbody>${row('Ventes du jour (CA net)', money(f.sales))}${row('À crédit, non payé', '− ' + money(f.credit))}${row('Anciens crédits réglés', '+ ' + money(f.settled))}${row('Dépenses', '− ' + money(f.spent))}${row('Encaissé', money(f.cashed), 'tot')}</tbody></table>
+        <table><tbody>${row('Nombre de ventes', f.n)}${row('Articles vendus', items)}${row('Remises accordées', money(0))}${row('Remboursements', money(0))}${row('Ventes annulées (non comptées)', '0')}</tbody></table>
+      </div>
+      <div class="two">
+        <div><h2>Par mode de paiement</h2><table><thead><tr><th>Mode</th><th class="num">Ventes</th><th class="num">Montant</th></tr></thead><tbody>
+          ${byPay.length ? byPay.map((x) => `<tr><td>${x.label}</td><td class="num">${x.n}</td><td class="num">${money(x.total)}</td></tr>`).join('') : '<tr><td colspan="3">Aucune vente.</td></tr>'}</tbody></table></div>
+        <div><h2>Dépenses</h2><table><thead><tr><th>Achat</th><th>Par</th><th class="num">Prix</th></tr></thead><tbody>
+          ${exps.length ? exps.map((x) => `<tr><td>${esc(x.label)}${all ? `<div style="font-size:11px">${esc(shopName(x.shop))}</div>` : ''}</td><td>${esc(x.by)}</td><td class="num">${money(x.amount)}</td></tr>`).join('') : '<tr><td colspan="3">Aucune dépense.</td></tr>'}</tbody></table></div>
+      </div>
+      <h2>Produits vendus</h2><table><thead><tr><th>Produit</th><th class="num">Quantité</th><th class="num">Montant</th></tr></thead><tbody>
+        ${products.length ? products.map((x) => `<tr><td>${esc(x.name)}</td><td class="num">${x.q}</td><td class="num">${money(x.total)}</td></tr>`).join('') : '<tr><td colspan="3">Aucun produit vendu.</td></tr>'}</tbody></table>
+      <h2>Liste des ventes (${rows.length})</h2><table><thead><tr><th>Heure</th><th>Reçu</th>${all ? '<th>Boutique</th>' : ''}<th>Caissier</th><th>Paiement</th><th>Statut</th><th class="num">Montant</th></tr></thead><tbody>
+        ${rows.length ? rows.map((x) => `<tr><td>${x.time}</td><td style="white-space:nowrap">${x.no}</td>${all ? `<td>${esc(shopName(x.shop))}</td>` : ''}<td>${esc(x.by)}</td><td>${esc(payLabel(x.pay))}${x.customer ? `<div style="font-size:11px">${esc(x.customer)}</div>` : ''}</td><td>${unpaid(x) ? 'À crédit' : 'Payée'}</td><td class="num">${money(x.total)}</td></tr>`).join('') : `<tr><td colspan="${all ? 7 : 6}">Aucune vente ce jour-là.</td></tr>`}</tbody></table>
+      <div class="sign"><p>Caissier(s) : <span></span></p><p>Administrateur : <span></span></p></div>
+      <p style="font-size:11px;margin-top:12px">Imprimé le ${new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })} par ${esc(USERS.admin.name)}.</p>
+    </article></div>`;
+}
+
 function renderBottom() {
-  const tabs = [['caisse', 'cart', 'Caisse'], ['ventes', 'receipt', 'Ventes']];
-  const right = [['bord', 'board', 'Tableau'], ['credits', 'note', 'Crédits']];
+  const admin = isAdminRole();
+  const tabs = admin ? [['ventes', 'receipt', 'Ventes'], ['credits', 'note', 'Crédits']] : [['ventes', 'receipt', 'Ventes']];
+  const right = admin ? [['bord', 'board', 'Tableau'], ['stocks', 'boxes', 'Stocks']] : [['credits', 'note', 'Crédits']];
   const spacer = '<span style="flex:1" aria-hidden="true"></span>';
   const btn = ([v, ic, label]) => `<button type="button" data-view="${v}" ${state.view === v ? 'aria-current="page"' : ''}>${icon(ic)}${label}</button>`;
   const center = state.view === 'caisse'
@@ -662,19 +791,36 @@ function renderBottom() {
 
 function renderShopbar() {
   const opts = [{ id: 'all', name: 'Toutes les boutiques' }, ...SHOPS];
-  document.getElementById('shopbar').innerHTML = `<div class="in" role="group" aria-label="Boutique affichée"><span class="lbl">${icon('store')} Boutique</span>${opts
-    .map((x) => `<button type="button" data-shop="${x.id}" aria-pressed="${state.shop === x.id}">${esc(x.name)}</button>`).join('')}</div>`;  // Téléphone : la boutique choisie reste visible dans la barre (sans faire défiler la page).
+  const roles = `<span class="sep"></span><span class="lbl">Voir comme</span><span role="group" aria-label="Voir la démo comme" style="display:flex;gap:4px">${[['admin', 'Administrateur'], ['cashier', 'Caissier']]
+    .map(([r, l]) => `<button type="button" data-role="${r}" aria-pressed="${state.role === r}">${l}</button>`).join('')}</span>`;
+  document.getElementById('shopbar').innerHTML = isAdminRole()
+    ? `<div class="in"><span class="lbl">${icon('store')} Boutique</span><span role="group" aria-label="Boutique affichée" style="display:flex;gap:4px">${opts
+      .map((x) => `<button type="button" data-shop="${x.id}" aria-pressed="${state.shop === x.id}">${esc(x.name)}</button>`).join('')}</span>${roles}</div>`
+    : `<div class="in"><span class="lbl">${icon('store')} Boutique</span><span class="fixed">${esc(shopName(state.shop))}</span>${roles}</div>`;
+  document.getElementById('who').innerHTML = `<b>${esc(USERS[state.role].name)}</b><small>${esc(USERS[state.role].label)} (démo)</small>`;  // Téléphone : la boutique choisie reste visible dans la barre (sans faire défiler la page).
   const bar = document.querySelector('#shopbar .in'), on = bar.querySelector('[aria-pressed="true"]');
   if (on && (on.offsetLeft + on.offsetWidth > bar.scrollLeft + bar.clientWidth || on.offsetLeft < bar.scrollLeft)) bar.scrollLeft = on.offsetLeft - 16;
 }
 function render() {
+  // Page réservée à l'administrateur : le caissier est renvoyé à la caisse.
+  if (!isAdminRole() && ADMIN_VIEWS.includes(state.view)) { state.view = 'caisse'; state.flash = 'Cette page est réservée à l’administrateur.'; }
   renderShopbar();
+  document.querySelectorAll('.tabs [data-admin]').forEach((b) => { b.hidden = !isAdminRole(); });
   const active = document.activeElement && ['search', 'q'].includes(document.activeElement.id) ? document.activeElement.id : null;
   const pos = active ? document.activeElement.selectionStart : null;
   document.querySelectorAll('.tabs [data-view]').forEach((b) => b.toggleAttribute('aria-current', false));
-  document.querySelector(`.tabs [data-view="${state.view === 'dossier' ? 'credits' : state.view}"]`).setAttribute('aria-current', 'page');
+  document.querySelector(`.tabs [data-view="${state.view === 'dossier' ? 'credits' : state.view === 'impression' ? 'bord' : state.view}"]`).setAttribute('aria-current', 'page');
   setNote();
-  document.getElementById('main').innerHTML = ({ caisse: viewCaisse, ventes: viewVentes, bord: viewBord, credits: viewCredits, dossier: viewDossier })[state.view]();
+  const html = ({ caisse: viewCaisse, ventes: viewVentes, bord: viewBord, credits: viewCredits, dossier: viewDossier, stocks: viewStocks, impression: viewImpression })[state.view]();
+  document.getElementById('main').innerHTML = html;
+  if (state.flash) {
+    document.querySelector('.flash')?.remove();
+    const note = document.createElement('p');
+    note.className = 'flash'; note.setAttribute('role', 'status'); note.textContent = state.flash;
+    document.body.appendChild(note);
+    setTimeout(() => note.remove(), 3500);
+    state.flash = '';
+  }
   renderBottom();
   if (active) { const input = document.getElementById(active); input.focus(); input.setSelectionRange(pos, pos); }
 }
@@ -695,6 +841,17 @@ document.addEventListener('click', (e) => {
   else if ('cartToggle' in d) { state.cartOpen = !state.cartOpen; render(); }
   else if ('checkout' in d) checkout();
   else if ('close' in d) document.getElementById('modal').innerHTML = '';
+  else if (d.role) {
+    if (d.role === state.role) return;
+    if (d.role === 'cashier') { state.adminShop = state.shop; state.shop = 'np1'; } else state.shop = state.adminShop;
+    state.role = d.role; state.cart = []; state.expErr = {}; render();
+  }
+  else if (d.stock) { state.stockErr = ''; stockDialog(d.stock, d.type); }
+  else if ('print' in d) {
+    let rule = document.getElementById('a4-page-rule');
+    if (!rule) { rule = document.createElement('style'); rule.id = 'a4-page-rule'; rule.textContent = '@page { size: A4; margin: 12mm; }'; document.head.appendChild(rule); }
+    window.print();
+  }
   else if (d.shop) { state.shop = d.shop; state.cart = []; state.cat = 'all'; state.expErr = {}; render(); }
   else if (d.delExp) {
     const x = state.expenses.find((r) => r.id === d.delExp);
@@ -722,6 +879,21 @@ document.addEventListener('input', (e) => {
   }
 });
 document.addEventListener('submit', (e) => {
+  if (e.target.id === 'stock-form') {
+    e.preventDefault();
+    const p = prod(e.target.dataset.id), restock = e.target.dataset.type === 'restock';
+    const raw = document.getElementById('sk-qty').value.replace(/\s/g, ''), qty = Number(raw), reason = document.getElementById('sk-reason').value.trim();
+    let err = '';
+    if (!raw || !Number.isInteger(qty) || qty === 0) err = 'Indiquez une quantité (nombre entier).';
+    else if (restock && qty < 0) err = 'Un approvisionnement ajoute du stock : quantité positive.';
+    else if (!restock && reason.length < 3) err = 'Le motif de l’ajustement est obligatoire.';
+    else if (p.stock + qty < 0) err = `Le stock ne peut pas devenir négatif (disponible : ${p.stock}).`;
+    if (err) { document.getElementById('sk-err').textContent = err; return; }
+    p.stock += qty;
+    addMovement(p, restock ? 'Approvisionnement' : 'Ajustement', qty, reason || (restock ? 'Livraison' : ''));
+    document.getElementById('modal').innerHTML = ''; render();
+    return;
+  }
   if (e.target.id !== 'exp-form') return;
   e.preventDefault();
   const label = document.getElementById('exp-label').value.trim(), raw = document.getElementById('exp-amount').value.replace(/\s/g, '');
@@ -730,7 +902,7 @@ document.addEventListener('submit', (e) => {
   if (!raw || !Number.isInteger(amount) || amount <= 0) err.amount = 'Prix en francs, nombre entier.';
   state.expErr = err;
   if (!err.label && !err.amount) {
-    state.expenses.unshift({ id: 'e' + Date.now(), shop: state.shop, label, amount, by: 'Awa Camara', time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) });
+    state.expenses.unshift({ id: 'e' + Date.now(), shop: state.shop, label, amount, by: USERS[state.role].name, time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) });
     state.expErr = {};
   }
   render();
@@ -748,18 +920,23 @@ window.addEventListener('resize', setNote);
 // Journée de vente de 7h à 7h : avant 7h du matin, c'est encore la veille.
 const today = new Date(Date.now() - 7 * 3600000).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Africa/Conakry' });
 document.body.dataset.today = today.charAt(0).toUpperCase() + today.slice(1);
+document.body.dataset.todayLong = new Date(Date.now() - 7 * 3600000).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Africa/Conakry' });
+// Heures des ventes d'exemple : réparties entre 7h (début de la journée de vente) et maintenant.
+function seedTime(i, n) {
+  const now = Date.now(), dayStart = now - ((now - 7 * 3600000) % 86400000); // Conakry = UTC
+  const t = dayStart + ((now - dayStart) * (i + 1)) / (n + 1);
+  return new Date(t).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Conakry' });
+}
 // Ventes d'exemple déjà enregistrées aujourd'hui.
 [[['p2', 2], ['p13', 1]], [['p8', 2], ['p6', 2]], [['p17', 3], ['p9', 3]], [['p3', 1], ['p11', 2]], [['p5', 1], ['p14', 2]]]
   .forEach((items, i) => {
-    const at = new Date(Date.now() - (5 - i) * 41 * 60000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    const sale = recordSale(items.map(([id, q]) => ({ id, q })), ['cash', 'om', 'cash', 'credit', 'cash'][i], 17 + i, at);
+    const sale = recordSale(items.map(([id, q]) => ({ id, q })), ['cash', 'om', 'cash', 'credit', 'cash'][i], 17 + i, seedTime(i, 5));
     if (sale.pay === 'credit') { const c = openDossier('Mamadou Bah', '+224 621 00 00 01'); c.since = '12 novembre'; sale.customerId = c.id; sale.customer = c.name; sale.phone = c.phone; }
   });
 // Ventes d'exemple de Nabele Plus 2 (ses propres produits).
 [[['q1', 1], ['q5', 2]], [['q3', 2], ['q7', 2]], [['q0', 1], ['q9', 2]]]
   .forEach((items, i) => {
-    const at = new Date(Date.now() - (4 - i) * 53 * 60000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    const sale = recordSale(items.map(([id, q]) => ({ id, q })), ['cash', 'om', 'credit'][i], 30 + i, at);
+    const sale = recordSale(items.map(([id, q]) => ({ id, q })), ['cash', 'om', 'credit'][i], 30 + i, seedTime(i, 3));
     if (sale.pay === 'credit') { const c = openDossier('Aïssatou Camara', '+224 624 00 00 04'); c.since = '15 novembre'; sale.customerId = c.id; sale.customer = c.name; sale.phone = c.phone; }
   });
 // Dépenses d'exemple : condiments achetés avec l'argent de la caisse.
@@ -777,10 +954,18 @@ state.expenses = [
   Object.assign(sale, { before: when, customerId: c.id, customer: c.name, phone: c.phone });
   if (paid) Object.assign(sale, { paid: true, paidWith: 'om', paidWhen: 'aujourd’hui à 09:15' });
 });
+// Vendeurs des ventes d'exemple, et approvisionnements du matin.
+state.sales.forEach((x) => { x.by = x.shop === 'np2' ? 'Ibrahima Barry' : 'Awa Camara'; });
+[['p10', 24, '07:30'], ['p11', 48, '07:30'], ['p13', 30, '07:45'], ['q5', 24, '07:40'], ['q8', 40, '07:40']].forEach(([id, qty, time]) => {
+  const p = prod(id);
+  state.movements.push({ id: 'm-' + id, shop: p.shop, product: p.name, type: 'Approvisionnement', qty, after: p.stock + qty, reason: 'Livraison du fournisseur', by: USERS.admin.name, time });
+});
+state.movements.reverse();
+const VIEWS = ['caisse', 'ventes', 'bord', 'credits', 'stocks', 'impression'];
 const start = location.hash.slice(1);
-if (['caisse', 'ventes', 'bord', 'credits'].includes(start)) state.view = start;
+if (VIEWS.includes(start)) state.view = start;
 render();
-window.addEventListener('hashchange', () => { const v = location.hash.slice(1); if (['caisse', 'ventes', 'bord', 'credits'].includes(v) && v !== state.view) go(v); });
+window.addEventListener('hashchange', () => { const v = location.hash.slice(1); if (VIEWS.includes(v) && v !== state.view) go(v); });
 </script>
 </body>
 </html>
