@@ -65,8 +65,22 @@ try {
     await shot('02-dashboard-vide');
   });
 
+  // L'administrateur choisit la boutique affichée en haut de l'écran.
+  const chooseShop = async (name) => {
+    const button = page.getByRole('group', { name: 'Boutique affichée' }).getByRole('button', { name, exact: true });
+    await button.click();
+    await page.waitForFunction(
+      (label) =>
+        [...document.querySelectorAll('[aria-label="Boutique affichée"] button')].some(
+          (b) => b.textContent.trim() === label && b.getAttribute('aria-pressed') === 'true',
+        ),
+      name,
+    );
+  };
+
   await step('création de produits (dont stock suivi et photo)', async () => {
     await page.goto(`${BASE}/admin/products`);
+    await chooseShop('Nabele Plus 1');
     await page.getByText('Aucun produit').waitFor();
 
     await page.getByRole('button', { name: 'Nouveau produit' }).click();
@@ -107,10 +121,15 @@ try {
     await dialog().getByLabel('Nom complet', { exact: true }).fill(CASHIER.name);
     await dialog().getByLabel('E-mail', { exact: true }).fill(CASHIER.email);
     await dialog().getByLabel('Mot de passe provisoire', { exact: true }).fill(CASHIER.password);
+    // Un caissier est rattaché à une boutique : obligatoire.
+    await page.getByRole('button', { name: 'Créer le compte' }).click();
+    await dialog().getByText('Choisissez la boutique de ce caissier.').waitFor();
+    await dialog().getByLabel('Boutique', { exact: true }).selectOption({ label: 'Nabele Plus 1' });
     await page.getByRole('button', { name: 'Créer le compte' }).click();
     await toast('Compte créé').waitFor();
     await page.getByRole('heading', { name: CASHIER.name }).waitFor();
     await page.getByText(CASHIER.email, { exact: true }).waitFor();
+    await page.getByRole('article').filter({ hasText: CASHIER.email }).getByText('Nabele Plus 1').waitFor();
     await shot('04-utilisateurs');
     await logout();
   });
@@ -150,7 +169,7 @@ try {
     await page.waitForURL('**/receipts/**');
     const receipt = page.locator('#receipt');
     await receipt.getByText(receiptNumber).waitFor();
-    for (const text of ['MASSAGUI FILS SARL.U', 'Riz au poulet', '2 x 25\u00a0000', '50\u00a0000', 'Jus naturel', 'Orange Money', 'Payé', 'Awa Camara', 'Merci de votre visite !']) {
+    for (const text of ['MASSAGUI FILS SARL.U', 'Riz au poulet', '2 x 25\u00a0000', '50\u00a0000', 'Jus naturel', 'Orange Money', 'Payé', 'Awa Camara', 'Nabele Plus 1', 'Merci de votre visite !']) {
       await receipt.getByText(text, { exact: false }).first().waitFor();
     }
     await receipt.getByText('60\u00a0000\u00a0GNF').first().waitFor();
@@ -206,6 +225,26 @@ try {
       assert.ok(overflow <= 1, `${name} : défilement horizontal de ${overflow}px`);
     }
     await page.setViewportSize({ width: 1440, height: 900 });
+    await logout();
+  });
+
+  await step('boutiques : Nabele Plus 2 a ses propres produits, la caisse admin demande la boutique', async () => {
+    await login(ADMIN.email, ADMIN.password);
+    await page.waitForURL('**/admin/dashboard');
+    await page.goto(`${BASE}/admin/products`);
+    await chooseShop('Nabele Plus 2');
+    await page.getByText('Aucun produit').waitFor();
+    await page.goto(`${BASE}/admin/dashboard`);
+    await page.getByTestId('day-value').getByText('0\u00a0GNF', { exact: true }).waitFor();
+    await shot('12b-boutique-2');
+    // « Toutes les boutiques » : la caisse demande dans quelle boutique encaisser.
+    await chooseShop('Toutes les boutiques');
+    await page.goto(`${BASE}/pos`);
+    await page.getByRole('heading', { name: 'Dans quelle boutique encaissez-vous ?' }).waitFor();
+    await shot('12c-choix-boutique');
+    await page.getByRole('button', { name: 'Nabele Plus 1', exact: true }).last().click();
+    await page.getByRole('button', { name: /Ajouter Riz au poulet/ }).waitFor();
+    await page.goto(`${BASE}/admin/dashboard`);
     await logout();
   });
 

@@ -25,6 +25,7 @@ function receiptOps(data: ReceiptData): Op[] {
   ops.push({ kind: 'rule' });
   ops.push({ kind: 'pair', left: 'Reçu n° :', right: sale.receipt_number, bold: true });
   ops.push({ kind: 'pair', left: 'Date :', right: pdfSafe(formatDateTime(sale.created_at, settings.timezone)) });
+  if (data.shopName) ops.push({ kind: 'pair', left: 'Boutique :', right: data.shopName });
   ops.push({ kind: 'pair', left: 'Caissier :', right: sale.cashier_name });
   ops.push({ kind: 'rule' });
   for (const item of items) {

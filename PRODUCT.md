@@ -40,6 +40,7 @@ Une caisse faite pour un restaurant guinéen : montants en francs guinéens sans
 - Une démonstration statique (`public/demo.html`) remplace l'application tant que la base n'est pas branchée.
 - **Décision ouverte** : prise de commande par les serveurs aux tables (tables, envoi en cuisine ou à la caisse). Non construite.
 - Ventes à crédit : mode de paiement « Crédit » avec nom (obligatoire) et téléphone du client ; la vente reste « à payer » jusqu'à son encaissement. Chaque client à crédit a un **dossier** (page « Crédits ») : ce qu'il doit, ce qu'il a réglé et l'historique de ses crédits ; un même numéro de téléphone retrouve le même dossier. Les chiffres du jour affichent « Encaissé aujourd'hui » = ventes du jour − crédits non payés du jour + anciens crédits réglés dans la journée, chaque ligne étant visible. MTN Mobile Money et Virement bancaire sont désactivés (ils restent dans l'historique).
+- Deux boutiques de vente, **Nabele Plus 1** et **Nabele Plus 2** : chacune a ses produits, ses prix et son stock ; chaque vente appartient à une boutique. Un caissier est rattaché à une seule boutique et ne voit qu'elle ; l'administrateur choisit en haut de l'écran la boutique affichée (ou les deux cumulées) et doit choisir une boutique pour encaisser. Les dossiers clients à crédit sont communs aux deux boutiques.
 - **Décision ouverte** : clôture de caisse de fin de journée (fond de caisse, écart). Non construite.
 
 ## Brand Commitments

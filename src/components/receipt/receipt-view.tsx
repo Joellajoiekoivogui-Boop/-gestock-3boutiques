@@ -55,6 +55,12 @@ export function ReceiptView({ data, format }: { data: ReceiptData; format: Recei
         <dd className="text-right font-bold">{sale.receipt_number}</dd>
         <dt>Date :</dt>
         <dd className="text-right">{formatDateTime(sale.created_at, settings.timezone)}</dd>
+        {data.shopName && (
+          <>
+            <dt>Boutique :</dt>
+            <dd className="text-right">{data.shopName}</dd>
+          </>
+        )}
         <dt>Caissier :</dt>
         <dd className="text-right">{sale.cashier_name}</dd>
       </dl>
