@@ -1,5 +1,6 @@
-import { Download } from 'lucide-react';
+import { Download, Printer } from 'lucide-react';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { CollapsibleFilters } from '@/components/app/collapsible-filters';
 import { PageHeader } from '@/components/app/page-header';
 import { Pagination, parsePage } from '@/components/app/pagination';
@@ -51,11 +52,20 @@ export default async function SalesPage({ searchParams }: PageProps<'/admin/sale
             : 'Toutes les ventes enregistrées, avec leurs reçus.'
         }
         actions={
-          <Button asChild variant="outline">
-            <a href={`/admin/sales/export?${exportParams.toString()}`}>
-              <Download /> Exporter en CSV
-            </a>
-          </Button>
+          <>
+            {isAdmin(session.profile) && (
+              <Button asChild variant="outline">
+                <Link href={filters.from ? `/admin/sales/journee?jour=${filters.from}` : '/admin/sales/journee'}>
+                  <Printer /> Imprimer une journée
+                </Link>
+              </Button>
+            )}
+            <Button asChild variant="outline">
+              <a href={`/admin/sales/export?${exportParams.toString()}`}>
+                <Download /> Exporter en CSV
+              </a>
+            </Button>
+          </>
         }
       />
       <Card className="mb-4">

@@ -109,13 +109,14 @@ describe('droits et navigation', () => {
   it('la navigation suit le rôle', () => {
     const hrefs = (p: Parameters<typeof navFor>[0]) => navFor(p).flatMap((s) => s.items.map((i) => i.href));
     expect(hrefs(cashier)).toEqual(['/pos', '/pos/sales', '/credits']);
-    expect(hrefs({ ...cashier, permissions: ['manage_stock', 'view_reports'] })).toEqual([
+    // Les stocks sont réservés à l'administrateur, même avec l'ancienne permission.
+    expect(hrefs({ ...cashier, permissions: ['manage_stock', 'view_reports'] as never })).toEqual([
       '/pos',
       '/pos/sales',
       '/credits',
-      '/admin/inventory',
       '/admin/reports',
     ]);
+    expect(hrefs(admin)).toContain('/admin/inventory');
     expect(hrefs(admin)).toContain('/admin/dashboard');
     expect(hrefs(admin)).toContain('/admin/users');
     expect(hrefs(admin)).toContain('/admin/sales');

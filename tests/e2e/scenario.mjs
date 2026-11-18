@@ -142,6 +142,12 @@ try {
     await page.goto(`${BASE}/admin/users`);
     await page.waitForURL('**/pos');
     assert.equal(await page.getByRole('link', { name: 'Utilisateurs' }).count(), 0);
+    // Stocks et impression des journées : réservés à l'administrateur.
+    await page.goto(`${BASE}/admin/inventory`);
+    await page.waitForURL('**/pos');
+    await page.goto(`${BASE}/admin/sales/journee`);
+    await page.waitForURL('**/pos');
+    assert.equal(await page.getByRole('link', { name: 'Stocks' }).count(), 0);
   });
 
   let receiptNumber = '';
@@ -383,6 +389,28 @@ try {
     await page.goto(`${BASE}/pos/sales?jour=2026-01-15`);
     await page.getByText('Encaissé ce jour-là').waitFor();
     await page.getByRole('heading', { name: /15 janvier 2026/ }).first().waitFor();
+  });
+
+  await step('impression : l’administrateur imprime les ventes d’une journée', async () => {
+    await page.goto(`${BASE}/admin/dashboard`);
+    await page.getByRole('link', { name: 'Imprimer les ventes' }).click();
+    await page.waitForURL('**/admin/sales/journee?jour=**');
+    const sheet = page.locator('#day-sheet');
+    await sheet.getByRole('heading', { name: /^Ventes du / }).waitFor();
+    await sheet.getByText('Nabele Plus 1').first().waitFor();
+    await sheet.getByText('Liste des ventes').waitFor();
+    await sheet.getByText('Riz au poulet').first().waitFor();
+    await page.getByRole('button', { name: 'Imprimer les ventes' }).waitFor();
+    await shot('22-impression-journee');
+    // En impression, seule la feuille reste visible.
+    await page.emulateMedia({ media: 'print' });
+    assert.equal(await page.getByRole('navigation', { name: 'Navigation principale' }).isVisible(), false);
+    assert.equal(await page.getByRole('button', { name: 'Imprimer les ventes' }).isVisible(), false);
+    await page.screenshot({ path: join(SHOTS, '22b-impression-apercu.png'), fullPage: true });
+    await page.emulateMedia({ media: 'screen' });
+    // Une autre date : feuille vide mais imprimable.
+    await page.goto(`${BASE}/admin/sales/journee?jour=2026-01-15`);
+    await sheet.getByText('Aucune vente ce jour-là.').waitFor();
   });
 
   assert.deepEqual(consoleErrors, [], `Erreurs JavaScript : ${consoleErrors.join(' | ')}`);

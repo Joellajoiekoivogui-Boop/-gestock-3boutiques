@@ -202,7 +202,8 @@ function EditUserDialog({
       id: user.id,
       fullName: user.full_name,
       role: user.role,
-      permissions: user.permissions as Permission[],
+      // Une ancienne permission qui n'est plus proposée (ex. « manage_stock ») est ignorée.
+      permissions: user.permissions.filter((p): p is Permission => PERMISSIONS.some((k) => k.key === p)),
       isActive: user.is_active,
       shopId: user.shop_id ?? null,
     },
@@ -412,10 +413,10 @@ export function UsersManager({
                 <div className="mt-3 mb-4 flex flex-wrap gap-1.5">
                   {u.role === 'admin' ? (
                     <Badge variant="secondary">Tous les droits</Badge>
-                  ) : u.permissions.length === 0 ? (
+                  ) : !u.permissions.some((p) => permissionLabel.has(p)) ? (
                     <Badge variant="secondary">Caisse et ses ventes</Badge>
                   ) : (
-                    u.permissions.map((p) => (
+                    u.permissions.filter((p) => permissionLabel.has(p)).map((p) => (
                       <Badge key={p} variant="secondary">
                         {permissionLabel.get(p) ?? p}
                       </Badge>
