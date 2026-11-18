@@ -3,6 +3,8 @@ import { requireUser, getSettings } from '@/lib/auth';
 import { can } from '@/lib/permissions';
 import { createClient } from '@/lib/supabase/server';
 import { toneForIndex } from '@/components/app/product-thumb';
+import { ShopChooser } from '@/components/app/shop-chooser';
+import { getShopScope } from '@/lib/shop';
 import { PosTerminal, type PosProduct } from './pos-terminal';
 
 export const metadata: Metadata = { title: 'Caisse' };
@@ -10,15 +12,30 @@ export const metadata: Metadata = { title: 'Caisse' };
 export default async function PosPage() {
   const session = await requireUser();
   const supabase = await createClient();
-  const settings = await getSettings();
+  const [settings, scope] = await Promise.all([getSettings(), getShopScope()]);
+
+  // On encaisse toujours dans UNE boutique : l'administrateur la choisit.
+  if (scope.shops.length > 0 && !scope.current) {
+    return scope.canChoose ? (
+      <ShopChooser
+        shops={scope.shops.filter((s) => s.is_active)}
+        title="Dans quelle boutique encaissez-vous ?"
+        description="Les produits, les prix et le stock sont propres à chaque boutique."
+      />
+    ) : (
+      <ShopChooser shops={[]} title="Aucune boutique" description="Demandez à l’administrateur de vous rattacher à une boutique." />
+    );
+  }
+
+  let productQuery = supabase
+    .from('products')
+    .select('id, name, description, price, image_url, category_id, track_stock, stock_quantity, is_available')
+    .eq('is_archived', false)
+    .eq('is_available', true);
+  if (scope.current) productQuery = productQuery.eq('shop_id', scope.current.id);
 
   const [products, categories, methods, customers] = await Promise.all([
-    supabase
-      .from('products')
-      .select('id, name, description, price, image_url, category_id, track_stock, stock_quantity, is_available')
-      .eq('is_archived', false)
-      .eq('is_available', true)
-      .order('name'),
+    productQuery.order('name'),
     supabase.from('categories').select('id, name, is_active').order('sort_order').order('name'),
     supabase.from('payment_methods').select('code, label').eq('is_active', true).order('sort_order'),
     // Dossiers clients, pour retrouver une personne lors d'une vente à crédit.

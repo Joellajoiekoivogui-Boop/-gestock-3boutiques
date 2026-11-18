@@ -13,6 +13,7 @@ import { getSettings, requirePermission } from '@/lib/auth';
 import { formatDate, formatMoney } from '@/lib/format';
 import { resolvePeriod } from '@/lib/dates';
 import { getSalesReport } from '@/lib/reports';
+import { getShopScope } from '@/lib/shop';
 import { ReportPdfButton } from './report-pdf-button';
 
 export const metadata: Metadata = { title: 'Rapports' };
@@ -29,7 +30,7 @@ export default async function ReportsPage({ searchParams }: PageProps<'/admin/re
     typeof params.to === 'string' ? params.to : undefined,
     settings?.timezone ?? 'Africa/Conakry',
   );
-  const report = await getSalesReport(range.from, range.to);
+  const [report, scope] = await Promise.all([getSalesReport(range.from, range.to), getShopScope()]);
   const query = new URLSearchParams({ period: range.period, from: range.from, to: range.to }).toString();
   // Les ventes annulées sont déjà résumées dans leur carte : sans vente valide
   // ni remboursement, il n'y a rien à tracer.
@@ -40,7 +41,7 @@ export default async function ReportsPage({ searchParams }: PageProps<'/admin/re
     <div className="space-y-6">
       <PageHeader
         title="Rapports"
-        description={`Du ${formatDate(range.from)} au ${formatDate(range.to)}`}
+        description={`${scope.current ? `${scope.current.name} · ` : scope.shops.length > 1 ? 'Toutes les boutiques · ' : ''}Du ${formatDate(range.from)} au ${formatDate(range.to)}`}
         actions={
           <>
             <Button asChild variant="outline">

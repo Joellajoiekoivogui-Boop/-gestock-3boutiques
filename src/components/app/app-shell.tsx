@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { signOutAction } from '@/app/actions/auth';
 import { Logo } from '@/components/app/logo';
 import { navLayout, type NavItem } from '@/components/app/nav';
+import { ShopSwitcher } from '@/components/app/shop-switcher';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -22,6 +23,8 @@ import { cn } from '@/lib/utils';
 type ShellProps = {
   profile: Pick<ProfileRow, 'full_name' | 'email' | 'role' | 'permissions' | 'is_active'>;
   brand: { name: string; logoUrl: string | null };
+  /** Boutiques : choix pour l'administrateur, nom de sa boutique pour le caissier. */
+  shop?: { choices: { id: string; name: string }[]; currentId: string | null; label: string | null };
   children: React.ReactNode;
 };
 
@@ -77,7 +80,7 @@ function BottomTab({ item, active }: { item: NavItem; active: boolean }) {
   );
 }
 
-export function AppShell({ profile, brand, children }: ShellProps) {
+export function AppShell({ profile, brand, shop, children }: ShellProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
@@ -180,13 +183,18 @@ export function AppShell({ profile, brand, children }: ShellProps) {
           <div className="ml-auto hidden items-center gap-3 md:flex">
             <div className="hidden text-right leading-tight xl:block">
               <p className="max-w-48 truncate text-sm font-semibold">{name}</p>
-              <p className="text-xs text-muted-foreground">{role}</p>
+              <p className="text-xs text-muted-foreground">
+                {role}
+                {shop?.label && !shop.choices.length ? ` · ${shop.label}` : ''}
+              </p>
             </div>
             <SignOut compact />
           </div>
 
         </div>
       </header>
+
+      {shop && shop.choices.length > 1 && <ShopSwitcher shops={shop.choices} currentId={shop.currentId} />}
 
       {manageActive && (
         <nav aria-label="Gestion" className="no-print border-b bg-card">
@@ -272,7 +280,10 @@ export function AppShell({ profile, brand, children }: ShellProps) {
         <SheetContent side="right" className="w-80 gap-0 p-0">
           <SheetTitle className="border-b px-5 py-4 text-left">
             <span className="block font-serif text-xl font-bold">{name}</span>
-            <span className="block text-sm font-normal text-muted-foreground">{role}</span>
+            <span className="block text-sm font-normal text-muted-foreground">
+              {role}
+              {shop?.label && !shop.choices.length ? ` · ${shop.label}` : ''}
+            </span>
           </SheetTitle>
           <nav aria-label="Menu" className="flex flex-col overflow-y-auto p-2">
             {[primary, manage].map((group, groupIndex) => (

@@ -96,6 +96,12 @@ export function SaleDetail({
                 <dd className="text-right">
                   <SaleStatusBadge status={sale.sale_status} unpaid={sale.payment_status === 'pending'} />
                 </dd>
+                {data.shopName && (
+                  <>
+                    <dt className="text-muted-foreground">Boutique</dt>
+                    <dd className="text-right">{data.shopName}</dd>
+                  </>
+                )}
                 <dt className="text-muted-foreground">Caissier</dt>
                 <dd className="text-right">{sale.cashier_name}</dd>
                 <dt className="text-muted-foreground">Paiement</dt>

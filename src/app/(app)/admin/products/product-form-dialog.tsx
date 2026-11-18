@@ -25,14 +25,22 @@ export function ProductFormDialog({
   product,
   categories,
   currency,
+  shops = [],
+  defaultShopId = null,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product: ProductRow | null;
   categories: { id: string; name: string; is_active: boolean }[];
   currency: string;
+  /** Boutiques : un nouveau produit appartient à une seule boutique. */
+  shops?: { id: string; name: string }[];
+  defaultShopId?: string | null;
 }) {
   const router = useRouter();
+  const [shopId, setShopId] = useState(product?.shop_id ?? defaultShopId ?? (shops.length === 1 ? (shops[0]?.id ?? '') : ''));
+  const [shopError, setShopError] = useState<string | null>(null);
+  const shopName = shops.find((s) => s.id === product?.shop_id)?.name;
   const [pending, startTransition] = useTransition();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(product?.image_url ?? null);
@@ -69,8 +77,13 @@ export function ProductFormDialog({
   }
 
   const submit = form.handleSubmit((values) => {
+    if (!product && shops.length > 0 && !shopId) {
+      setShopError('Choisissez la boutique du produit.');
+      return;
+    }
     const data = new FormData();
     if (product) data.set('id', product.id);
+    if (!product && shopId) data.set('shopId', shopId);
     data.set('name', values.name);
     data.set('description', values.description ?? '');
     data.set('categoryId', values.categoryId ?? '');
@@ -146,6 +159,31 @@ export function ProductFormDialog({
             </div>
 
             <div className="grid gap-4">
+              {shops.length > 0 &&
+                (product ? (
+                  <p className="text-sm text-muted-foreground">
+                    Boutique : <span className="font-semibold text-foreground">{shopName ?? '—'}</span>
+                  </p>
+                ) : (
+                  <Field label="Boutique" htmlFor="shopId" error={shopError ?? undefined}>
+                    <NativeSelect
+                      id="shopId"
+                      value={shopId}
+                      aria-invalid={!!shopError}
+                      onChange={(event) => {
+                        setShopId(event.target.value);
+                        setShopError(null);
+                      }}
+                    >
+                      <option value="">Choisir la boutique</option>
+                      {shops.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </NativeSelect>
+                  </Field>
+                ))}
               <Field label="Nom" htmlFor="name" error={errors.name?.message}>
                 <Input id="name" aria-invalid={!!errors.name} {...form.register('name')} />
               </Field>

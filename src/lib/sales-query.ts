@@ -46,7 +46,7 @@ export async function listSales(
   supabase: Client,
   filters: SalesFilters,
   timeZone: string,
-  options: { offset: number; limit: number; cashierId?: string },
+  options: { offset: number; limit: number; cashierId?: string; shopId?: string | null },
 ): Promise<{ rows: SaleRow[]; count: number }> {
   let query = supabase.from('sales').select('*', { count: 'exact' });
 
@@ -57,6 +57,7 @@ export async function listSales(
   if (filters.status) query = query.eq('sale_status', filters.status);
   const cashier = options.cashierId ?? filters.cashier;
   if (cashier) query = query.eq('cashier_id', cashier);
+  if (options.shopId) query = query.eq('shop_id', options.shopId);
 
   const { data, error, count } = await query
     .order('created_at', { ascending: false })

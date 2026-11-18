@@ -1,5 +1,6 @@
 import 'server-only';
 import type { RefundRow, SaleItemRow, SaleRow, SettingsRow } from '@/lib/database.types';
+import { shopNames } from '@/lib/shop';
 import { createClient } from '@/lib/supabase/server';
 
 export type ReceiptData = {
@@ -10,6 +11,8 @@ export type ReceiptData = {
     SettingsRow,
     'name' | 'tagline' | 'logo_url' | 'address' | 'phone' | 'email' | 'currency' | 'receipt_footer' | 'receipt_format' | 'timezone'
   >;
+  /** Boutique où la vente a été faite (null si la base n'a pas de boutiques). */
+  shopName: string | null;
 };
 
 const DEFAULT_SETTINGS: ReceiptData['settings'] = {
@@ -31,7 +34,7 @@ export async function getSaleDetails(id: string): Promise<ReceiptData | null> {
   if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
   const supabase = await createClient();
 
-  const [sale, items, refunds, settings] = await Promise.all([
+  const [sale, items, refunds, settings, names] = await Promise.all([
     supabase.from('sales').select('*').eq('id', id).maybeSingle(),
     supabase.from('sale_items').select('*').eq('sale_id', id).order('product_name'),
     supabase.from('refunds').select('*, profiles(full_name)').eq('sale_id', id).order('created_at'),
@@ -40,6 +43,7 @@ export async function getSaleDetails(id: string): Promise<ReceiptData | null> {
       .select('name, tagline, logo_url, address, phone, email, currency, receipt_footer, receipt_format, timezone')
       .eq('id', 1)
       .maybeSingle(),
+    shopNames(),
   ]);
 
   const error = sale.error ?? items.error ?? refunds.error ?? settings.error;
@@ -54,5 +58,6 @@ export async function getSaleDetails(id: string): Promise<ReceiptData | null> {
       user_name: (profiles as { full_name: string } | null)?.full_name ?? null,
     })),
     settings: settings.data ?? DEFAULT_SETTINGS,
+    shopName: (sale.data.shop_id && names.get(sale.data.shop_id)) || null,
   };
 }

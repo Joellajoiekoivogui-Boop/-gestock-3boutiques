@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { getSettings, requireUser } from '@/lib/auth';
 import { formatDate, formatDateTime, formatMoney } from '@/lib/format';
 import { isAdmin } from '@/lib/permissions';
+import { shopNames } from '@/lib/shop';
 import { createClient } from '@/lib/supabase/server';
 import { idSchema } from '@/lib/validation';
 import { CustomerFormButton } from '../customer-form';
@@ -27,11 +28,12 @@ export default async function CustomerPage({ params }: PageProps<'/credits/[id]'
   const money = (v: number) => formatMoney(v, settings?.currency ?? 'GNF');
   const supabase = await createClient();
 
+  const names = await shopNames();
   const [customer, sales, methods] = await Promise.all([
     supabase.from('customers').select('*').eq('id', id).maybeSingle(),
     supabase
       .from('sales')
-      .select('id, receipt_number, total_amount, refunded_amount, payment_status, sale_status, created_at, cashier_name, paid_at, settled_payment_label')
+      .select('*')
       .eq('customer_id', id)
       .eq('payment_method', 'credit')
       .order('created_at', { ascending: false })
@@ -106,6 +108,7 @@ export default async function CustomerPage({ params }: PageProps<'/credits/[id]'
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {formatDateTime(sale.created_at, tz)} · {sale.cashier_name}
+                      {names.size > 1 && sale.shop_id ? ` · ${names.get(sale.shop_id) ?? ''}` : ''}
                     </p>
                     {sale.sale_status === 'cancelled' ? (
                       <p className="text-sm font-semibold text-destructive-strong">Vente annulée</p>

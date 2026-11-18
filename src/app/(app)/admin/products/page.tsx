@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
 import { getSettings, requireAdmin } from '@/lib/auth';
+import { getShopScope } from '@/lib/shop';
 import { createClient } from '@/lib/supabase/server';
 import { NewProductButton, ProductsTable } from './products-manager';
 
@@ -26,10 +27,12 @@ export default async function ProductsPage({ searchParams }: PageProps<'/admin/p
   const category = typeof params.category === 'string' && /^[0-9a-f-]{36}$/i.test(params.category) ? params.category : '';
   const status: Status = STATUSES.includes(params.status as Status) ? (params.status as Status) : 'active';
   const page = parsePage(params.page);
-  const settings = await getSettings();
+  const [settings, scope] = await Promise.all([getSettings(), getShopScope()]);
   const supabase = await createClient();
+  const shops = scope.shops.map(({ id, name }) => ({ id, name }));
 
   let query = supabase.from('products').select('*', { count: 'exact' });
+  if (scope.current) query = query.eq('shop_id', scope.current.id);
   if (q) query = query.ilike('name', `%${q}%`);
   if (category) query = query.eq('category_id', category);
   if (status === 'archived') query = query.eq('is_archived', true);
@@ -50,8 +53,19 @@ export default async function ProductsPage({ searchParams }: PageProps<'/admin/p
     <div>
       <PageHeader
         title="Produits"
-        description="Catalogue, prix, disponibilité et photos."
-        actions={<NewProductButton categories={categories.data ?? []} currency={currency} />}
+        description={
+          scope.current
+            ? `Catalogue de ${scope.current.name} : prix, disponibilité et photos.`
+            : 'Catalogue, prix, disponibilité et photos.'
+        }
+        actions={
+          <NewProductButton
+            categories={categories.data ?? []}
+            currency={currency}
+            shops={shops}
+            defaultShopId={scope.current?.id ?? null}
+          />
+        }
       />
       <div className="mb-5 flex flex-col gap-4">
         <div role="group" aria-label="Filtrer par catégorie" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6">
@@ -118,6 +132,8 @@ export default async function ProductsPage({ searchParams }: PageProps<'/admin/p
         categories={categories.data ?? []}
         currency={currency}
         stockEnabled={settings?.stock_enabled ?? true}
+        shops={shops}
+        showShop={!scope.current && shops.length > 1}
       />
       <Pagination
         page={page}

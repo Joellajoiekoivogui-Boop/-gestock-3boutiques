@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { authorizeUser } from '@/lib/auth';
 import type { CreateSaleResult } from '@/lib/database.types';
 import { DENIED, fail, toUserMessage, type ActionResult } from '@/lib/errors';
+import { isAdmin } from '@/lib/permissions';
+import { getShopScope } from '@/lib/shop';
 import { createClient } from '@/lib/supabase/server';
 import { fieldErrorsOf, saleSchema, type SaleInput } from '@/lib/validation';
 
@@ -21,6 +23,14 @@ export async function createSaleAction(input: SaleInput): Promise<ActionResult<C
     return fail('Vente à crédit : indiquez le nom du client.');
   }
 
+  // L'administrateur encaisse dans la boutique choisie en haut de l'écran ;
+  // le caissier, toujours dans la sienne (imposée par la base).
+  const scope = await getShopScope();
+  const admin = isAdmin(session.profile);
+  if (admin && scope.shops.length > 0 && !scope.current) {
+    return fail('Choisissez d’abord la boutique en haut de l’écran.');
+  }
+
   const supabase = await createClient();
   const { data, error } = await supabase.rpc('create_sale', {
     p_items: items.map((item) => ({ product_id: item.productId, quantity: item.quantity })),
@@ -33,6 +43,7 @@ export async function createSaleAction(input: SaleInput): Promise<ActionResult<C
     ...(paymentMethod === 'credit'
       ? { p_customer_name: customerName, p_customer_phone: customerPhone, p_customer_id: customerId ?? null }
       : {}),
+    ...(admin && scope.current ? { p_shop_id: scope.current.id } : {}),
   });
 
   if (error || !data) {

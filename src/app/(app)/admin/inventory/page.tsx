@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getSettings, requirePermission } from '@/lib/auth';
 import { formatDateTime, MOVEMENT_TYPE_LABELS } from '@/lib/format';
+import { getShopScope } from '@/lib/shop';
 import { createClient } from '@/lib/supabase/server';
 import { StockMovementButton } from './stock-movement-dialog';
 
@@ -48,23 +49,37 @@ export default async function InventoryPage({ searchParams }: PageProps<'/admin/
   const productFilter =
     typeof params.product === 'string' && /^[0-9a-f-]{36}$/i.test(params.product) ? params.product : '';
   const page = parsePage(params.page);
-  const settings = await getSettings();
+  const [settings, scope] = await Promise.all([getSettings(), getShopScope()]);
   const tz = settings?.timezone ?? 'Africa/Conakry';
   const supabase = await createClient();
+  const shopId = scope.current?.id ?? null;
+
+  // Mouvements de la boutique choisie : ceux de ses produits.
+  let shopProductIds: string[] | null = null;
+  if (shopId) {
+    const { data, error } = await supabase.from('products').select('id').eq('shop_id', shopId).limit(5000);
+    if (error) throw new Error(error.message);
+    shopProductIds = (data ?? []).map((p) => p.id);
+  }
 
   let movementsQuery = supabase
     .from('stock_movements')
     .select('*, products(name), profiles(full_name)', { count: 'exact' })
     .order('created_at', { ascending: false });
   if (productFilter) movementsQuery = movementsQuery.eq('product_id', productFilter);
+  if (shopProductIds) {
+    // Liste vide : aucun produit, donc aucun mouvement (identifiant impossible).
+    movementsQuery = movementsQuery.in('product_id', shopProductIds.length ? shopProductIds : ['00000000-0000-0000-0000-000000000000']);
+  }
+  let productsQuery = supabase
+    .from('products')
+    .select('id, name, stock_quantity, minimum_stock, is_available')
+    .eq('track_stock', true)
+    .eq('is_archived', false);
+  if (shopId) productsQuery = productsQuery.eq('shop_id', shopId);
 
   const [products, movements] = await Promise.all([
-    supabase
-      .from('products')
-      .select('id, name, stock_quantity, minimum_stock, is_available')
-      .eq('track_stock', true)
-      .eq('is_archived', false)
-      .order('name'),
+    productsQuery.order('name'),
     movementsQuery.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1),
   ]);
   if (products.error) throw new Error(products.error.message);
@@ -77,7 +92,14 @@ export default async function InventoryPage({ searchParams }: PageProps<'/admin/
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Stocks" description="Approvisionnements, ajustements et historique des mouvements." />
+      <PageHeader
+        title="Stocks"
+        description={
+          scope.current
+            ? `Stock de ${scope.current.name} : approvisionnements, ajustements et mouvements.`
+            : 'Approvisionnements, ajustements et historique des mouvements.'
+        }
+      />
 
       {settings && !settings.stock_enabled && (
         <p role="status" className="rounded-lg border border-warning-foreground/30 bg-warning px-4 py-3 text-sm text-warning-foreground">

@@ -3,13 +3,38 @@ import { as, createProduct, createSale, createUser, n, pool, sql } from './helpe
 
 let admin: string;
 let cashier: string;
+// Boutique propre à ce fichier : ses chiffres ne sont pas mêlés aux ventes des autres tests.
+let shop: string;
 
 type Report = Record<string, unknown> & {
-  by_day: { day: string; gross: number; refunds: number; net: number; count: number }[];
-  by_payment_method: { code: string; gross: number; refunds: number; net: number; count: number }[];
-  top_products: { product_id: string; name: string; quantity: number; revenue: number }[];
+  by_day: {
+    day: string;
+    gross: number;
+    refunds: number;
+    net: number;
+    count: number;
+  }[];
+  by_payment_method: {
+    code: string;
+    gross: number;
+    refunds: number;
+    net: number;
+    count: number;
+  }[];
+  top_products: {
+    product_id: string;
+    name: string;
+    quantity: number;
+    revenue: number;
+  }[];
   by_category: { name: string; revenue: number }[];
-  by_cashier: { cashier_id: string; count: number; gross: number; refunds: number; cancelled_count: number }[];
+  by_cashier: {
+    cashier_id: string;
+    count: number;
+    gross: number;
+    refunds: number;
+    cancelled_count: number;
+  }[];
 };
 
 async function today(): Promise<string> {
@@ -21,14 +46,21 @@ async function today(): Promise<string> {
 
 async function report(uid: string, from: string, to: string): Promise<Report> {
   return as(uid, async (c) => {
-    const { rows } = await c.query(`select public.get_sales_report($1::date, $2::date) as r`, [from, to]);
+    const { rows } = await c.query(`select public.get_sales_report($1::date, $2::date, $3::uuid) as r`, [
+      from,
+      to,
+      uid === admin ? shop : null,
+    ]);
     return rows[0].r as Report;
   });
 }
 
 beforeAll(async () => {
+  [{ id: shop }] = await sql<{ id: string }>(
+    `insert into public.shops (name, sort_order) values ('Boutique rapports', 99) returning id`,
+  );
   admin = await createUser({ role: 'admin' });
-  cashier = await createUser({ name: 'Caissier Rapport' });
+  cashier = await createUser({ name: 'Caissier Rapport', shop });
 });
 
 afterAll(async () => {
@@ -40,8 +72,16 @@ describe('get_sales_report', () => {
     const day = await today();
     const before = await report(admin, day, day);
 
-    const plat = await createProduct({ name: 'Plat rapport', price: 20000 });
-    const boisson = await createProduct({ name: 'Boisson rapport', price: 5000 });
+    const plat = await createProduct({
+      name: 'Plat rapport',
+      price: 20000,
+      shop,
+    });
+    const boisson = await createProduct({
+      name: 'Boisson rapport',
+      price: 5000,
+      shop,
+    });
 
     const s1 = await createSale(cashier, [
       { product_id: plat, quantity: 2 },
@@ -109,7 +149,10 @@ describe('get_dashboard_summary', () => {
     await expect(as(cashier, (c) => c.query(`select public.get_dashboard_summary()`))).rejects.toThrow(
       /réservé aux administrateurs/,
     );
-    const summary = await as(admin, async (c) => (await c.query(`select public.get_dashboard_summary() as s`)).rows[0].s);
+    const summary = await as(
+      admin,
+      async (c) => (await c.query(`select public.get_dashboard_summary($1::uuid) as s`, [shop])).rows[0].s,
+    );
     const day = await today();
     const r = await report(admin, day, day);
     expect(n(summary.periods.today.net)).toBe(n(r.net_revenue));

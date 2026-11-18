@@ -27,14 +27,36 @@ import { ProductFormDialog } from './product-form-dialog';
 
 type Category = { id: string; name: string; is_active: boolean };
 
-export function NewProductButton({ categories, currency }: { categories: Category[]; currency: string }) {
+type Shop = { id: string; name: string };
+
+export function NewProductButton({
+  categories,
+  currency,
+  shops = [],
+  defaultShopId = null,
+}: {
+  categories: Category[];
+  currency: string;
+  shops?: Shop[];
+  defaultShopId?: string | null;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <>
       <Button onClick={() => setOpen(true)}>
         <Plus /> Nouveau produit
       </Button>
-      {open && <ProductFormDialog open={open} onOpenChange={setOpen} product={null} categories={categories} currency={currency} />}
+      {open && (
+        <ProductFormDialog
+          open={open}
+          onOpenChange={setOpen}
+          product={null}
+          categories={categories}
+          currency={currency}
+          shops={shops}
+          defaultShopId={defaultShopId}
+        />
+      )}
     </>
   );
 }
@@ -44,12 +66,18 @@ export function ProductsTable({
   categories,
   currency,
   stockEnabled,
+  shops = [],
+  showShop = false,
 }: {
   products: ProductRow[];
   categories: Category[];
   currency: string;
   stockEnabled: boolean;
+  shops?: Shop[];
+  /** Afficher la boutique de chaque produit (vue « toutes les boutiques »). */
+  showShop?: boolean;
 }) {
+  const shopName = new Map(shops.map((s) => [s.id, s.name]));
   const router = useRouter();
   const [editing, setEditing] = useState<ProductRow | null>(null);
   const [deleting, setDeleting] = useState<ProductRow | null>(null);
@@ -108,6 +136,11 @@ export function ProductsTable({
                   </div>
                 </div>
                 <div className="flex flex-1 flex-col gap-1 p-4 pt-3">
+                  {showShop && (
+                    <p className="text-xs font-semibold tracking-wide text-gold-strong uppercase">
+                      {shopName.get(p.shop_id) ?? ''}
+                    </p>
+                  )}
                   <h3 className="text-lg leading-snug font-bold">{p.name}</h3>
                   {p.description && <p className="line-clamp-2 text-sm text-muted-foreground">{p.description}</p>}
                   <div className="mt-auto flex items-end justify-between gap-3 pt-3">
@@ -177,6 +210,7 @@ export function ProductsTable({
           onOpenChange={(o) => !o && setEditing(null)}
           product={editing}
           categories={categories}
+          shops={shops}
           currency={currency}
         />
       )}

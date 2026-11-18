@@ -43,23 +43,31 @@ export async function as<T>(uid: string | null, fn: (client: pg.PoolClient) => P
   }
 }
 
-export async function createUser(options: {
-  role?: 'admin' | 'cashier';
-  active?: boolean;
-  permissions?: string[];
-  name?: string;
-} = {}): Promise<string> {
+// Boutiques créées par la migration des boutiques.
+export const SHOP1 = '00000000-0000-4000-8000-000000000001';
+export const SHOP2 = '00000000-0000-4000-8000-000000000002';
+
+export async function createUser(
+  options: {
+    role?: 'admin' | 'cashier';
+    active?: boolean;
+    permissions?: string[];
+    name?: string;
+    shop?: string | null;
+  } = {},
+): Promise<string> {
   const id = randomUUID();
   await sql(`insert into auth.users (id, email, raw_user_meta_data) values ($1, $2, $3)`, [
     id,
     `${id}@test.local`,
     { full_name: options.name ?? 'Utilisateur test' },
   ]);
-  await sql(`update public.profiles set role = $2, is_active = $3, permissions = $4 where id = $1`, [
+  await sql(`update public.profiles set role = $2, is_active = $3, permissions = $4, shop_id = $5 where id = $1`, [
     id,
     options.role ?? 'cashier',
     options.active ?? true,
     options.permissions ?? [],
+    options.shop === undefined ? SHOP1 : options.shop,
   ]);
   return id;
 }
@@ -70,11 +78,12 @@ export async function createProduct(options: {
   trackStock?: boolean;
   stock?: number;
   available?: boolean;
+  shop?: string;
 }): Promise<string> {
   const [category] = await sql<{ id: string }>(`select id from public.categories order by sort_order limit 1`);
   const [row] = await sql<{ id: string }>(
-    `insert into public.products (name, category_id, price, track_stock, stock_quantity, is_available)
-     values ($1, $2, $3, $4, $5, $6) returning id`,
+    `insert into public.products (name, category_id, price, track_stock, stock_quantity, is_available, shop_id)
+     values ($1, $2, $3, $4, $5, $6, $7) returning id`,
     [
       options.name ?? `Produit ${randomUUID().slice(0, 8)}`,
       category.id,
@@ -82,6 +91,7 @@ export async function createProduct(options: {
       options.trackStock ?? false,
       options.stock ?? 0,
       options.available ?? true,
+      options.shop ?? SHOP1,
     ],
   );
   return row.id;
@@ -97,11 +107,19 @@ export type SaleResult = {
 export async function createSale(
   uid: string,
   items: { product_id: string; quantity: number; [key: string]: unknown }[],
-  options: { method?: string; discount?: number; key?: string; customer?: string; phone?: string; customerId?: string } = {},
+  options: {
+    method?: string;
+    discount?: number;
+    key?: string;
+    customer?: string;
+    phone?: string;
+    customerId?: string;
+    shopId?: string;
+  } = {},
 ): Promise<SaleResult> {
   return as(uid, async (client) => {
     const { rows } = await client.query<{ result: SaleResult }>(
-      `select public.create_sale($1::jsonb, $2, $3::uuid, $4, null, $5, $6, $7::uuid) as result`,
+      `select public.create_sale($1::jsonb, $2, $3::uuid, $4, null, $5, $6, $7::uuid, $8::uuid) as result`,
       [
         JSON.stringify(items),
         options.method ?? 'cash',
@@ -110,6 +128,7 @@ export async function createSale(
         options.customer ?? null,
         options.phone ?? null,
         options.customerId ?? null,
+        options.shopId ?? null,
       ],
     );
     return rows[0].result;
@@ -134,10 +153,9 @@ export async function withProductHeld<T>(productId: string, run: () => Promise<T
 }
 
 export async function stockOf(productId: string): Promise<number> {
-  const [row] = await sql<{ stock_quantity: number }>(
-    `select stock_quantity from public.products where id = $1`,
-    [productId],
-  );
+  const [row] = await sql<{ stock_quantity: number }>(`select stock_quantity from public.products where id = $1`, [
+    productId,
+  ]);
   return row.stock_quantity;
 }
 

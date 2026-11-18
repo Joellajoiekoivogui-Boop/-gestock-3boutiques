@@ -24,6 +24,16 @@ export type ProfileRow = {
   role: AppRole;
   permissions: string[];
   is_active: boolean;
+  shop_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ShopRow = {
+  id: string;
+  name: string;
+  sort_order: number;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -69,6 +79,7 @@ export type ProductRow = {
   track_stock: boolean;
   stock_quantity: number;
   minimum_stock: number;
+  shop_id: string;
   created_at: string;
   updated_at: string;
 };
@@ -109,6 +120,7 @@ export type SaleRow = {
   settled_payment_method: string | null;
   settled_payment_label: string | null;
   customer_id: string | null;
+  shop_id: string;
 };
 
 export type CustomerRow = {
@@ -172,8 +184,9 @@ export type Database = {
       profiles: Table<
         ProfileRow,
         { id: string; full_name?: string; email?: string | null; role?: AppRole; permissions?: string[]; is_active?: boolean },
-        { full_name?: string; role?: AppRole; permissions?: string[]; is_active?: boolean }
+        { full_name?: string; role?: AppRole; permissions?: string[]; is_active?: boolean; shop_id?: string | null }
       >;
+      shops: Table<ShopRow, never, { name?: string; sort_order?: number; is_active?: boolean }>;
       restaurant_settings: Table<
         SettingsRow,
         Partial<SettingsRow>,
@@ -189,6 +202,8 @@ export type Database = {
         {
           name: string;
           price: number;
+          // Obligatoire en base (migration des boutiques).
+          shop_id?: string;
           description?: string | null;
           category_id?: string | null;
           image_url?: string | null;
@@ -292,6 +307,7 @@ export type Database = {
           p_customer_name?: string | null;
           p_customer_phone?: string | null;
           p_customer_id?: string | null;
+          p_shop_id?: string | null;
         };
         Returns: Json;
       };
@@ -303,8 +319,8 @@ export type Database = {
         Args: { p_product_id: string; p_movement_type: string; p_quantity: number; p_reason?: string | null };
         Returns: number;
       };
-      get_sales_report: { Args: { p_from: string; p_to: string }; Returns: Json };
-      get_dashboard_summary: { Args: Record<string, never>; Returns: Json };
+      get_sales_report: { Args: { p_from: string; p_to: string; p_shop_id?: string | null }; Returns: Json };
+      get_dashboard_summary: { Args: { p_shop_id?: string | null }; Returns: Json };
       log_admin_event: {
         Args: { p_action: string; p_entity_type: string; p_entity_id: string; p_details?: Json };
         Returns: undefined;
