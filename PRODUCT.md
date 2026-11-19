@@ -44,6 +44,7 @@ Une caisse faite pour un restaurant guinéen : montants en francs guinéens sans
 - **Journée de vente de 7h à 7h** : une vente faite le 17 à 2h du matin compte pour la journée du 16 (caisse, tableau de bord, rapports, historique). Heure fixée dans `DAY_START_HOUR` (src/lib/dates.ts) et `public.day_start()` en base.
 - **Dépenses de caisse** : le caissier note ce qu'il achète avec l'argent de la caisse (condiments…) et son prix, dans « Mes ventes », pour la journée en cours ; le montant est retiré de l'argent encaissé du jour. Seul l'administrateur peut supprimer une dépense (tracé au journal) ; il peut aussi en noter une pour un jour passé depuis le tableau de bord.
 - **Impression des ventes d'une journée** (administrateur) : depuis le tableau de bord ou l'historique, feuille A4 de la journée choisie (résumé, encaissé, modes de paiement, dépenses, produits vendus, liste des ventes, signatures), à imprimer ou enregistrer en PDF.
+- **Rapports** : boutiques côte à côte, meilleurs jours, moyenne par jour de la semaine, export Excel (.xlsx, un onglet par tableau), CSV et PDF. **Prix d'achat** facultatif par produit (administrateur seulement, jamais visible des caissiers) : le coût est figé au moment de chaque vente et le rapport de l'administrateur donne la marge.
 - **Décision ouverte** : clôture de caisse de fin de journée (fond de caisse, écart). Non construite.
 
 ## Brand Commitments

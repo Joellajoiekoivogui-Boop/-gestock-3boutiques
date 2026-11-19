@@ -68,6 +68,7 @@ export function ProductsTable({
   stockEnabled,
   shops = [],
   showShop = false,
+  costs = {},
 }: {
   products: ProductRow[];
   categories: Category[];
@@ -76,6 +77,8 @@ export function ProductsTable({
   shops?: Shop[];
   /** Afficher la boutique de chaque produit (vue « toutes les boutiques »). */
   showShop?: boolean;
+  /** Prix d'achat connus (administrateur), par produit. */
+  costs?: Record<string, number>;
 }) {
   const shopName = new Map(shops.map((s) => [s.id, s.name]));
   const router = useRouter();
@@ -144,7 +147,18 @@ export function ProductsTable({
                   <h3 className="text-lg leading-snug font-bold">{p.name}</h3>
                   {p.description && <p className="line-clamp-2 text-sm text-muted-foreground">{p.description}</p>}
                   <div className="mt-auto flex items-end justify-between gap-3 pt-3">
-                    <p className="text-xl font-bold tracking-tight whitespace-nowrap tabular-nums">{formatMoney(p.price, currency)}</p>
+                    <div>
+                      <p className="text-xl font-bold tracking-tight whitespace-nowrap tabular-nums">{formatMoney(p.price, currency)}</p>
+                      {(() => {
+                        const cost = costs[p.id];
+                        if (cost === undefined || Number(p.price) <= 0) return null;
+                        return (
+                          <p className="text-xs text-muted-foreground tabular-nums">
+                            Achat {formatMoney(cost, currency)} · marge {Math.round(((Number(p.price) - cost) / Number(p.price)) * 100)} %
+                          </p>
+                        );
+                      })()}
+                    </div>
                     <p className="text-right text-sm text-muted-foreground tabular-nums">
                       {p.category_id ? categoryName.get(p.category_id) : 'Sans catégorie'}
                       {p.track_stock && (
@@ -212,6 +226,7 @@ export function ProductsTable({
           categories={categories}
           shops={shops}
           currency={currency}
+          costPrice={costs[editing.id] ?? null}
         />
       )}
 

@@ -251,6 +251,7 @@ export type Database = {
       >;
       sales: Table<SaleRow, never, never>;
       expenses: Table<ExpenseRow, never, never>;
+      product_costs: Table<{ product_id: string; cost_price: number; updated_by: string | null; updated_at: string }, never, never>;
       customers: Table<CustomerRow, never, Partial<Pick<CustomerRow, 'name' | 'phone' | 'note' | 'is_active'>>>;
       sale_items: Table<
         SaleItemRow,
@@ -329,6 +330,7 @@ export type Database = {
         Returns: string;
       };
       current_business_day: { Args: Record<string, never>; Returns: string };
+      set_product_cost: { Args: { p_product_id: string; p_cost: number | null }; Returns: undefined };
       settle_credit: { Args: { p_sale_id: string; p_payment_method: string }; Returns: Json };
       cancel_sale: { Args: { p_sale_id: string; p_reason: string }; Returns: undefined };
       refund_sale: { Args: { p_sale_id: string; p_amount: number; p_reason: string }; Returns: Json };
@@ -381,6 +383,11 @@ export type SalesReport = {
   by_payment_method: { code: string; label: string; count: number; gross: number; refunds: number; net: number }[];
   top_products: { product_id: string; name: string; quantity: number; revenue: number }[];
   by_category: { name: string; quantity: number; revenue: number }[];
+  /** Boutiques côte à côte (une seule si le rapport porte sur une boutique). */
+  by_shop?: { shop_id: string; name: string; count: number; gross: number; refunds: number; net: number }[];
+  /** Administrateur seulement : marge sur les lignes dont le prix d'achat est connu. */
+  margin?: { revenue_with_cost: number; cost_total: number; margin: number; revenue_without_cost: number };
+  top_margin?: { product_id: string; name: string; quantity: number; revenue: number; cost: number; margin: number }[];
   by_cashier: {
     cashier_id: string;
     name: string;

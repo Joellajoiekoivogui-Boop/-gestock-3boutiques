@@ -87,6 +87,9 @@ try {
     await dialog().getByLabel('Nom', { exact: true }).fill('Riz au poulet');
     await dialog().getByLabel('Catégorie', { exact: true }).selectOption({ label: 'Plats africains' });
     await dialog().getByLabel('Prix (GNF)', { exact: true }).fill('25000');
+    // Prix d'achat (facultatif) : la marge s'affiche pendant la saisie.
+    await dialog().getByLabel('Prix d’achat (GNF, facultatif)').fill('15000');
+    await dialog().getByText('Marge : 10 000 GNF par unité (40 %)').waitFor();
     await dialog().locator('#product-image').setInputFiles({ name: 'riz.png', mimeType: 'image/png', buffer: PNG });
     await dialog().getByRole('button', { name: 'Enregistrer' }).click();
     await toast('Produit créé.').waitFor();
@@ -103,6 +106,7 @@ try {
 
     await page.getByRole('heading', { name: 'Jus naturel', exact: true }).waitFor();
     await page.getByRole('heading', { name: 'Riz au poulet', exact: true }).waitFor();
+    await page.getByText('Achat 15\u00a0000\u00a0GNF · marge 40 %').waitFor();
     await shot('03-produits');
   });
 
@@ -309,6 +313,12 @@ try {
     await shot('15-rapports');
     const csv = await page.request.get(`${BASE}/admin/reports/export?period=today`);
     assert.equal(csv.status(), 200);
+    // Classeur Excel : un vrai fichier .xlsx (archive ZIP).
+    const xlsx = await page.request.get(`${BASE}/admin/reports/export?period=today&format=xlsx`);
+    assert.equal(xlsx.status(), 200);
+    assert.match(xlsx.headers()['content-type'] ?? '', /spreadsheetml/);
+    const bytes = await xlsx.body();
+    assert.equal(bytes.subarray(0, 2).toString(), 'PK');
   });
 
   await step('stocks : stock réintégré après annulation, mouvements tracés', async () => {

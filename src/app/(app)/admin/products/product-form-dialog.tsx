@@ -17,6 +17,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import type { ProductRow } from '@/lib/database.types';
 import { IMAGE_TYPES, productSchema, validateImage, type ProductFormOutput, type ProductFormValues } from '@/lib/validation';
+import { formatMoney } from '@/lib/format';
 import { saveProductAction } from './actions';
 
 export function ProductFormDialog({
@@ -27,6 +28,7 @@ export function ProductFormDialog({
   currency,
   shops = [],
   defaultShopId = null,
+  costPrice = null,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -36,6 +38,8 @@ export function ProductFormDialog({
   /** Boutiques : un nouveau produit appartient à une seule boutique. */
   shops?: { id: string; name: string }[];
   defaultShopId?: string | null;
+  /** Prix d'achat actuel (administrateur). */
+  costPrice?: number | null;
 }) {
   const router = useRouter();
   const [shopId, setShopId] = useState(product?.shop_id ?? defaultShopId ?? (shops.length === 1 ? (shops[0]?.id ?? '') : ''));
@@ -54,6 +58,7 @@ export function ProductFormDialog({
       description: product?.description ?? '',
       categoryId: product?.category_id ?? '',
       price: product ? Number(product.price) : (undefined as unknown as number),
+      costPrice: costPrice ?? null,
       isAvailable: product?.is_available ?? true,
       trackStock: product?.track_stock ?? false,
       minimumStock: product?.minimum_stock ?? 0,
@@ -62,6 +67,13 @@ export function ProductFormDialog({
   });
   const { errors } = form.formState;
   const trackStock = useWatch({ control: form.control, name: 'trackStock' });
+  // Marge affichée pendant la saisie : prix de vente − prix d'achat.
+  const watchedPrice = useWatch({ control: form.control, name: 'price' });
+  const watchedCost = useWatch({ control: form.control, name: 'costPrice' });
+  const marginHint =
+    typeof watchedPrice === 'number' && watchedPrice > 0 && typeof watchedCost === 'number' && Number.isFinite(watchedCost)
+      ? `Marge : ${formatMoney(watchedPrice - watchedCost, currency)} par unité (${Math.round(((watchedPrice - watchedCost) / watchedPrice) * 100)} %)`
+      : null;
 
   function onFile(event: React.ChangeEvent<HTMLInputElement>) {
     const selected = event.target.files?.[0] ?? null;
@@ -88,6 +100,7 @@ export function ProductFormDialog({
     data.set('description', values.description ?? '');
     data.set('categoryId', values.categoryId ?? '');
     data.set('price', String(values.price));
+    data.set('costPrice', values.costPrice == null ? '' : String(values.costPrice));
     data.set('isAvailable', String(values.isAvailable));
     data.set('trackStock', String(values.trackStock));
     data.set('minimumStock', String(values.minimumStock));
@@ -211,6 +224,25 @@ export function ProductFormDialog({
                   />
                 </Field>
               </div>
+              <Field
+                label={`Prix d’achat (${currency}, facultatif)`}
+                htmlFor="costPrice"
+                error={errors.costPrice?.message}
+                hint={
+                  marginHint ?? 'Visible seulement par l’administrateur : sert à calculer la marge dans les rapports.'
+                }
+              >
+                <Input
+                  id="costPrice"
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  step={1}
+                  placeholder="Ex. : 30000"
+                  aria-invalid={!!errors.costPrice}
+                  {...form.register('costPrice', { setValueAs: (v) => (v === '' || v == null ? null : Number(v)) })}
+                />
+              </Field>
               <Field label="Description" htmlFor="description" error={errors.description?.message}>
                 <Textarea id="description" rows={2} {...form.register('description')} />
               </Field>

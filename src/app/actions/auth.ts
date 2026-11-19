@@ -6,7 +6,7 @@ import { fail, isNetworkError, type ActionResult } from '@/lib/errors';
 import { createClient } from '@/lib/supabase/server';
 import { loginSchema, type LoginInput } from '@/lib/validation';
 
-const SAFE_NEXT = /^\/(admin|pos|receipts)(\/[\w\-./]*)?$/;
+const SAFE_NEXT = /^\/(admin|pos|receipts|credits)(\/[\w\-./]*)?$/;
 
 export async function loginAction(values: LoginInput, next?: string | null): Promise<ActionResult> {
   const parsed = loginSchema.safeParse(values);

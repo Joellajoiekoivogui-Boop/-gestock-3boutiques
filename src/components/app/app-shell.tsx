@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown, LogOut, Menu, ShoppingBag } from 'lucide-react';
+import { ChevronDown, LogOut, Menu, ShoppingBag, Store } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -38,13 +38,19 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function Brand({ brand }: { brand: ShellProps['brand'] }) {
+function Brand({ brand, compact = false }: { brand: ShellProps['brand']; compact?: boolean }) {
   return (
     <span className="flex min-w-0 items-center gap-3">
       <Logo logoUrl={brand.logoUrl} name={brand.name} size={42} className="rounded-xl" />
       <span className="block min-w-0 leading-tight md:hidden lg:block">
         <span className="block truncate font-serif text-xl font-bold">{brand.name.replace(/\s+SARL\.?U?$/i, '')}</span>
-        <span className="block text-[11px] font-semibold tracking-[0.2em] text-gold-strong uppercase">
+        {/* Téléphone d'un caissier : la place va à sa boutique, affichée à côté. */}
+        <span
+          className={cn(
+            'text-[11px] font-semibold tracking-[0.2em] text-gold-strong uppercase',
+            compact ? 'hidden sm:block' : 'block',
+          )}
+        >
           • Hôtellerie — Restaurant •
         </span>
       </span>
@@ -127,7 +133,7 @@ export function AppShell({ profile, brand, shop, children }: ShellProps) {
       <header className="no-print sticky top-0 z-30 border-b bg-card/95 backdrop-blur-sm">
         <div className="flex h-[4.5rem] items-center gap-3 px-4 sm:px-6">
           <Link href={primary[0]?.href ?? '/pos'} className="shrink-0">
-            <Brand brand={brand} />
+            <Brand brand={brand} compact={!!shop?.label && !shop.choices.length} />
           </Link>
 
           <nav
@@ -180,6 +186,13 @@ export function AppShell({ profile, brand, shop, children }: ShellProps) {
             )}
           </nav>
 
+          {/* Caissier : sa boutique toujours visible (le nom complet n'apparaît que sur grand écran). */}
+          {shop?.label && !shop.choices.length && (
+            <span className="ml-auto inline-flex h-9 min-w-0 shrink items-center gap-1.5 rounded-full bg-forest-soft px-3 text-sm font-semibold whitespace-nowrap text-forest md:ml-0 xl:hidden">
+              <Store className="size-4" aria-hidden />
+              {shop.label}
+            </span>
+          )}
           <div className="ml-auto hidden items-center gap-3 md:flex">
             <div className="hidden text-right leading-tight xl:block">
               <p className="max-w-48 truncate text-sm font-semibold">{name}</p>

@@ -3,6 +3,7 @@ import { csvResponse, toCsvSections } from '@/lib/csv';
 import { resolvePeriod } from '@/lib/dates';
 import { can } from '@/lib/permissions';
 import { reportSections } from '@/lib/report-sections';
+import { buildXlsx } from '@/lib/xlsx';
 import { getSalesReport } from '@/lib/reports';
 
 export async function GET(request: Request) {
@@ -19,6 +20,18 @@ export async function GET(request: Request) {
     settings?.timezone ?? 'Africa/Conakry',
   );
   const report = await getSalesReport(range.from, range.to);
-  const csv = toCsvSections(reportSections(report, settings?.currency ?? 'GNF'));
-  return csvResponse(csv, `rapport-${range.from}_${range.to}.csv`);
+  const sections = reportSections(report, settings?.currency ?? 'GNF');
+  const name = `rapport-${range.from}_${range.to}`;
+  if (url.searchParams.get('format') === 'xlsx') {
+    // Classeur Excel : un onglet par tableau.
+    const bytes = buildXlsx(sections.map((s) => ({ name: s.sheet, title: s.title, headers: s.headers, rows: s.rows })));
+    return new Response(new Blob([bytes as BlobPart]), {
+      headers: {
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition': `attachment; filename="${name}.xlsx"`,
+        'Cache-Control': 'no-store',
+      },
+    });
+  }
+  return csvResponse(toCsvSections(sections), `${name}.csv`);
 }

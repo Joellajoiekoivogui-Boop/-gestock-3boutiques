@@ -38,7 +38,7 @@ export function SalesTable({
           {!compact && <TableHead className="hidden text-right md:table-cell">Articles</TableHead>}
           <TableHead className="text-right">Montant</TableHead>
           <TableHead className={compact ? 'hidden sm:table-cell' : 'hidden md:table-cell'}>Paiement</TableHead>
-          <TableHead>Statut</TableHead>
+          <TableHead className="hidden sm:table-cell">Statut</TableHead>
           {!compact && <TableHead className="hidden text-right sm:table-cell">Actions</TableHead>}
         </TableRow>
       </TableHeader>
@@ -59,9 +59,13 @@ export function SalesTable({
             {!compact && <TableCell className="hidden text-right tabular-nums md:table-cell">{sale.item_count}</TableCell>}
             <TableCell className="text-right font-medium whitespace-nowrap tabular-nums">
               {formatMoney(sale.total_amount, currency)}
+              {/* Téléphone : le statut passe sous le montant (la colonne Statut ne tiendrait pas). */}
+              <span className="mt-1 block sm:hidden">
+                <SaleStatusBadge status={sale.sale_status} unpaid={sale.payment_status === 'pending'} />
+              </span>
             </TableCell>
             <TableCell className={cn('hidden whitespace-nowrap', compact ? 'sm:table-cell' : 'md:table-cell')}>{sale.payment_method_label}</TableCell>
-            <TableCell>
+            <TableCell className="hidden sm:table-cell">
               <SaleStatusBadge status={sale.sale_status} unpaid={sale.payment_status === 'pending'} />
             </TableCell>
             {!compact && (
