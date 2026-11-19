@@ -45,6 +45,7 @@ Une caisse faite pour un restaurant guinéen : montants en francs guinéens sans
 - **Dépenses de caisse** : le caissier note ce qu'il achète avec l'argent de la caisse (condiments…) et son prix, dans « Mes ventes », pour la journée en cours ; le montant est retiré de l'argent encaissé du jour. Seul l'administrateur peut supprimer une dépense (tracé au journal) ; il peut aussi en noter une pour un jour passé depuis le tableau de bord.
 - **Impression des ventes d'une journée** (administrateur) : depuis le tableau de bord ou l'historique, feuille A4 de la journée choisie (résumé, encaissé, modes de paiement, dépenses, produits vendus, liste des ventes, signatures), à imprimer ou enregistrer en PDF.
 - **Rapports** : boutiques côte à côte, meilleurs jours, moyenne par jour de la semaine, export Excel (.xlsx, un onglet par tableau), CSV et PDF. **Prix d'achat** facultatif par produit (administrateur seulement, jamais visible des caissiers) : le coût est figé au moment de chaque vente et le rapport de l'administrateur donne la marge.
+- **Bilan du mois** (tableau de bord de l'administrateur, mois au choix, par boutique ou les deux) : ventes du mois − dépenses et achats − dettes (ventes à crédit du mois pas encore payées) = bénéfice du mois. Achats et dépenses forment un seul total, noté par les caissières dans « Dépenses et achats du jour ».
 - **Décision ouverte** : clôture de caisse de fin de journée (fond de caisse, écart). Non construite.
 
 ## Brand Commitments

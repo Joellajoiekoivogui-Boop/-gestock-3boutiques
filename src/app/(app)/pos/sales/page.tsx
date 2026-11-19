@@ -125,7 +125,7 @@ export default async function MySalesPage({ searchParams }: PageProps<'/pos/sale
                 ]
               : []),
             ...(expenses.total > 0
-              ? [{ label: 'Dépenses', value: `− ${formatMoney(expenses.total, currency)}` }]
+              ? [{ label: 'Dépenses et achats', value: `− ${formatMoney(expenses.total, currency)}` }]
               : []),
             { label: 'Nombre de ventes', value: day.count },
             {
@@ -136,7 +136,7 @@ export default async function MySalesPage({ searchParams }: PageProps<'/pos/sale
           ]}
         />
         <p className="mt-2 text-sm text-muted-foreground">
-          Ventes du jour − crédits non payés + anciens crédits réglés − dépenses. La journée va de 7h à 7h le lendemain.
+          Ventes du jour − crédits non payés + anciens crédits réglés − dépenses et achats. La journée va de 7h à 7h le lendemain.
           Hors ventes annulées, remboursements déduits.
         </p>
         {expenses.available && (

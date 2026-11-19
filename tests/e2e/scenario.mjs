@@ -222,14 +222,14 @@ try {
   await step('dépenses : le caissier note un achat de condiments, retiré de l’argent du jour', async () => {
     await page.goto(`${BASE}/pos/sales`);
     await page.getByTestId('day-value').getByText('60\u00a0000\u00a0GNF').waitFor();
-    await page.getByRole('button', { name: 'Ajouter la dépense' }).click();
+    await page.getByRole('button', { name: 'Ajouter', exact: true }).click();
     await page.getByText('Indiquez ce qui a été acheté.').waitFor();
     await page.getByLabel('Ce qui a été acheté').fill('Piment et oignons');
     await page.getByLabel('Prix (GNF)').fill('5000');
-    await page.getByRole('button', { name: 'Ajouter la dépense' }).click();
+    await page.getByRole('button', { name: 'Ajouter', exact: true }).click();
     await toast('Dépense notée').waitFor();
     await page.getByTestId('day-value').getByText('55\u00a0000\u00a0GNF').waitFor();
-    await page.getByRole('region', { name: 'Dépenses du jour' }).getByText('Piment et oignons').waitFor();
+    await page.getByRole('region', { name: 'Dépenses et achats du jour' }).getByText('Piment et oignons').waitFor();
     // Seul l'administrateur peut supprimer une dépense.
     assert.equal(await page.getByRole('button', { name: /Supprimer la dépense/ }).count(), 0);
     await shot('10b-depenses');
@@ -361,6 +361,8 @@ try {
     await page.goto(`${BASE}/admin/dashboard`);
     await page.getByTestId('day-value').getByText('0\u00a0GNF', { exact: true }).waitFor();
     await page.getByText('À crédit aujourd’hui').waitFor();
+    // Bilan du mois : la vente à crédit non payée est une dette, déduite du bénéfice.
+    await page.getByTestId('month-profit').getByText('0\u00a0GNF', { exact: true }).waitFor();
     // Un dossier a été ouvert pour le client.
     await page.goto(`${BASE}/credits`);
     await page.getByText('+224 622 00 00 00').waitFor();
@@ -375,6 +377,10 @@ try {
     await page.getByRole('button', { name: 'Confirmer le paiement' }).click();
     await toast('Crédit de Mamadou Bah encaissé.').waitFor();
     await page.getByText('Tout est réglé').waitFor();
+    // Bilan du mois : la dette est réglée, le bénéfice compte la vente.
+    await page.goto(`${BASE}/admin/dashboard`);
+    await page.getByTestId('month-profit').getByText('25\u00a0000\u00a0GNF').waitFor();
+    await page.getByRole('region', { name: /Bilan de/ }).screenshot({ path: join(SHOTS, '20b-bilan-du-mois.png') });
     // Une fois réglé, le crédit devient de l'argent encaissé.
     await page.goto(`${BASE}/admin/dashboard`);
     await page.getByTestId('day-value').getByText('0\u00a0GNF', { exact: true }).waitFor({ state: 'detached' });

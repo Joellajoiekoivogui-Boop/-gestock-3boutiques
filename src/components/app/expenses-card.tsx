@@ -88,7 +88,7 @@ export function ExpensesCard({
     <section aria-labelledby="expenses-title" className="rounded-xl bg-card shadow-card">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b px-5 py-4">
         <h2 id="expenses-title" className="flex items-center gap-2 font-serif text-xl font-semibold">
-          <ShoppingBasket className="size-5 text-gold-strong" aria-hidden /> Dépenses du jour
+          <ShoppingBasket className="size-5 text-gold-strong" aria-hidden /> Dépenses et achats du jour
         </h2>
         <p className="text-sm text-muted-foreground">
           Total : <span className="font-semibold text-foreground tabular-nums">{money(total)}</span>
@@ -102,7 +102,7 @@ export function ExpensesCard({
               ref={labelRef}
               id="expense-label"
               value={label}
-              placeholder="Ex. : piment, oignons, cube"
+              placeholder="Ex. : piment, oignons, riz, boissons"
               autoComplete="off"
               aria-invalid={!!errors.label}
               onChange={(e) => setLabel(e.target.value)}
@@ -120,7 +120,7 @@ export function ExpensesCard({
             />
           </Field>
           <Button type="submit" size="lg" disabled={pending}>
-            {pending ? <Loader2 className="animate-spin" aria-hidden /> : <Plus aria-hidden />} Ajouter la dépense
+            {pending ? <Loader2 className="animate-spin" aria-hidden /> : <Plus aria-hidden />} Ajouter
           </Button>
         </form>
       ) : (
@@ -128,7 +128,7 @@ export function ExpensesCard({
       )}
 
       {expenses.length === 0 ? (
-        <p className="px-5 py-6 text-center text-muted-foreground">Aucune dépense ce jour-là.</p>
+        <p className="px-5 py-6 text-center text-muted-foreground">Aucune dépense ni aucun achat ce jour-là.</p>
       ) : (
         <ul className="divide-y">
           {expenses.map((e) => (
