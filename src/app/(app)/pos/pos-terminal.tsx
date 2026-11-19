@@ -285,7 +285,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
     <div className="-m-4 sm:-m-6 lg:grid lg:h-[calc(100dvh-4.5rem-1px)] lg:grid-cols-[minmax(0,1fr)_26rem]">
       {/* Plats */}
       <section aria-label="Produits" className="flex min-h-0 flex-col lg:overflow-y-auto">
-        <div className="sticky top-[4.5rem] z-10 flex shrink-0 flex-col gap-4 border-b bg-background px-4 pt-4 pb-3 sm:px-6 lg:top-0 lg:pt-5">
+        <div className="sticky top-[4.5rem] z-10 flex shrink-0 flex-col gap-3 border-b bg-background px-4 pt-3 pb-2.5 sm:gap-4 sm:px-6 sm:pt-4 sm:pb-3 lg:top-0 lg:pt-5">
           <div className="flex items-center gap-3">
             <h1 className="sr-only">Caisse</h1>
             <div className="relative min-w-0 flex-1">
@@ -300,7 +300,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Rechercher un plat, une boisson…"
                 aria-label="Rechercher un produit"
-                className="h-13 rounded-full border-transparent bg-card pr-12 pl-12 text-base shadow-card [&::-webkit-search-cancel-button]:hidden"
+                className="h-12 rounded-full border-transparent bg-card pr-12 pl-12 text-base shadow-card sm:h-13 [&::-webkit-search-cancel-button]:hidden"
               />
               {search ? (
                 <button
@@ -330,7 +330,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
             </Button>
           </div>
 
-          <div role="group" aria-label="Catégories" className="-mx-4 flex shrink-0 gap-4 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:gap-5 sm:px-6">
+          <div role="group" aria-label="Catégories" className="-mx-4 flex shrink-0 gap-3 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:gap-5 sm:px-6">
             {categoryButtons.map((c) => (
               <CategoryButton
                 key={c.id}
@@ -341,16 +341,16 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
               />
             ))}
           </div>
-
-          <div className="flex items-baseline justify-between gap-3">
-            <h2 className="font-serif text-2xl font-bold">{sectionTitle}</h2>
-            <p className="text-sm text-muted-foreground">
-              {visibleProducts.length} plat{visibleProducts.length > 1 ? 's' : ''}
-            </p>
-          </div>
         </div>
 
         <div className="flex-1 px-4 pt-4 pb-8 sm:px-6">
+          {/* Titre de section hors de la zone fixe : sur téléphone, les plats gardent l'écran. */}
+          <div className="mb-3 flex items-baseline justify-between gap-3">
+            <h2 className="font-serif text-xl font-bold sm:text-2xl">{sectionTitle}</h2>
+            <p className="text-sm text-muted-foreground">
+              {visibleProducts.length} produit{visibleProducts.length > 1 ? 's' : ''}
+            </p>
+          </div>
           {products.length === 0 ? (
             <EmptyState
               icon={PackageX}
@@ -450,9 +450,7 @@ export function PosTerminal({ products, categories, paymentMethods, currency, sh
           <span className="flex items-center gap-2">
             <ShoppingCart aria-hidden className="size-6" /> Panier ({totals.itemCount})
           </span>
-          <span className="text-xl font-bold">
-            <AnimatedMoney value={totals.total} currency={currency} duration={0.4} />
-          </span>
+          <span className="text-xl font-bold tabular-nums">{formatMoney(totals.total, currency)}</span>
         </Button>
       </div>
       <Sheet open={cartOpen} onOpenChange={setCartOpen}>
@@ -512,24 +510,24 @@ function CategoryButton({
       type="button"
       onClick={onSelect}
       aria-pressed={active}
-      className="group flex w-[5.5rem] shrink-0 flex-col items-center gap-2 rounded-xl text-center focus-visible:ring-[3px] focus-visible:ring-ring/40 focus-visible:outline-none"
+      className="group flex w-[4.75rem] shrink-0 flex-col items-center gap-1.5 rounded-xl text-center focus-visible:ring-[3px] focus-visible:ring-ring/40 focus-visible:outline-none sm:w-[5.5rem] sm:gap-2"
     >
       <span
         className={cn(
-          'flex size-16 items-center justify-center rounded-full border transition-colors',
+          'flex size-13 items-center justify-center rounded-full border transition-colors sm:size-16',
           active ? 'border-forest bg-forest text-forest-foreground shadow-md' : 'border-border bg-card shadow-card group-hover:border-forest/50',
         )}
         style={active || category.tone < 0 ? undefined : { color: toneColor(category.tone) }}
       >
         {category.tone < 0 ? (
-          <LayoutGrid className="size-7" strokeWidth={1.75} aria-hidden />
+          <LayoutGrid className="size-6 sm:size-7" strokeWidth={1.75} aria-hidden />
         ) : (
-          <DishIcon name={category.name} className="size-7" strokeWidth={1.75} />
+          <DishIcon name={category.name} className="size-6 sm:size-7" strokeWidth={1.75} />
         )}
       </span>
       <span className={cn('text-[13px] leading-tight font-semibold', active ? 'text-forest' : 'text-foreground')}>
         {category.name}
-        <span className="block text-xs font-medium text-muted-foreground">{count}</span>
+        <span className="hidden text-xs font-medium text-muted-foreground sm:block">{count}</span>
       </span>
     </button>
   );
@@ -741,8 +739,9 @@ function TicketPanel({
                 </button>
               )}
             </dt>
-            <dd className="text-3xl leading-none font-bold tracking-tight sm:text-[2.25rem]">
-              <AnimatedMoney value={totals.total} currency={currency} duration={0.4} />
+            {/* Montant affiché d'un coup : le caissier ne doit jamais lire un chiffre intermédiaire. */}
+            <dd className="text-3xl leading-none font-bold tracking-tight tabular-nums sm:text-[2.25rem]">
+              {formatMoney(totals.total, currency)}
             </dd>
           </div>
         </dl>
@@ -752,7 +751,7 @@ function TicketPanel({
           {paymentMethods.length === 0 ? (
             <p className="text-destructive">Aucun mode de paiement actif : voir Paramètres.</p>
           ) : (
-            <div className="grid grid-cols-3 gap-2">
+            <div className={cn('grid gap-2', paymentMethods.length % 2 === 0 ? 'grid-cols-2' : 'grid-cols-3')}>
               {paymentMethods.map((m) => {
                 const selected = paymentMethod === m.code;
                 return (

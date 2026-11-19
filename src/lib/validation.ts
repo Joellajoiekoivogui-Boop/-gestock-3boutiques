@@ -94,6 +94,8 @@ export const productSchema = z.object({
     .transform((v) => (v ? v : null))
     .pipe(idSchema.nullable()),
   price: amount('Le prix'),
+  // Prix d'achat (facultatif, administrateur) : sert à calculer la marge.
+  costPrice: amount('Le prix d’achat').nullish(),
   isAvailable: z.boolean(),
   trackStock: z.boolean(),
   minimumStock: z.number('Saisissez un nombre.').int().min(0).max(1_000_000),

@@ -47,6 +47,12 @@ export default async function ProductsPage({ searchParams }: PageProps<'/admin/p
     supabase.from('categories').select('id, name, is_active').order('sort_order').order('name'),
   ]);
   if (products.error) throw new Error(products.error.message);
+  // Prix d'achat (administrateur) des produits affichés ; base sans la migration : aucun.
+  const ids = (products.data ?? []).map((p) => p.id);
+  const costRows = ids.length
+    ? await supabase.from('product_costs').select('product_id, cost_price').in('product_id', ids)
+    : { data: [], error: null };
+  const costs = Object.fromEntries((costRows.error ? [] : (costRows.data ?? [])).map((c) => [c.product_id, Number(c.cost_price)]));
   const currency = settings?.currency ?? 'GNF';
 
   return (
@@ -134,6 +140,7 @@ export default async function ProductsPage({ searchParams }: PageProps<'/admin/p
         stockEnabled={settings?.stock_enabled ?? true}
         shops={shops}
         showShop={!scope.current && shops.length > 1}
+        costs={costs}
       />
       <Pagination
         page={page}

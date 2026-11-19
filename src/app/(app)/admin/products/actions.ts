@@ -28,6 +28,7 @@ export async function saveProductAction(formData: FormData): Promise<ActionResul
     description: formData.get('description') ?? '',
     categoryId: formData.get('categoryId') ?? '',
     price: num(formData.get('price')),
+    costPrice: formData.get('costPrice') ? num(formData.get('costPrice')) : null,
     isAvailable: formData.get('isAvailable') === 'true',
     trackStock: formData.get('trackStock') === 'true',
     minimumStock: num(formData.get('minimumStock')),
@@ -107,6 +108,19 @@ export async function saveProductAction(formData: FormData): Promise<ActionResul
         revalidateCatalog();
         return fail(`Produit créé, mais le stock initial n’a pas été enregistré : ${toUserMessage(stockError)}`);
       }
+    }
+  }
+
+  // Prix d'achat : enregistré à part, lisible seulement par l'administrateur.
+  // (Base sans la migration des rapports : la fonction n'existe pas, on ignore.)
+  if (formData.has('costPrice') && productId) {
+    const { error: costError } = await supabase.rpc('set_product_cost', {
+      p_product_id: productId,
+      p_cost: values.costPrice ?? null,
+    });
+    if (costError && !['PGRST202', '42883'].includes(costError.code ?? '')) {
+      revalidateCatalog();
+      return fail(`Produit enregistré, mais le prix d’achat n’a pas été enregistré : ${toUserMessage(costError)}`);
     }
   }
 
