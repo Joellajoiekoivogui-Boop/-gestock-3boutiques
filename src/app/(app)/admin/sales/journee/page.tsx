@@ -137,7 +137,7 @@ export default async function DaySalesPrintPage({ searchParams }: PageProps<'/ad
                 <td className={`${td} ${num}`}>+ {money(credit.settledToday)}</td>
               </tr>
               <tr>
-                <td className={td}>Dépenses</td>
+                <td className={td}>Dépenses et achats</td>
                 <td className={`${td} ${num}`}>− {money(expenses.total)}</td>
               </tr>
               <tr className="text-base font-bold">
@@ -211,7 +211,7 @@ export default async function DaySalesPrintPage({ searchParams }: PageProps<'/ad
 
           <section aria-labelledby="exp-title">
             <h2 id="exp-title" className="mb-1 font-bold">
-              Dépenses
+              Dépenses et achats
             </h2>
             <table className="w-full">
               <thead>
